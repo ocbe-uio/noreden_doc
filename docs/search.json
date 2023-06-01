@@ -4,7 +4,7 @@
     "href": "documentation/index.html",
     "title": "Documentation",
     "section": "",
-    "text": "It is important to documentt while you go."
+    "text": "It is important to document while you go.\n\n\n\n\n\n\n\n\n\n\nTitle\n\n\n\n\n\n\nProblem definition\n\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "index.html",
@@ -19,5 +19,75 @@
     "title": "About",
     "section": "",
     "text": "This is the development documentation site for NorEden Project."
+  },
+  {
+    "objectID": "documentation/define_problem.html",
+    "href": "documentation/define_problem.html",
+    "title": "Problem definition",
+    "section": "",
+    "text": "Understand the data\nLoad the aggregated food groups and their attributes. We have 25 food groups.\n\nfoods <- read.csv('data/foods.csv', sep = ',')\ndata.table::setDT(foods) # use data.table format\nhead(foods) \n\n           food intake energy protein   fat carbs sugar alcohol  ghge\n1:        Bread  175.4 10.696   0.091 0.030 0.441 0.002       0 0.001\n2: Other grains   45.0 14.022   0.100 0.042 0.607 0.011       0 0.002\n3:        Cakes   35.6 14.185   0.067 0.152 0.424 0.185       0 0.002\n4:     Potatoes   67.8  3.791   0.021 0.007 0.178 0.000       0 0.000\n5:   Vegetables  154.6  1.565   0.015 0.008 0.050 0.005       0 0.001\n6:      Legumes    3.5  8.571   0.143 0.029 0.286 0.000       0 0.001\n\n\nDefine the constraints on\n\nenergy\nprotein, fat, carbs, sugar, alcohol\nGHGE (greenhouse gas equivalent)\n\n\nconstraints <- data.frame(\n  constraint = c('lower', 'upper'), \n  energy = c(9000, 10000), \n  protein = c(55, 111.5), \n  fat = c(61.8, 98.8), \n  carbs = c(250, 334.6), \n  sugar = c(0, 54.8), \n  alcohol = c(0, 10),\n  ghge = c(0, 4.7)\n)\nconstraints\n\n  constraint energy protein  fat carbs sugar alcohol ghge\n1      lower   9000    55.0 61.8 250.0   0.0       0  0.0\n2      upper  10000   111.5 98.8 334.6  54.8      10  4.7\n\n\nNow we can examine whether the current intake satisfy the constraints.\n\nt(as.matrix(foods$intake)) %*% as.matrix(foods[, .(energy, protein, fat, carbs, sugar, alcohol, ghge)])\n\n       energy protein     fat    carbs   sugar alcohol   ghge\n[1,] 9314.278 98.2159 85.7644 234.7172 39.2148  8.6498 3.7807\n\n\nIt looks like all categories but carbs fall within the expected range. Carb is slighter lower than the lower threshold."
+  },
+  {
+    "objectID": "data_example/info_data.html",
+    "href": "data_example/info_data.html",
+    "title": "NorEden",
+    "section": "",
+    "text": "Personliste\n1187 subjects\nsex, age, height, weight, BMI,…\n\n\nxx. Stoffinntak per person\nNutrition intake\nCan be linked with personliste via ID\nCan be linked with Alle matvarer naringsstoffer ICs (impact category)\n(energyprosenfordeling per person also has nutrients, but slightly mismathed)\n\n\nxx Matinntak for gruppen\nsame info as alle matvarer, do not need.\nMatvarers bidrag av stoffer\nnot needs\n\n\nAlle matvarer ICs\nEnv impact for each food and nutritional"
+  },
+  {
+    "objectID": "notes_internal/resources.html",
+    "href": "notes_internal/resources.html",
+    "title": "NorEden",
+    "section": "",
+    "text": "Nutrition\nhttps://cran.r-project.org/web/packages/NutrienTrackeR/NutrienTrackeR.pdf\n\n\nOptimization\nhttps://cran.r-project.org/web/views/Optimization.html\nhttps://www.mlstack.cafe/interview-questions/optimisation\nhttps://www.techinterviewhandbook.org/algorithms/math/"
+  },
+  {
+    "objectID": "notes_internal/literature.html",
+    "href": "notes_internal/literature.html",
+    "title": "NorEden",
+    "section": "",
+    "text": "Cleghorn 2022\nOptimise NZ versio nof EAT-lancet diet\nModel impact on population health\nConstraints\n\npopulation diet meets the nutritional recommendations\ndiet related greenhouse gas emission within boundary\ndiet cost witthin baseline cost of average diet\n\n\nDIET multi-state life-table modelling\npopulation (4.4m), modeled until deah/110 yo + sex, age, ethnicity\ndietary risk factors: red meat, processed meat, sugar beverage, sodium, low fruit, …\n9 diseases: coronary heart disease, stroke, …\n\n\n\nWalker 2021\nPuLP (python), linear optimizationn to determine the lowest possible impact diet for each scenario\nenv impact:\n\nClimate change\nbiodiversity loss"
+  },
+  {
+    "objectID": "notes_internal/objective.html",
+    "href": "notes_internal/objective.html",
+    "title": "NorEden",
+    "section": "",
+    "text": "energy composition\nepi\nAcceptability\ncost"
+  },
+  {
+    "objectID": "notes_internal/objective.html#food-groups",
+    "href": "notes_internal/objective.html#food-groups",
+    "title": "NorEden",
+    "section": "Food groups",
+    "text": "Food groups\n\n\n\nFood groups\nEnergy\nProtein\nFat\nCarb\nGHGE\n\n\n\n\nBread\n10.6956\n0.0912\n0.0302\n0.4413\n0.0011\n\n\nVegetables\n1.5653\n0.0149\n0.0084\n0.0498\n0.0010\n\n\nFruit, berries\n2.7289\n0.0076\n0.0041\n0.1341\n0.0007\n\n\nMeat\n7.7432\n0.1800\n0.1211\n0.0113\n0.0110\n\n\nFish\n6.0863\n0.1698\n0.0748\n0.0245\n0.0031\n\n\nMilk, yogurt\n1.9797\n0.0359\n0.0111\n0.0559\n0.0014\n\n\n\n\nObjective\nminimize deviation from current diet\n(x1 - 175.4)^2 +\n(x2 - 154.6)^2 +\n(x3 - 171.5)^2 +\n(x4 - 151.1)^2 +\n(x5 - 69.5)^2 +\n(x6 - 306.1)^2\n\n\nContraints, 5 categories\n(intake g 3681.2 )\nEnergy kj 9314\nprotein g 97.7\nfat g 86.3\ncarbs g 235.1\nGHGE <= 4.7\n\n\n\nConstraint\nEnergy\nProtein\nFat\nCarb\nGHGE\n\n\n\n\nLower\n9000\n55\n61.8\n250\n0\n\n\nUpper\n10000\n111.5\n98.8\n334.6\n4.7"
+  },
+  {
+    "objectID": "notes_internal/Optimization.html",
+    "href": "notes_internal/Optimization.html",
+    "title": "NorEden",
+    "section": "",
+    "text": "https://cran.r-project.org/web/views/Optimization.html"
+  },
+  {
+    "objectID": "notes_internal/Optimization.html#linear-programming-lp",
+    "href": "notes_internal/Optimization.html#linear-programming-lp",
+    "title": "NorEden",
+    "section": "Linear programming LP",
+    "text": "Linear programming LP\nObjective linear, constraints linear equalities or inequalities\nmaximise f(x) = cx\ns.t. Ax <= b\nx>= 0"
+  },
+  {
+    "objectID": "notes_internal/Optimization.html#quadratic-programming",
+    "href": "notes_internal/Optimization.html#quadratic-programming",
+    "title": "NorEden",
+    "section": "Quadratic programming",
+    "text": "Quadratic programming\nsome QP are convex, some not\nConstraints: linear equality or inequality\nminimize 1/2 x^t Q x + c^t x\ns.t. Ax < b"
+  },
+  {
+    "objectID": "notes_internal/Optimization.html#nonlinear-optimizaion-more-general-than-qp",
+    "href": "notes_internal/Optimization.html#nonlinear-optimizaion-more-general-than-qp",
+    "title": "NorEden",
+    "section": "Nonlinear optimizaion (more general than QP)",
+    "text": "Nonlinear optimizaion (more general than QP)\nminimize f(x)\ns.t. g(x) <= 0\nh(x) = 0\nxl <= x <= xu"
   }
 ]
