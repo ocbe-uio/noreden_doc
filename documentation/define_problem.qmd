@@ -7,9 +7,8 @@ format:
 editor: source
 ---
 
-# Understand the data
 
-Load the aggregated food groups and their attributes. We have 25 food groups.
+The information we have are the food groups and constraints. 
 
 ```{r}
 #| label: load-food-info
@@ -18,19 +17,14 @@ Load the aggregated food groups and their attributes. We have 25 food groups.
 
 foods <- read.csv('data/foods.csv', sep = ',')
 data.table::setDT(foods) # use data.table format
-head(foods) 
+head(foods)  # print the fist 6
 ```
 
 
-Define the constraints on 
-
-* energy
-* protein, fat, carbs, sugar, alcohol 
-* GHGE (greenhouse gas equivalent)
 
 ```{r}
 #| label: load-contraints
-#| echo: true
+#| echo: false
 #| eval: true
 
 constraints <- data.frame(
@@ -46,17 +40,68 @@ constraints <- data.frame(
 constraints
 ```
 
+## Formulation
 
-Now we can examine whether the current intake satisfy the constraints. 
+Aim: find a diet combination that satisfy the nutritional and environmental constraints, while similar to the current diet. 
 
-```{r}
-#| label: check-current
-#| echo: true
-#| eval: true
 
-t(as.matrix(foods$intake)) %*% as.matrix(foods[, .(energy, protein, fat, carbs, sugar, alcohol, ghge)])
-```
+### Notation
 
-It looks like all categories but carbs fall within the expected range. Carb is slighter lower than the lower threshold. 
+We make the following notation: 
+
+* $x_1, x_2, ..., x_{k}$ are the **target food intake** (in grams, or other units) for $k$ food groups.
+* $X_1, X_2, ..., X_{k}$ are the **current food intake** (in grams, or other units).
+
+For the constraints, 
+
+* $e_1, ..., e_k$: energy associated with each of the food groups
+  * $E$ is the total energy for all foods, with range between $E_{lower}, E_{upper}$
+  * For example, with the data we have, this range is (9000, 10000). 
+* $p_1, ..., p_k$: protein
+* $f_1, ..., f_k$: fat
+* $c_1, ..., c_k$: carbs
+* $s_1, ..., s_k$: sugar
+* $a_1, ..., a_k$: alcohol
+* $g_1, ..., g_k$: ghge
+
+### Optimization 
+
+Find a set of $x_1, ..., x_k$ such that the values would 
+
+**minimise** the squared sum of differences between current diet and target diet:
+
+$(x_1 - X_1)^2 + (x_2 - X_2)^2 + ... + (x_k - X_k)^2$
+
+and satisfy the following **constraints**: 
+
+$x_1, ..., x_k >= 0$ (realistic diet intake can not be negative)
+ 
+$x_1e_1 + x_2 e_2 + ... + x_k e_k >= E_{lower}$, total energy above the lower limit
+
+$x_1e_1 + x_2 e_2 + ... + x_k e_k <= E_{upper}$, total energy below the upper limit
+
+$x_1p_1 + x_2 p_2 + ... + x_k p_k >= P_{lower}$, total protein below the upper limit
+
+$x_1p_1 + x_2 p_2 + ... + x_k e_k <= P_{upper}$, total protein below the upper limit
+
+And so on. 
+
+
+
+## Solve the optimization problem 
+
+This setting is a quadratic program (QP). It is an optimization problem with **quadratic objective**, and **inequality constraints**. We do not have equality constraints in this setting. 
+
+With R, there are various software to find a solution: 
+
+* `nloptr` in `nloptr` package (non-linear optimization),
+* `constrOptim` in `stats` package, which relies on `optim` function,
+* `solve.QP` in `quadprog` package
+
+among others. 
+
+
+
+
 
 

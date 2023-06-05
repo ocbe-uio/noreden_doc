@@ -221,7 +221,7 @@ res$solution
 
 
 
-# multiple inequaity ----
+# multiple inequality ----
 # Objective function
 eval_f <- function(x)
 {

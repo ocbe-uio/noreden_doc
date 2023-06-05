@@ -4,7 +4,7 @@
     "href": "documentation/index.html",
     "title": "Documentation",
     "section": "",
-    "text": "It is important to document while you go.\n\n\n\n\n\n\n\n\n\n\nTitle\n\n\n\n\n\n\nProblem definition\n\n\n\n\n\n\nNo matching items"
+    "text": "It is important to document while you go.\n\n\n\n\n\n\n\n\n\n\nTitle\n\n\n\n\n\n\nUnderstand the current diet\n\n\n\n\nProblem definition\n\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "index.html",
@@ -25,7 +25,7 @@
     "href": "documentation/define_problem.html",
     "title": "Problem definition",
     "section": "",
-    "text": "Understand the data\nLoad the aggregated food groups and their attributes. We have 25 food groups.\n\nfoods <- read.csv('data/foods.csv', sep = ',')\ndata.table::setDT(foods) # use data.table format\nhead(foods) \n\n           food intake energy protein   fat carbs sugar alcohol  ghge\n1:        Bread  175.4 10.696   0.091 0.030 0.441 0.002       0 0.001\n2: Other grains   45.0 14.022   0.100 0.042 0.607 0.011       0 0.002\n3:        Cakes   35.6 14.185   0.067 0.152 0.424 0.185       0 0.002\n4:     Potatoes   67.8  3.791   0.021 0.007 0.178 0.000       0 0.000\n5:   Vegetables  154.6  1.565   0.015 0.008 0.050 0.005       0 0.001\n6:      Legumes    3.5  8.571   0.143 0.029 0.286 0.000       0 0.001\n\n\nDefine the constraints on\n\nenergy\nprotein, fat, carbs, sugar, alcohol\nGHGE (greenhouse gas equivalent)\n\n\nconstraints <- data.frame(\n  constraint = c('lower', 'upper'), \n  energy = c(9000, 10000), \n  protein = c(55, 111.5), \n  fat = c(61.8, 98.8), \n  carbs = c(250, 334.6), \n  sugar = c(0, 54.8), \n  alcohol = c(0, 10),\n  ghge = c(0, 4.7)\n)\nconstraints\n\n  constraint energy protein  fat carbs sugar alcohol ghge\n1      lower   9000    55.0 61.8 250.0   0.0       0  0.0\n2      upper  10000   111.5 98.8 334.6  54.8      10  4.7\n\n\nNow we can examine whether the current intake satisfy the constraints.\n\nt(as.matrix(foods$intake)) %*% as.matrix(foods[, .(energy, protein, fat, carbs, sugar, alcohol, ghge)])\n\n       energy protein     fat    carbs   sugar alcohol   ghge\n[1,] 9314.278 98.2159 85.7644 234.7172 39.2148  8.6498 3.7807\n\n\nIt looks like all categories but carbs fall within the expected range. Carb is slighter lower than the lower threshold."
+    "text": "The information we have are the food groups and constraints."
   },
   {
     "objectID": "data_example/info_data.html",
@@ -89,5 +89,40 @@
     "title": "NorEden",
     "section": "Nonlinear optimizaion (more general than QP)",
     "text": "Nonlinear optimizaion (more general than QP)\nminimize f(x)\ns.t. g(x) <= 0\nh(x) = 0\nxl <= x <= xu"
+  },
+  {
+    "objectID": "documentation/understand_data.html",
+    "href": "documentation/understand_data.html",
+    "title": "Understand the current diet",
+    "section": "",
+    "text": "Load the aggregated food groups and their attributes. We have 25 food groups.\nDefine the constraints on"
+  },
+  {
+    "objectID": "documentation/understand_data.html#exploratory-data-analysis-on-current-diet",
+    "href": "documentation/understand_data.html#exploratory-data-analysis-on-current-diet",
+    "title": "Understand the current diet",
+    "section": "Exploratory data analysis on current diet",
+    "text": "Exploratory data analysis on current diet\n\n# compute the contribution (indiv * intake) for 28 foods\nftotal <- apply(X = foods[, c('energy', 'protein', 'fat', \n                              'carbs', 'sugar', 'alcohol', 'ghge')], \n                MARGIN = 2, \n                FUN = function(x){x*foods$intake})\nrownames(ftotal) <- foods$food # name the rows\nhead(ftotal)\n\n                energy protein    fat   carbs  sugar alcohol   ghge\nBread        1876.0784 15.9614 5.2620 77.3514 0.3508       0 0.1754\nOther grains  630.9900  4.5000 1.8900 27.3150 0.4950       0 0.0900\nCakes         504.9860  2.3852 5.4112 15.0944 6.5860       0 0.0712\nPotatoes      257.0298  1.4238 0.4746 12.0684 0.0000       0 0.0000\nVegetables    241.9490  2.3190 1.2368  7.7300 0.7730       0 0.1546\nLegumes        29.9985  0.5005 0.1015  1.0010 0.0000       0 0.0035\n\n\nNow we can compute the percentage of food group contribution against the total.\n\n# divide by total of all 28 (upper constraints)\nfsum <- apply(ftotal, 2, sum)\nfsum\n\n   energy   protein       fat     carbs     sugar   alcohol      ghge \n9314.2778   98.2159   85.7644  234.7172   39.2148    8.6498    3.7807 \n\nfprop <- t(apply(X = ftotal, MARGIN = 1, FUN = function(x){x/fsum}))\nfprop <- round(fprop, digits = 3) # keep 3 digits\nrownames(fprop) <- foods$food\nhead(fprop)\n\n             energy protein   fat carbs sugar alcohol  ghge\nBread         0.201   0.163 0.061 0.330 0.009       0 0.046\nOther grains  0.068   0.046 0.022 0.116 0.013       0 0.024\nCakes         0.054   0.024 0.063 0.064 0.168       0 0.019\nPotatoes      0.028   0.014 0.006 0.051 0.000       0 0.000\nVegetables    0.026   0.024 0.014 0.033 0.020       0 0.041\nLegumes       0.003   0.005 0.001 0.004 0.000       0 0.001\n\n\n\nVisualize\nWe need some more data manipulation before plotting.\n\n# require some data manip\n# need big food group, food name (smaller food group)\npdt <- data.frame(ftotal) # total \npdt$food_name <- row.names(pdt)\npdt_long <- tidyr::pivot_longer(pdt, cols = -food_name, names_to = 'category')\npdt_long <- data.table::setDT(pdt_long)\n\n\nlibrary(ggplot2)\nlibrary(ggrepel)\n\np1 <- ggplot(data = pdt_long[category == 'energy'], \n             aes(x = food_name, y = value))\np1 <- p1 + geom_bar(stat = 'identity')\np1 <- p1 + coord_flip()\np1 <- p1 + theme_bw()\np1 <- p1 + labs(title = 'Energy (food intake)', \n                x = 'Food groups', \n                y = 'Energy')\np1\n\n\n\n\n\np2 <- ggplot(data = pdt_long[category == 'ghge'], \n             aes(x = food_name, y = value))\np2 <- p2 + geom_bar(stat = 'identity')\np2 <- p2 + coord_flip()\np2 <- p2 + theme_bw()\np2 <- p2 + labs(title = 'GHGE (food intake)', \n                x = 'Food groups', \n                y = 'GHGE')\np2\n\n\n\n\n\npdfd <- data.table::setDT(foods)\n# remove water, outlier\npdfd <- pdfd[food != 'Water']\n\np3 <- ggplot(data = pdfd, \n             aes(x = energy, y = ghge, size = intake, label = food))\np3 <- p3 + geom_point(alpha = 0.3) + xlim(-3, 30) + ylim(-0.002, 0.015)\np3 <- p3 + scale_size(range = c(0.1, 20))\np3 <- p3 + geom_text_repel(size = 4, max.overlaps = 15)\n# p3 <- p3 + geom_text(size = 3, check_overlap = T)\np3 <- p3 + theme_bw()\np3 <- p3 + labs(title = 'Energy vs GHGE', \n                x = 'Energy (per unit)', \n                y = 'GHGE (per unit)')\np3\n\n\n\n\n(How do they relate to the constraints)"
+  },
+  {
+    "objectID": "documentation/define_problem.html#formulation",
+    "href": "documentation/define_problem.html#formulation",
+    "title": "Problem definition",
+    "section": "Formulation",
+    "text": "Formulation\nAim: find a diet combination that satisfy the nutritional and environmental constraints, while similar to the current diet.\n\nNotation\nWe make the following notation:\n\n\\(x_1, x_2, ..., x_{k}\\) are the target food intake (in grams, or other units) for \\(k\\) food groups.\n\\(X_1, X_2, ..., X_{k}\\) are the current food intake (in grams, or other units).\n\nFor the constraints,\n\n\\(e_1, ..., e_k\\): energy associated with each of the food groups\n\n\\(E\\) is the total energy for all foods, with range between \\(E_{lower}, E_{upper}\\)\nFor example, with the data we have, this range is (9000, 10000).\n\n\\(p_1, ..., p_k\\): protein\n\\(f_1, ..., f_k\\): fat\n\\(c_1, ..., c_k\\): carbs\n\\(s_1, ..., s_k\\): sugar\n\\(a_1, ..., a_k\\): alcohol\n\\(g_1, ..., g_k\\): ghge\n\n\n\nOptimization\nFind a set of \\(x_1, ..., x_k\\) such that the values would\nminimise the squared sum of differences between current diet and target diet:\n\\((x_1 - X_1)^2 + (x_2 - X_2)^2 + ... + (x_k - X_k)^2\\)\nand satisfy the following constraints:\n\\(x_1, ..., x_k >= 0\\) (realistic diet intake can not be negative)\n\\(x_1e_1 + x_2 e_2 + ... + x_k e_k >= E_{lower}\\), total energy above the lower limit\n\\(x_1e_1 + x_2 e_2 + ... + x_k e_k <= E_{upper}\\), total energy below the upper limit\n\\(x_1p_1 + x_2 p_2 + ... + x_k p_k >= P_{lower}\\), total protein below the upper limit\n\\(x_1p_1 + x_2 p_2 + ... + x_k e_k <= P_{upper}\\), total protein below the upper limit\nAnd so on."
+  },
+  {
+    "objectID": "documentation/define_problem.html#solve-the-optimization-problem",
+    "href": "documentation/define_problem.html#solve-the-optimization-problem",
+    "title": "Problem definition",
+    "section": "Solve the optimization problem",
+    "text": "Solve the optimization problem\nThis setting is a quadratic program (QP). It is an optimization problem with quadratic objective, and inequality constraints. We do not have equality constraints in this setting.\nWith R, there are various software to find a solution:\n\nnloptr in nloptr package (non-linear optimization),\nconstrOptim in stats package, which relies on optim function,\nsolve.QP in quadprog package\n\namong others."
+  },
+  {
+    "objectID": "documentation/understand_data.html#compare-with-constraints",
+    "href": "documentation/understand_data.html#compare-with-constraints",
+    "title": "Understand the current diet",
+    "section": "Compare with constraints",
+    "text": "Compare with constraints\nNow we can also examine whether the current intake satisfy the constraints.\n\nt(as.matrix(foods$intake)) %*% as.matrix(foods[, .(energy, protein, fat, carbs, sugar, alcohol, ghge)])\n\n       energy protein     fat    carbs   sugar alcohol   ghge\n[1,] 9314.278 98.2159 85.7644 234.7172 39.2148  8.6498 3.7807\n\n\nIt looks like all categories but carbs fall within the expected range. Carb is slighter lower than the lower threshold."
   }
 ]

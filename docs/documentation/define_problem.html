@@ -122,6 +122,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   }
 }</script>
 
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
 <link rel="stylesheet" href="../styles.css">
 </head>
@@ -169,7 +170,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#understand-the-data" id="toc-understand-the-data" class="nav-link active" data-scroll-target="#understand-the-data">Understand the data</a></li>
+  <li><a href="#formulation" id="toc-formulation" class="nav-link active" data-scroll-target="#formulation">Formulation</a>
+  <ul class="collapse">
+  <li><a href="#notation" id="toc-notation" class="nav-link" data-scroll-target="#notation">Notation</a></li>
+  <li><a href="#optimization" id="toc-optimization" class="nav-link" data-scroll-target="#optimization">Optimization</a></li>
+  </ul></li>
+  <li><a href="#solve-the-optimization-problem" id="toc-solve-the-optimization-problem" class="nav-link" data-scroll-target="#solve-the-optimization-problem">Solve the optimization problem</a></li>
   </ul>
 </nav>
     </div>
@@ -193,13 +199,11 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 </header>
 
-<section id="understand-the-data" class="level1">
-<h1>Understand the data</h1>
-<p>Load the aggregated food groups and their attributes. We have 25 food groups.</p>
+<p>The information we have are the food groups and constraints.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>foods <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">'data/foods.csv'</span>, <span class="at">sep =</span> <span class="st">','</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>data.table<span class="sc">::</span><span class="fu">setDT</span>(foods) <span class="co"># use data.table format</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(foods) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(foods)  <span class="co"># print the fist 6</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>           food intake energy protein   fat carbs sugar alcohol  ghge
 1:        Bread  175.4 10.696   0.091 0.030 0.441 0.002       0 0.001
@@ -210,39 +214,62 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 6:      Legumes    3.5  8.571   0.143 0.029 0.286 0.000       0 0.001</code></pre>
 </div>
 </div>
-<p>Define the constraints on</p>
-<ul>
-<li>energy</li>
-<li>protein, fat, carbs, sugar, alcohol</li>
-<li>GHGE (greenhouse gas equivalent)</li>
-</ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>constraints <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">constraint =</span> <span class="fu">c</span>(<span class="st">'lower'</span>, <span class="st">'upper'</span>), </span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">energy =</span> <span class="fu">c</span>(<span class="dv">9000</span>, <span class="dv">10000</span>), </span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">protein =</span> <span class="fu">c</span>(<span class="dv">55</span>, <span class="fl">111.5</span>), </span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">fat =</span> <span class="fu">c</span>(<span class="fl">61.8</span>, <span class="fl">98.8</span>), </span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">carbs =</span> <span class="fu">c</span>(<span class="dv">250</span>, <span class="fl">334.6</span>), </span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">sugar =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">54.8</span>), </span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">alcohol =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">10</span>),</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">ghge =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">4.7</span>)</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>constraints</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  constraint energy protein  fat carbs sugar alcohol ghge
 1      lower   9000    55.0 61.8 250.0   0.0       0  0.0
 2      upper  10000   111.5 98.8 334.6  54.8      10  4.7</code></pre>
 </div>
 </div>
-<p>Now we can examine whether the current intake satisfy the constraints.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">t</span>(<span class="fu">as.matrix</span>(foods<span class="sc">$</span>intake)) <span class="sc">%*%</span> <span class="fu">as.matrix</span>(foods[, .(energy, protein, fat, carbs, sugar, alcohol, ghge)])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>       energy protein     fat    carbs   sugar alcohol   ghge
-[1,] 9314.278 98.2159 85.7644 234.7172 39.2148  8.6498 3.7807</code></pre>
-</div>
-</div>
-<p>It looks like all categories but carbs fall within the expected range. Carb is slighter lower than the lower threshold.</p>
+<section id="formulation" class="level2">
+<h2 class="anchored" data-anchor-id="formulation">Formulation</h2>
+<p>Aim: find a diet combination that satisfy the nutritional and environmental constraints, while similar to the current diet.</p>
+<section id="notation" class="level3">
+<h3 class="anchored" data-anchor-id="notation">Notation</h3>
+<p>We make the following notation:</p>
+<ul>
+<li><span class="math inline">\(x_1, x_2, ..., x_{k}\)</span> are the <strong>target food intake</strong> (in grams, or other units) for <span class="math inline">\(k\)</span> food groups.</li>
+<li><span class="math inline">\(X_1, X_2, ..., X_{k}\)</span> are the <strong>current food intake</strong> (in grams, or other units).</li>
+</ul>
+<p>For the constraints,</p>
+<ul>
+<li><span class="math inline">\(e_1, ..., e_k\)</span>: energy associated with each of the food groups
+<ul>
+<li><span class="math inline">\(E\)</span> is the total energy for all foods, with range between <span class="math inline">\(E_{lower}, E_{upper}\)</span></li>
+<li>For example, with the data we have, this range is (9000, 10000).</li>
+</ul></li>
+<li><span class="math inline">\(p_1, ..., p_k\)</span>: protein</li>
+<li><span class="math inline">\(f_1, ..., f_k\)</span>: fat</li>
+<li><span class="math inline">\(c_1, ..., c_k\)</span>: carbs</li>
+<li><span class="math inline">\(s_1, ..., s_k\)</span>: sugar</li>
+<li><span class="math inline">\(a_1, ..., a_k\)</span>: alcohol</li>
+<li><span class="math inline">\(g_1, ..., g_k\)</span>: ghge</li>
+</ul>
+</section>
+<section id="optimization" class="level3">
+<h3 class="anchored" data-anchor-id="optimization">Optimization</h3>
+<p>Find a set of <span class="math inline">\(x_1, ..., x_k\)</span> such that the values would</p>
+<p><strong>minimise</strong> the squared sum of differences between current diet and target diet:</p>
+<p><span class="math inline">\((x_1 - X_1)^2 + (x_2 - X_2)^2 + ... + (x_k - X_k)^2\)</span></p>
+<p>and satisfy the following <strong>constraints</strong>:</p>
+<p><span class="math inline">\(x_1, ..., x_k &gt;= 0\)</span> (realistic diet intake can not be negative)</p>
+<p><span class="math inline">\(x_1e_1 + x_2 e_2 + ... + x_k e_k &gt;= E_{lower}\)</span>, total energy above the lower limit</p>
+<p><span class="math inline">\(x_1e_1 + x_2 e_2 + ... + x_k e_k &lt;= E_{upper}\)</span>, total energy below the upper limit</p>
+<p><span class="math inline">\(x_1p_1 + x_2 p_2 + ... + x_k p_k &gt;= P_{lower}\)</span>, total protein below the upper limit</p>
+<p><span class="math inline">\(x_1p_1 + x_2 p_2 + ... + x_k e_k &lt;= P_{upper}\)</span>, total protein below the upper limit</p>
+<p>And so on.</p>
+</section>
+</section>
+<section id="solve-the-optimization-problem" class="level2">
+<h2 class="anchored" data-anchor-id="solve-the-optimization-problem">Solve the optimization problem</h2>
+<p>This setting is a quadratic program (QP). It is an optimization problem with <strong>quadratic objective</strong>, and <strong>inequality constraints</strong>. We do not have equality constraints in this setting.</p>
+<p>With R, there are various software to find a solution:</p>
+<ul>
+<li><code>nloptr</code> in <code>nloptr</code> package (non-linear optimization),</li>
+<li><code>constrOptim</code> in <code>stats</code> package, which relies on <code>optim</code> function,</li>
+<li><code>solve.QP</code> in <code>quadprog</code> package</li>
+</ul>
+<p>among others.</p>
 
 
 </section>

@@ -1,0 +1,180 @@
+---
+title: "Understand the current diet"
+format: 
+  html:
+    code-fold: false
+    code-tools: false
+editor: source
+---
+
+Load the aggregated food groups and their attributes. We have 25 food groups.
+
+```{r}
+#| label: load-food-info
+#| echo: true
+#| eval: true
+
+foods <- read.csv('data/foods.csv', sep = ',')
+data.table::setDT(foods) # use data.table format
+foods[1:10,] # show the first 10
+```
+
+
+Define the constraints on 
+
+* energy
+* protein, fat, carbs, sugar, alcohol 
+* GHGE (greenhouse gas equivalent)
+
+```{r}
+#| label: load-contraints
+#| echo: true
+#| eval: true
+
+constraints <- data.frame(
+  constraint = c('lower', 'upper'), 
+  energy = c(9000, 10000), 
+  protein = c(55, 111.5), 
+  fat = c(61.8, 98.8), 
+  carbs = c(250, 334.6), 
+  sugar = c(0, 54.8), 
+  alcohol = c(0, 10),
+  ghge = c(0, 4.7)
+)
+constraints
+```
+
+
+
+## Exploratory data analysis on current diet
+
+
+
+
+```{r}
+#| label: manip-1
+#| echo: true
+#| eval: true
+
+# compute the contribution (indiv * intake) for 28 foods
+ftotal <- apply(X = foods[, c('energy', 'protein', 'fat', 
+                              'carbs', 'sugar', 'alcohol', 'ghge')], 
+                MARGIN = 2, 
+                FUN = function(x){x*foods$intake})
+rownames(ftotal) <- foods$food # name the rows
+head(ftotal)
+```
+
+Now we can compute the percentage of food group contribution against the total.
+
+```{r}
+#| label: manip-2
+#| echo: true
+#| eval: true
+
+# divide by total of all 28 (upper constraints)
+fsum <- apply(ftotal, 2, sum)
+fsum
+
+fprop <- t(apply(X = ftotal, MARGIN = 1, FUN = function(x){x/fsum}))
+fprop <- round(fprop, digits = 3) # keep 3 digits
+rownames(fprop) <- foods$food
+head(fprop)
+```
+
+
+### Visualize
+
+We need some more data manipulation before plotting. 
+
+```{r}
+#| label: manip-3
+#| echo: true
+#| eval: true
+
+# require some data manip
+# need big food group, food name (smaller food group)
+pdt <- data.frame(ftotal) # total 
+pdt$food_name <- row.names(pdt)
+pdt_long <- tidyr::pivot_longer(pdt, cols = -food_name, names_to = 'category')
+pdt_long <- data.table::setDT(pdt_long)
+```
+
+
+```{r}
+#| label: p1
+#| echo: true
+#| eval: true
+library(ggplot2)
+library(ggrepel)
+
+p1 <- ggplot(data = pdt_long[category == 'energy'], 
+             aes(x = food_name, y = value))
+p1 <- p1 + geom_bar(stat = 'identity')
+p1 <- p1 + coord_flip()
+p1 <- p1 + theme_bw()
+p1 <- p1 + labs(title = 'Energy (food intake)', 
+                x = 'Food groups', 
+                y = 'Energy')
+p1
+```
+
+
+
+```{r}
+#| label: p2
+#| echo: true
+#| eval: true
+
+p2 <- ggplot(data = pdt_long[category == 'ghge'], 
+             aes(x = food_name, y = value))
+p2 <- p2 + geom_bar(stat = 'identity')
+p2 <- p2 + coord_flip()
+p2 <- p2 + theme_bw()
+p2 <- p2 + labs(title = 'GHGE (food intake)', 
+                x = 'Food groups', 
+                y = 'GHGE')
+p2
+```
+
+```{r}
+#| label: p3
+#| echo: true
+#| eval: true
+
+pdfd <- data.table::setDT(foods)
+# remove water, outlier
+pdfd <- pdfd[food != 'Water']
+
+p3 <- ggplot(data = pdfd, 
+             aes(x = energy, y = ghge, size = intake, label = food))
+p3 <- p3 + geom_point(alpha = 0.3) + xlim(-3, 30) + ylim(-0.002, 0.015)
+p3 <- p3 + scale_size(range = c(0.1, 20))
+p3 <- p3 + geom_text_repel(size = 4, max.overlaps = 15)
+# p3 <- p3 + geom_text(size = 3, check_overlap = T)
+p3 <- p3 + theme_bw()
+p3 <- p3 + labs(title = 'Energy vs GHGE', 
+                x = 'Energy (per unit)', 
+                y = 'GHGE (per unit)')
+p3
+```
+
+(How do they relate to the constraints)
+
+
+
+## Compare with constraints
+
+Now we can also examine whether the current intake satisfy the constraints. 
+
+```{r}
+#| label: check-current
+#| echo: true
+#| eval: true
+
+t(as.matrix(foods$intake)) %*% as.matrix(foods[, .(energy, protein, fat, carbs, sugar, alcohol, ghge)])
+```
+
+It looks like all categories but carbs fall within the expected range. Carb is slighter lower than the lower threshold. 
+
+

@@ -1,0 +1,32 @@
+---
+title: "Demo: 3 foods,  2 constraints"
+format: 
+  html:
+    code-fold: false
+    code-tools: false
+editor: source
+---
+
+We document the optimization procedure with `nloptr` using a small example of 3 foods, and 2 constraints (energy and protein). 
+
+```{r}
+#| label: small-demo
+#| echo: true
+#| eval: true
+
+foods <- read.csv('data/foods.csv', sep = ',')
+data.table::setDT(foods) # use data.table format
+foods[1:10,] # show the first 10
+```
+
+
+
+
+
+
+
+
+
+
+
+

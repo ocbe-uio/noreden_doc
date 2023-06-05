@@ -6,6 +6,7 @@ listing:
     image-height: 150px
     fields: [title]
     contents: 
+      - "understand_data.qmd"
       - "define_problem.qmd"
     type: table
     grid-item-border: false
