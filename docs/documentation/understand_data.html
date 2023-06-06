@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>NorEden - Understand the current diet</title>
+<title>NorEden - Part 1: Understand the current diet</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -122,6 +122,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   }
 }</script>
 
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
 <link rel="stylesheet" href="../styles.css">
 </head>
@@ -169,11 +170,14 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#exploratory-data-analysis-on-current-diet" id="toc-exploratory-data-analysis-on-current-diet" class="nav-link active" data-scroll-target="#exploratory-data-analysis-on-current-diet">Exploratory data analysis on current diet</a>
+  <li><a href="#exploratory-data-analysis-on-current-diet" id="toc-exploratory-data-analysis-on-current-diet" class="nav-link active" data-scroll-target="#exploratory-data-analysis-on-current-diet">Exploratory data analysis on current diet</a></li>
+  <li><a href="#visualization" id="toc-visualization" class="nav-link" data-scroll-target="#visualization">Visualization</a>
   <ul class="collapse">
-  <li><a href="#visualize" id="toc-visualize" class="nav-link" data-scroll-target="#visualize">Visualize</a></li>
+  <li><a href="#energy-contribution-from-28-food-groups" id="toc-energy-contribution-from-28-food-groups" class="nav-link" data-scroll-target="#energy-contribution-from-28-food-groups">Energy contribution from 28 food groups</a></li>
+  <li><a href="#ghge-contribution-from-28-food-groups" id="toc-ghge-contribution-from-28-food-groups" class="nav-link" data-scroll-target="#ghge-contribution-from-28-food-groups">GHGE contribution from 28 food groups</a></li>
+  <li><a href="#energy-vs-ghge" id="toc-energy-vs-ghge" class="nav-link" data-scroll-target="#energy-vs-ghge">Energy vs GHGE</a></li>
+  <li><a href="#proportion-for-5-metrics" id="toc-proportion-for-5-metrics" class="nav-link" data-scroll-target="#proportion-for-5-metrics">Proportion for 5 metrics</a></li>
   </ul></li>
-  <li><a href="#compare-with-constraints" id="toc-compare-with-constraints" class="nav-link" data-scroll-target="#compare-with-constraints">Compare with constraints</a></li>
   </ul>
 </nav>
     </div>
@@ -182,7 +186,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Understand the current diet</h1>
+<h1 class="title">Part 1: Understand the current diet</h1>
 </div>
 
 
@@ -197,7 +201,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 </header>
 
-<p>Load the aggregated food groups and their attributes. We have 25 food groups.</p>
+<p>Load the aggregated food groups and their attributes. We have 28 food groups.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>foods <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">'data/foods.csv'</span>, <span class="at">sep =</span> <span class="st">','</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>data.table<span class="sc">::</span><span class="fu">setDT</span>(foods) <span class="co"># use data.table format</span></span>
@@ -242,6 +246,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 <section id="exploratory-data-analysis-on-current-diet" class="level2">
 <h2 class="anchored" data-anchor-id="exploratory-data-analysis-on-current-diet">Exploratory data analysis on current diet</h2>
+<p>Before we construct the optimization problem, we should always understand the data. This helps us picking the important food groups, as well as making sense of the constraints.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># compute the contribution (indiv * intake) for 28 foods</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>ftotal <span class="ot">&lt;-</span> <span class="fu">apply</span>(<span class="at">X =</span> foods[, <span class="fu">c</span>(<span class="st">'energy'</span>, <span class="st">'protein'</span>, <span class="st">'fat'</span>, </span>
@@ -260,19 +265,28 @@ Vegetables    241.9490  2.3190 1.2368  7.7300 0.7730       0 0.1546
 Legumes        29.9985  0.5005 0.1015  1.0010 0.0000       0 0.0035</code></pre>
 </div>
 </div>
-<p>Now we can compute the percentage of food group contribution against the total.</p>
+<p>We can also examine whether the current intake satisfy the constraints from above. For example, the energy contribution from bread is <span class="math inline">\(175.4 \times 10.696\)</span>, which is the intake times per unit energy.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># divide by total of all 28 (upper constraints)</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>fsum <span class="ot">&lt;-</span> <span class="fu">apply</span>(ftotal, <span class="dv">2</span>, sum)</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>fsum</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">t</span>(<span class="fu">as.matrix</span>(foods<span class="sc">$</span>intake)) <span class="sc">%*%</span> <span class="fu">as.matrix</span>(foods[, .(energy, protein, fat, carbs, sugar, alcohol, ghge)])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       energy protein     fat    carbs   sugar alcohol   ghge
+[1,] 9314.278 98.2159 85.7644 234.7172 39.2148  8.6498 3.7807</code></pre>
+</div>
+</div>
+<p>It looks like all categories but carbs fall within the expected range. Carb is slighter lower than the lower threshold.</p>
+<p>Now we can compute the <strong>percentage</strong> of each one of the 28 food group contribution towards the total.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># divide by total of all 28 (upper constraints)</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>fsum <span class="ot">&lt;-</span> <span class="fu">apply</span>(ftotal, <span class="dv">2</span>, sum)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>fsum</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   energy   protein       fat     carbs     sugar   alcohol      ghge 
 9314.2778   98.2159   85.7644  234.7172   39.2148    8.6498    3.7807 </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>fprop <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">apply</span>(<span class="at">X =</span> ftotal, <span class="at">MARGIN =</span> <span class="dv">1</span>, <span class="at">FUN =</span> <span class="cf">function</span>(x){x<span class="sc">/</span>fsum}))</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>fprop <span class="ot">&lt;-</span> <span class="fu">round</span>(fprop, <span class="at">digits =</span> <span class="dv">3</span>) <span class="co"># keep 3 digits</span></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(fprop) <span class="ot">&lt;-</span> foods<span class="sc">$</span>food</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(fprop)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>fprop <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">apply</span>(<span class="at">X =</span> ftotal, <span class="at">MARGIN =</span> <span class="dv">1</span>, <span class="at">FUN =</span> <span class="cf">function</span>(x){x<span class="sc">/</span>fsum}))</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>fprop <span class="ot">&lt;-</span> <span class="fu">round</span>(fprop, <span class="at">digits =</span> <span class="dv">3</span>) <span class="co"># keep 3 digits</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(fprop) <span class="ot">&lt;-</span> foods<span class="sc">$</span>food</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(fprop)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>             energy protein   fat carbs sugar alcohol  ghge
 Bread         0.201   0.163 0.061 0.330 0.009       0 0.046
@@ -283,84 +297,235 @@ Vegetables    0.026   0.024 0.014 0.033 0.020       0 0.041
 Legumes       0.003   0.005 0.001 0.004 0.000       0 0.001</code></pre>
 </div>
 </div>
-<section id="visualize" class="level3">
-<h3 class="anchored" data-anchor-id="visualize">Visualize</h3>
+<p>For example, bread contributes to 20% towards the total energy, and 16.3% of the total protein.</p>
+</section>
+<section id="visualization" class="level2">
+<h2 class="anchored" data-anchor-id="visualization">Visualization</h2>
+<div class="callout-note callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>In this section we are mostly focused on <strong>energy, intake, ghge</strong>. It is easy to extend to other macronutrient categories.</p>
+</div>
+</div>
 <p>We need some more data manipulation before plotting.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># require some data manip</span></span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="co"># need big food group, food name (smaller food group)</span></span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>pdt <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(ftotal) <span class="co"># total </span></span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>pdt<span class="sc">$</span>food_name <span class="ot">&lt;-</span> <span class="fu">row.names</span>(pdt)</span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>pdt_long <span class="ot">&lt;-</span> tidyr<span class="sc">::</span><span class="fu">pivot_longer</span>(pdt, <span class="at">cols =</span> <span class="sc">-</span>food_name, <span class="at">names_to =</span> <span class="st">'category'</span>)</span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>pdt_long <span class="ot">&lt;-</span> data.table<span class="sc">::</span><span class="fu">setDT</span>(pdt_long)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details>
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># first define big groups</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>grain <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'Bread'</span>, <span class="st">'Other grains'</span>, <span class="st">'Cakes'</span>)</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>fruit_vege <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'Potatoes'</span>, <span class="st">'Vegetables'</span>, <span class="st">'Legumes'</span>, <span class="st">'Fruit, berries'</span>, </span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>                <span class="st">'Juice'</span>, <span class="st">'Nuts'</span>, <span class="st">'Vegetarian products'</span>)</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>meat <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'Red meat'</span>, <span class="st">'White meat'</span>)</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>fish_egg <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'Fish'</span>, <span class="st">'Eggs'</span>)</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>dairy <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'Cream, cream desserts'</span>, <span class="st">'Milk, yoghurt'</span>, <span class="st">'Cheese'</span>)</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>fats <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'Butter, margarine, oil'</span>)</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>beverages <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'Coffee, tea'</span>, <span class="st">'Soda, saft'</span>, <span class="st">'Water'</span>, </span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>               <span class="st">'Alcoholic beverages'</span>, <span class="st">'Non-dairy milk'</span>)</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>sugar_other <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'Sugar, sweets'</span>, <span class="st">'Snacks'</span>, <span class="st">'Sauces'</span>, <span class="st">'Spices'</span>, <span class="st">'Other'</span>)</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="co"># reorder food names to make the plot easier to read</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>names_ordered <span class="ot">&lt;-</span> <span class="fu">c</span>(grain, fruit_vege, meat, fish_egg, </span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>                   dairy, fats, beverages, sugar_other)</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>names_ordered</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "Bread"                  "Other grains"           "Cakes"                 
+ [4] "Potatoes"               "Vegetables"             "Legumes"               
+ [7] "Fruit, berries"         "Juice"                  "Nuts"                  
+[10] "Vegetarian products"    "Red meat"               "White meat"            
+[13] "Fish"                   "Eggs"                   "Cream, cream desserts" 
+[16] "Milk, yoghurt"          "Cheese"                 "Butter, margarine, oil"
+[19] "Coffee, tea"            "Soda, saft"             "Water"                 
+[22] "Alcoholic beverages"    "Non-dairy milk"         "Sugar, sweets"         
+[25] "Snacks"                 "Sauces"                 "Spices"                
+[28] "Other"                 </code></pre>
+</div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggrepel)</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> pdt_long[category <span class="sc">==</span> <span class="st">'energy'</span>], </span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>             <span class="fu">aes</span>(<span class="at">x =</span> food_name, <span class="at">y =</span> value))</span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> p1 <span class="sc">+</span> <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">'identity'</span>)</span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> p1 <span class="sc">+</span> <span class="fu">coord_flip</span>()</span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> p1 <span class="sc">+</span> <span class="fu">theme_bw</span>()</span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> p1 <span class="sc">+</span> <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">'Energy (food intake)'</span>, </span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>                <span class="at">x =</span> <span class="st">'Food groups'</span>, </span>
-<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>                <span class="at">y =</span> <span class="st">'Energy'</span>)</span>
-<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>p1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details>
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># require some data manip</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="co"># need big food group, food name (smaller food group)</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>pdt <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(ftotal) <span class="co"># total </span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>pdt<span class="sc">$</span>food_name <span class="ot">&lt;-</span> <span class="fu">row.names</span>(pdt)</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>pdt <span class="ot">&lt;-</span> data.table<span class="sc">::</span><span class="fu">setDT</span>(pdt)</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="co"># attach big group</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>pdt[food_name <span class="sc">%in%</span> grain, big_group <span class="sc">:</span><span class="er">=</span> <span class="st">'grain'</span>]</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>pdt[food_name <span class="sc">%in%</span> fruit_vege, big_group <span class="sc">:</span><span class="er">=</span> <span class="st">'fruit_vege'</span>]</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>pdt[food_name <span class="sc">%in%</span> meat, big_group <span class="sc">:</span><span class="er">=</span> <span class="st">'meat'</span>]</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>pdt[food_name <span class="sc">%in%</span> fish_egg, big_group <span class="sc">:</span><span class="er">=</span> <span class="st">'fish_egg'</span>]</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>pdt[food_name <span class="sc">%in%</span> dairy, big_group <span class="sc">:</span><span class="er">=</span> <span class="st">'dairy'</span>]</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>pdt[food_name <span class="sc">%in%</span> fats, big_group <span class="sc">:</span><span class="er">=</span> <span class="st">'fats'</span>]</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>pdt[food_name <span class="sc">%in%</span> beverages, big_group <span class="sc">:</span><span class="er">=</span> <span class="st">'beverages'</span>]</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>pdt[food_name <span class="sc">%in%</span> sugar_other, big_group <span class="sc">:</span><span class="er">=</span> <span class="st">'sugar_other'</span>]</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a><span class="co"># make long format</span></span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>pdt_long <span class="ot">&lt;-</span> tidyr<span class="sc">::</span><span class="fu">pivot_longer</span>(pdt, <span class="at">cols =</span> <span class="sc">-</span><span class="fu">c</span>(food_name, big_group),</span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>                                <span class="at">names_to =</span> <span class="st">'category'</span>)</span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>pdt_long <span class="ot">&lt;-</span> data.table<span class="sc">::</span><span class="fu">setDT</span>(pdt_long)</span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a><span class="co"># new variable, food_name_order</span></span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>pdt_long<span class="sc">$</span>food_name_order <span class="ot">&lt;-</span> <span class="fu">factor</span>(pdt_long<span class="sc">$</span>food_name, </span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">levels =</span> names_ordered, </span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">labels =</span> names_ordered)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<section id="energy-contribution-from-28-food-groups" class="level3">
+<h3 class="anchored" data-anchor-id="energy-contribution-from-28-food-groups">Energy contribution from 28 food groups</h3>
+<p>In total these 28 food groups contribute to 9314kJ. Here is a breakdown of each food groups, colored by different types of food (crude).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggrepel)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(RColorBrewer)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> pdt_long[category <span class="sc">==</span> <span class="st">'energy'</span>], </span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>             <span class="fu">aes</span>(<span class="at">x =</span> food_name_order, <span class="at">y =</span> value, <span class="at">fill =</span> big_group))</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> p1 <span class="sc">+</span> <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">'identity'</span>)</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> p1 <span class="sc">+</span> <span class="fu">coord_flip</span>()</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> p1 <span class="sc">+</span> <span class="fu">theme_bw</span>()</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> p1 <span class="sc">+</span> <span class="fu">scale_fill_brewer</span>(<span class="at">palette =</span> <span class="st">'Dark2'</span>)</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> p1 <span class="sc">+</span> <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">'Energy (multiplied by food intake)'</span>, </span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>                <span class="at">x =</span> <span class="st">'Food groups'</span>, </span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>                <span class="at">y =</span> <span class="st">'Energy'</span>)</span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> p1 <span class="sc">+</span> <span class="fu">theme</span>(<span class="at">axis.text =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">12</span>), </span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>                   <span class="at">axis.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">12</span>), </span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>                   <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">20</span>))</span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>p1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="understand_data_files/figure-html/p1-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+</section>
+<section id="ghge-contribution-from-28-food-groups" class="level3">
+<h3 class="anchored" data-anchor-id="ghge-contribution-from-28-food-groups">GHGE contribution from 28 food groups</h3>
+<p>We can also plot a different metric, say GHGE. We can see that red meat is the largest contributor, followed by cheese and milk (dairy products).</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>p2 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> pdt_long[category <span class="sc">==</span> <span class="st">'ghge'</span>], </span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>             <span class="fu">aes</span>(<span class="at">x =</span> food_name, <span class="at">y =</span> value))</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>p2 <span class="ot">&lt;-</span> p2 <span class="sc">+</span> <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">'identity'</span>)</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>p2 <span class="ot">&lt;-</span> p2 <span class="sc">+</span> <span class="fu">coord_flip</span>()</span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>p2 <span class="ot">&lt;-</span> p2 <span class="sc">+</span> <span class="fu">theme_bw</span>()</span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>p2 <span class="ot">&lt;-</span> p2 <span class="sc">+</span> <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">'GHGE (food intake)'</span>, </span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>                <span class="at">x =</span> <span class="st">'Food groups'</span>, </span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>                <span class="at">y =</span> <span class="st">'GHGE'</span>)</span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>p2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details>
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>p2 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> pdt_long[category <span class="sc">==</span> <span class="st">'ghge'</span>], </span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>             <span class="fu">aes</span>(<span class="at">x =</span> food_name_order, <span class="at">y =</span> value, <span class="at">fill =</span> big_group))</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>p2 <span class="ot">&lt;-</span> p2 <span class="sc">+</span> <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">'identity'</span>)</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>p2 <span class="ot">&lt;-</span> p2 <span class="sc">+</span> <span class="fu">coord_flip</span>()</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>p2 <span class="ot">&lt;-</span> p2 <span class="sc">+</span> <span class="fu">theme_bw</span>()</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>p2 <span class="ot">&lt;-</span> p2 <span class="sc">+</span> <span class="fu">scale_fill_brewer</span>(<span class="at">palette =</span> <span class="st">'Dark2'</span>)</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>p2 <span class="ot">&lt;-</span> p2 <span class="sc">+</span> <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">'GHGE (multiplied by food intake)'</span>, </span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>                <span class="at">x =</span> <span class="st">'Food groups'</span>, </span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>                <span class="at">y =</span> <span class="st">'GHGE'</span>)</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>p2 <span class="ot">&lt;-</span> p2 <span class="sc">+</span> <span class="fu">theme</span>(<span class="at">axis.text =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">12</span>), </span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>                 <span class="at">axis.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">12</span>), </span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>                 <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">20</span>))</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>p2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display">
 <p><img src="understand_data_files/figure-html/p2-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+</section>
+<section id="energy-vs-ghge" class="level3">
+<h3 class="anchored" data-anchor-id="energy-vs-ghge">Energy vs GHGE</h3>
+<p>We can also show the per unit contribution to energy and GHGE. The size of the bubbles are the amount of consumption: the bigger the more consumed.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>pdfd <span class="ot">&lt;-</span> data.table<span class="sc">::</span><span class="fu">setDT</span>(foods)</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="co"># remove water, outlier</span></span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>pdfd <span class="ot">&lt;-</span> pdfd[food <span class="sc">!=</span> <span class="st">'Water'</span>]</span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>p3 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> pdfd, </span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>             <span class="fu">aes</span>(<span class="at">x =</span> energy, <span class="at">y =</span> ghge, <span class="at">size =</span> intake, <span class="at">label =</span> food))</span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>p3 <span class="ot">&lt;-</span> p3 <span class="sc">+</span> <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.3</span>) <span class="sc">+</span> <span class="fu">xlim</span>(<span class="sc">-</span><span class="dv">3</span>, <span class="dv">30</span>) <span class="sc">+</span> <span class="fu">ylim</span>(<span class="sc">-</span><span class="fl">0.002</span>, <span class="fl">0.015</span>)</span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>p3 <span class="ot">&lt;-</span> p3 <span class="sc">+</span> <span class="fu">scale_size</span>(<span class="at">range =</span> <span class="fu">c</span>(<span class="fl">0.1</span>, <span class="dv">20</span>))</span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>p3 <span class="ot">&lt;-</span> p3 <span class="sc">+</span> <span class="fu">geom_text_repel</span>(<span class="at">size =</span> <span class="dv">4</span>, <span class="at">max.overlaps =</span> <span class="dv">15</span>)</span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="co"># p3 &lt;- p3 + geom_text(size = 3, check_overlap = T)</span></span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>p3 <span class="ot">&lt;-</span> p3 <span class="sc">+</span> <span class="fu">theme_bw</span>()</span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>p3 <span class="ot">&lt;-</span> p3 <span class="sc">+</span> <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">'Energy vs GHGE'</span>, </span>
-<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>                <span class="at">x =</span> <span class="st">'Energy (per unit)'</span>, </span>
-<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>                <span class="at">y =</span> <span class="st">'GHGE (per unit)'</span>)</span>
-<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>p3</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details>
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>pdfd <span class="ot">&lt;-</span> data.table<span class="sc">::</span><span class="fu">setDT</span>(foods)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="co"># remove water, outlier</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>pdfd <span class="ot">&lt;-</span> pdfd[food <span class="sc">!=</span> <span class="st">'Water'</span>]</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a><span class="co"># attach label </span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>pdfd[food <span class="sc">%in%</span> grain, big_group <span class="sc">:</span><span class="er">=</span> <span class="st">'grain'</span>]</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>pdfd[food <span class="sc">%in%</span> fruit_vege, big_group <span class="sc">:</span><span class="er">=</span> <span class="st">'fruit_vege'</span>]</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>pdfd[food <span class="sc">%in%</span> meat, big_group <span class="sc">:</span><span class="er">=</span> <span class="st">'meat'</span>]</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>pdfd[food <span class="sc">%in%</span> fish_egg, big_group <span class="sc">:</span><span class="er">=</span> <span class="st">'fish_egg'</span>]</span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>pdfd[food <span class="sc">%in%</span> dairy, big_group <span class="sc">:</span><span class="er">=</span> <span class="st">'dairy'</span>]</span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>pdfd[food <span class="sc">%in%</span> fats, big_group <span class="sc">:</span><span class="er">=</span> <span class="st">'fats'</span>]</span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>pdfd[food <span class="sc">%in%</span> beverages, big_group <span class="sc">:</span><span class="er">=</span> <span class="st">'beverages'</span>]</span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>pdfd[food <span class="sc">%in%</span> sugar_other, big_group <span class="sc">:</span><span class="er">=</span> <span class="st">'sugar_other'</span>]</span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>p3 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> pdfd, </span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>             <span class="fu">aes</span>(<span class="at">x =</span> energy, <span class="at">y =</span> ghge, <span class="at">size =</span> intake, </span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>                 <span class="at">label =</span> food, <span class="at">color =</span> big_group))</span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a>p3 <span class="ot">&lt;-</span> p3 <span class="sc">+</span> <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.3</span>) <span class="sc">+</span> <span class="fu">xlim</span>(<span class="sc">-</span><span class="dv">3</span>, <span class="dv">30</span>) <span class="sc">+</span> <span class="fu">ylim</span>(<span class="sc">-</span><span class="fl">0.002</span>, <span class="fl">0.015</span>)</span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a>p3 <span class="ot">&lt;-</span> p3 <span class="sc">+</span> <span class="fu">scale_size</span>(<span class="at">range =</span> <span class="fu">c</span>(<span class="fl">0.1</span>, <span class="dv">20</span>))</span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a>p3 <span class="ot">&lt;-</span> p3 <span class="sc">+</span> <span class="fu">geom_text_repel</span>(<span class="at">size =</span> <span class="dv">4</span>, <span class="at">max.overlaps =</span> <span class="dv">15</span>)</span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a><span class="co"># p3 &lt;- p3 + geom_text(size = 3, check_overlap = T)</span></span>
+<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a>p3 <span class="ot">&lt;-</span> p3 <span class="sc">+</span> <span class="fu">theme_bw</span>()</span>
+<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a>p3 <span class="ot">&lt;-</span> p3 <span class="sc">+</span> <span class="fu">scale_color_brewer</span>(<span class="at">palette =</span> <span class="st">'Dark2'</span>)</span>
+<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a>p3 <span class="ot">&lt;-</span> p3 <span class="sc">+</span> <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">'Energy vs GHGE per unit food (group)'</span>, </span>
+<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a>                <span class="at">x =</span> <span class="st">'Energy (per unit)'</span>, </span>
+<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a>                <span class="at">y =</span> <span class="st">'GHGE (per unit)'</span>)</span>
+<span id="cb18-29"><a href="#cb18-29" aria-hidden="true" tabindex="-1"></a>p3</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display">
 <p><img src="understand_data_files/figure-html/p3-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<p>(How do they relate to the constraints)</p>
 </section>
-</section>
-<section id="compare-with-constraints" class="level2">
-<h2 class="anchored" data-anchor-id="compare-with-constraints">Compare with constraints</h2>
-<p>Now we can also examine whether the current intake satisfy the constraints.</p>
+<section id="proportion-for-5-metrics" class="level3">
+<h3 class="anchored" data-anchor-id="proportion-for-5-metrics">Proportion for 5 metrics</h3>
+<p>Finally we present the percentage contribution of 28 food groups towards 5 categories.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">t</span>(<span class="fu">as.matrix</span>(foods<span class="sc">$</span>intake)) <span class="sc">%*%</span> <span class="fu">as.matrix</span>(foods[, .(energy, protein, fat, carbs, sugar, alcohol, ghge)])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>       energy protein     fat    carbs   sugar alcohol   ghge
-[1,] 9314.278 98.2159 85.7644 234.7172 39.2148  8.6498 3.7807</code></pre>
+<details>
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>pdfp <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(fprop) <span class="co"># total </span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>pdfp<span class="sc">$</span>food_name <span class="ot">&lt;-</span> <span class="fu">row.names</span>(pdfp)</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="co"># attach big group</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>data.table<span class="sc">::</span><span class="fu">setDT</span>(pdfp)</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>pdfp[food_name <span class="sc">%in%</span> grain, big_group <span class="sc">:</span><span class="er">=</span> <span class="st">'grain'</span>]</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>pdfp[food_name <span class="sc">%in%</span> fruit_vege, big_group <span class="sc">:</span><span class="er">=</span> <span class="st">'fruit_vege'</span>]</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>pdfp[food_name <span class="sc">%in%</span> meat, big_group <span class="sc">:</span><span class="er">=</span> <span class="st">'meat'</span>]</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>pdfp[food_name <span class="sc">%in%</span> fish_egg, big_group <span class="sc">:</span><span class="er">=</span> <span class="st">'fish_egg'</span>]</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>pdfp[food_name <span class="sc">%in%</span> dairy, big_group <span class="sc">:</span><span class="er">=</span> <span class="st">'dairy'</span>]</span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>pdfp[food_name <span class="sc">%in%</span> fats, big_group <span class="sc">:</span><span class="er">=</span> <span class="st">'fats'</span>]</span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>pdfp[food_name <span class="sc">%in%</span> beverages, big_group <span class="sc">:</span><span class="er">=</span> <span class="st">'beverages'</span>]</span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>pdfp[food_name <span class="sc">%in%</span> sugar_other, big_group <span class="sc">:</span><span class="er">=</span> <span class="st">'sugar_other'</span>]</span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>pdfp_long <span class="ot">&lt;-</span> tidyr<span class="sc">::</span><span class="fu">pivot_longer</span>(pdfp, <span class="at">cols =</span> <span class="sc">-</span><span class="fu">c</span>(food_name, big_group), <span class="at">names_to =</span> <span class="st">'category'</span>)</span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>pdfp_long <span class="ot">&lt;-</span> data.table<span class="sc">::</span><span class="fu">setDT</span>(pdfp_long)</span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a><span class="co"># also add orders here</span></span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>pdfp_long<span class="sc">$</span>food_name_order <span class="ot">&lt;-</span> <span class="fu">factor</span>(pdfp_long<span class="sc">$</span>food_name, </span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">levels =</span> names_ordered, </span>
+<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">labels =</span> names_ordered)</span>
+<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a><span class="co"># plot </span></span>
+<span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a>p4 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> pdfp_long[category <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">'energy'</span>, <span class="st">'protein'</span>, <span class="st">'fat'</span>, <span class="st">'carbs'</span>,<span class="st">'ghge'</span>)], </span>
+<span id="cb19-25"><a href="#cb19-25" aria-hidden="true" tabindex="-1"></a>             <span class="fu">aes</span>(<span class="at">x =</span> food_name_order, <span class="at">y =</span> value, <span class="at">fill =</span> big_group))</span>
+<span id="cb19-26"><a href="#cb19-26" aria-hidden="true" tabindex="-1"></a>p4 <span class="ot">&lt;-</span> p4 <span class="sc">+</span> <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">'identity'</span>)</span>
+<span id="cb19-27"><a href="#cb19-27" aria-hidden="true" tabindex="-1"></a>p4 <span class="ot">&lt;-</span> p4 <span class="sc">+</span> <span class="fu">coord_flip</span>()</span>
+<span id="cb19-28"><a href="#cb19-28" aria-hidden="true" tabindex="-1"></a>p4 <span class="ot">&lt;-</span> p4 <span class="sc">+</span> <span class="fu">facet_wrap</span>(<span class="sc">~</span>category, <span class="at">ncol =</span> <span class="dv">5</span>)</span>
+<span id="cb19-29"><a href="#cb19-29" aria-hidden="true" tabindex="-1"></a>p4 <span class="ot">&lt;-</span> p4 <span class="sc">+</span> <span class="fu">scale_fill_brewer</span>(<span class="at">palette =</span> <span class="st">'Dark2'</span>)</span>
+<span id="cb19-30"><a href="#cb19-30" aria-hidden="true" tabindex="-1"></a>p4 <span class="ot">&lt;-</span> p4 <span class="sc">+</span> <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">'Proportion of food contribution'</span>,</span>
+<span id="cb19-31"><a href="#cb19-31" aria-hidden="true" tabindex="-1"></a>                <span class="at">subtitle =</span> <span class="st">'Each category sums up to 1'</span>,</span>
+<span id="cb19-32"><a href="#cb19-32" aria-hidden="true" tabindex="-1"></a>                <span class="at">x =</span> <span class="st">'Food groups'</span>, </span>
+<span id="cb19-33"><a href="#cb19-33" aria-hidden="true" tabindex="-1"></a>                <span class="at">y =</span> <span class="st">'Percentage'</span>)</span>
+<span id="cb19-34"><a href="#cb19-34" aria-hidden="true" tabindex="-1"></a>p4 <span class="ot">&lt;-</span> p4 <span class="sc">+</span> <span class="fu">theme_bw</span>()</span>
+<span id="cb19-35"><a href="#cb19-35" aria-hidden="true" tabindex="-1"></a>p4 <span class="ot">&lt;-</span> p4 <span class="sc">+</span> <span class="fu">theme</span>(<span class="at">axis.text =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">10</span>), </span>
+<span id="cb19-36"><a href="#cb19-36" aria-hidden="true" tabindex="-1"></a>                 <span class="at">axis.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">10</span>), </span>
+<span id="cb19-37"><a href="#cb19-37" aria-hidden="true" tabindex="-1"></a>                 <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">15</span>), </span>
+<span id="cb19-38"><a href="#cb19-38" aria-hidden="true" tabindex="-1"></a>                 <span class="at">strip.text =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">12</span>), </span>
+<span id="cb19-39"><a href="#cb19-39" aria-hidden="true" tabindex="-1"></a>                 <span class="at">legend.position =</span> <span class="st">'none'</span>)</span>
+<span id="cb19-40"><a href="#cb19-40" aria-hidden="true" tabindex="-1"></a>p4</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="understand_data_files/figure-html/p4-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<p>It looks like all categories but carbs fall within the expected range. Carb is slighter lower than the lower threshold.</p>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->

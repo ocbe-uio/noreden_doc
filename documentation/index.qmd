@@ -8,6 +8,7 @@ listing:
     contents: 
       - "understand_data.qmd"
       - "define_problem.qmd"
+      - "small_demo.qmd"
     type: table
     grid-item-border: false
     sort-ui: false

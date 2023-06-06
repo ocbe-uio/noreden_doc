@@ -36,16 +36,14 @@ const_max_allfoods <- c(9314.3, 98.2, 85.8, 234.7, 39.2, 8.6, 3.8)
 const_max_3foods <- t(as.matrix(fd$intake)) %*% as.matrix(fd[, .(energy, protein, fat, carbs, sugar, alcohol, ghge)])
 const_max_3foods
 
-c3 <- rbind(const_max_3foods, 
-            const_max_3foods*0.9, 
-            const_max_3foods*1.1)
-
-c3 <- data.frame(c3)
-rownames(c3) <- c('mean', 'lwr', 'upr')
-c3
+c3foods <- rbind(const_max_3foods*0.9, 
+            const_max_3foods*1)
+rownames(c3foods) <- c('lwr', 'upr')
+c3foods <- data.frame(c3foods)
+c3foods
 
 # const_max_3foods * 0.9
-# seems alright! 
+
 
 
 

@@ -1,5 +1,5 @@
 ---
-title: "Demo: 3 foods,  2 constraints"
+title: "Part 3: A simple problem with 3 foods and 3 constraints"
 format: 
   html:
     code-fold: false
@@ -7,7 +7,7 @@ format:
 editor: source
 ---
 
-We document the optimization procedure with `nloptr` using a small example of 3 foods, and 2 constraints (energy and protein). 
+We document the optimization procedure with `nloptr` using a small example of 3 foods, and 3 constraints (energy, protein, ghge). 
 
 ```{r}
 #| label: small-demo
@@ -16,17 +16,284 @@ We document the optimization procedure with `nloptr` using a small example of 3 
 
 foods <- read.csv('data/foods.csv', sep = ',')
 data.table::setDT(foods) # use data.table format
-foods[1:10,] # show the first 10
+
+# we only take 3 foods
+fd <- foods[food %in% c('Bread', 'Vegetables', 'Red meat')]
+fd
+```
+
+## Constraints for 3 foods
+
+We compute the constraints for 3 foods together. Note that the consumption for each of the 28 food groups are different, hence we can not use 3/28 times the total energy, protein...; we need to use a weighted average. 
+
+The cosntraints can be set to any positive number that make sense.
+
+```{r}
+#| label: const-3foods-1
+#| echo: true
+#| eval: true
+
+# original constraint for all foods (maximum)
+const_max_allfoods <- c(9314.3, 98.2, 85.8, 234.7, 39.2, 8.6, 3.8)
+
+# 3 foods contribution (maximum)
+const_max_3foods <- t(as.matrix(fd$intake)) %*% as.matrix(fd[, .(energy, protein, fat, carbs, sugar, alcohol, ghge)])
+const_max_3foods
 ```
 
 
+In the optimization problem, we want to have a range (lower, upper) for the metrics. We can assume that the lower range is 90% of the maximum.  
 
 
+```{r}
+#| label: const-3foods-2
+#| echo: true
+#| eval: true
+
+c3foods <- rbind(const_max_3foods*0.9, const_max_3foods*1)
+rownames(c3foods) <- c('lwr', 'upr')
+c3foods <- data.frame(c3foods)
+c3foods
+```
+
+For example, the total energy for the 3 foods together should be within [2789.14, 3099.05]. 
+
+## Optimization 
+
+Now we are going to solve the optimization problem using `nloptr`. 
+
+There are a few components that need to be specified: 
+
+* objective function (as a function of `x`)
+* constraint functions
+* initial values
+* options 
+
+### Objective function
+
+The objective is to **minimize** the following function: 
+
+$(x_1 - X_1)^2 + (x_2 - X_2)^2 + (x_3 - X_3)^2$ where
+
+$x_1, x_2, x_3$ are the target diet (grams or other units) we want to find, these three are unknown.
+
+$X_1, X_2, X_3$ are the current diet for bread, vegetables and red meat. We have these values in the data: 175.4, 154.6, 117.6. In the function we use `fd$intake` to programmatically extract the values. 
+
+```{r}
+#| label: opt-obj
+#| echo: true
+#| eval: true
+
+fd$intake
+
+# define objective 
+objective <- function(x)
+{
+  return ( (x[1]- fd$intake[1])^2 + 
+             (x[2]- fd$intake[2])^2 + 
+             (x[3]- fd$intake[3])^2)
+}
+```
+
+### Constraints
+
+Now we define the inequality constraints. For this demo, we only include 3 metrics (energy, protein, ghge) for simplicity. 
+
+```{r}
+#| label: opt-const-c
+#| echo: true
+#| eval: true
+
+# select the metrics we want to keep 
+c3 <- c3foods[, c('energy', 'protein', 'ghge')]
+c3
+```
+
+The inequality constraints need to be reformulated for `nloptr` to work. More specifically, `nloptr` optimizes a function $f(x)$ subject to a set of equality and inequality constraints. For the inequality constraints, they need to be the form of $g(x) <= 0$. 
+
+We write out our own constraints for **energy**:
+
+$x_1 e_1 + x_2e_2 + x_3e_3 >= E_{lower}, x_1 e_1 + x_2e_2 + x_3e_3 <= E_{upper}$
+
+These two need to be re-written to be in the format of $g(x) <= 0$. 
+
+$-(x_1 e_1 + x_2e_2 + x_3e_3)+E_{lower} <= 0$
+
+$x_1 e_1 + x_2e_2 + x_3e_3 - E_{upper} <= 0$
+
+The constraints for **protein, ghge** can be written in similar ways.
+
+```{r}
+#| label: opt-const-f
+#| echo: true
+#| eval: true
+
+# define the inequality constraints
+inequalconstr <- function (x) {
+  constr <- c(
+    # energy
+    - x[1]*fd$energy[1] - x[2]*fd$energy[2] - x[3]*fd$energy[3] + c3$energy[1], # lower
+    x[1]*fd$energy[1] + x[2]*fd$energy[2] + x[3]*fd$energy[3] - c3$energy[2], # upper
+    
+    # protein
+    - x[1]*fd$protein[1] - x[2]*fd$protein[2] - x[3]*fd$protein[3] + c3$protein[1],
+    x[1]*fd$protein[1] + x[2]*fd$protein[2] + x[3]*fd$protein[3] - c3$protein[2],
+
+    # ghge
+    - x[1]*fd$ghge[1] - x[2]*fd$ghge[2] - x[3]*fd$ghge[3]+ c3$ghge[1],
+    x[1]*fd$ghge[1] + x[2]*fd$ghge[2] + x[3]*fd$ghge[3] - c3$ghge[2]
+  )
+  return (constr)
+}
+```
+
+### Other options
+
+We do not need to explicitly specify the **non-negativity constraints** for $x$ inside the function. They are specified outside the function as a set of **lower and upper bounds**. You can set these range to be anything that make sense; for now we make it close to the current diet. 
+
+**Initial values** are the values you tell the program to start the search. This is also up to you; sometimes initial values can have a large impact on the final results when the optimization problem is difficult (e.g. has multiple local optima). We can start close to the values of the current diet. 
+
+```{r}
+#| label: opt-init
+#| echo: true
+#| eval: true
+
+# lower and upper bounds of x (3 foods)
+lb <- c(160, 140, 100)
+ub <- c(180, 160, 120)
+
+# Initial values
+# (try different ones!)
+x0 <- c(175, 150, 110) 
+```
 
 
+Options should also be supplied to the program as a named list. These are specifications for the algorithm, tolerance and maximum evaluation. For more details please check the function manual.
+
+Pay attention to the last line here: the size inside `rep()` need to match the number of inequality constraints. In this example it should be 6.
+
+```{r}
+#| label: opt-algo
+#| echo: true
+#| eval: true
+
+opts <- list( "algorithm" = "NLOPT_GN_ISRES",
+              "xtol_rel"= 1.0e-15,
+              "maxeval"= 160000,
+              "tol_constraints_ineq" = rep( 1.0e-10, 6 ))
+
+```
+
+Now we run the optimization by calling `nloptr` from `nloptr` package. If you have loaded the package before, you don't need the `::` between the two. 
+
+We print the result and check the optimized values. 
+
+```{r}
+#| label: opt-run
+#| echo: true
+#| eval: true
+
+# run the algorithm
+res <- nloptr::nloptr(
+  x0          = x0,        # initial value for x
+  eval_f      = objective, # objective function
+  lb          = lb,        # lower bound for x
+  ub          = ub,        # upper bound for x
+  eval_g_ineq = inequalconstr, # inequality constraint
+  opts        = opts       # options
+  )
+
+print(res)
+```
 
 
+The optimal values are 175.4, 154.6, 117.6. These are the same as the current diet. 
+
+::: {.callout-note}
+This result is not surprising; our current diet on the three foods already satisfies the constraints, and it *is* the closest to the current diet ($(x_1 - X_1)^2 +(x_2 - X_2)^2 + (x_3 - X_3)^2 = 0$) when $x_1 = X_1, x_2 = X_2, x_3 = X_3$.
+:::
+
+## Reduce **ghge** to 80%
+
+We can try to modify the constraint values to see if the diet will be different. 
+
+For example, we can limit **ghge**. The current upper and lower range are [1.673, 1.859], let us try to limit it to [1.338, 1.487], which is 80% of the original values. 
+
+```{r}
+#| label: const-stricter
+#| echo: true
+#| eval: true
+
+# c3foods <- rbind(const_max_3foods*0.9, const_max_3foods*1)
+# rownames(c3foods) <- c('lwr', 'upr')
+# c3foods <- data.frame(c3foods)
+c3
+c3_alt <- c3
+c3_alt$ghge <- c3_alt$ghge * 0.8 # you can try different limits
+c3_alt
+```
 
 
+We keep the objective function and options same as before; but we modify the inequality constraints.
 
+```{r}
+#| label: opt-const-f2
+#| echo: true
+#| eval: true
+
+# define the inequality constraints
+# instead of c3, we use c3_alt
+
+inequalconstr_alt <- function (x) {
+  constr <- c(
+    # energy
+    - x[1]*fd$energy[1] - x[2]*fd$energy[2] - x[3]*fd$energy[3] + c3_alt$energy[1], # lower
+    x[1]*fd$energy[1] + x[2]*fd$energy[2] + x[3]*fd$energy[3] - c3_alt$energy[2], # upper
+    
+    # protein
+    - x[1]*fd$protein[1] - x[2]*fd$protein[2] - x[3]*fd$protein[3] + c3_alt$protein[1],
+    x[1]*fd$protein[1] + x[2]*fd$protein[2] + x[3]*fd$protein[3] - c3_alt$protein[2],
+
+    # ghge
+    - x[1]*fd$ghge[1] - x[2]*fd$ghge[2] - x[3]*fd$ghge[3]+ c3_alt$ghge[1], # new values
+    x[1]*fd$ghge[1] + x[2]*fd$ghge[2] + x[3]*fd$ghge[3] - c3_alt$ghge[2] # new values
+  )
+  return (constr)
+}
+```
+
+
+Now we run the optimization again with the new constraint,  `inequalconstr_alt`. 
+
+```{r}
+#| label: opt-run2
+#| echo: true
+#| eval: true
+
+# run the algorithm
+res_alt <- nloptr::nloptr(
+  x0          = x0,        # initial value for x
+  eval_f      = objective, # objective function
+  lb          = lb,        # lower bound for x
+  ub          = ub,        # upper bound for x
+  eval_g_ineq = inequalconstr_alt, # inequality constraint (NEW)
+  opts        = opts       # options
+  )
+
+print(res_alt)
+```
+
+The new results are 168.806, 140, 100. 
+
+::: {.callout-note}
+## Compare the two runs
+
+* Bread: 175.4 -> 168.8 (3.7% reduction)
+* Vegetables: 154.6 -> 140 (9.4% reduction)
+* Red meat: 117.6 -> 100 (15.0% reduction)
+
+This makes sense, as **red meat** is the largest contributor for **ghge**.
+:::
+
+What we have shown here is a very crude demonstration of how to construct the optimization problem, and a sanity check of the results. A lot more can be tried out. 
 
