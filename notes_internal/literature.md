@@ -33,3 +33,40 @@ env impact:
 
 
 
+
+
+# Nordman 2023
+
+Optimization targets (via QP)
+
+- Nutrient only
+- nurient, health-based targets for food amounts
+- GHGE only
+- Nutrient, health, GHGE
+
+Current GHGE: 4.37 kg CO2-eq
+
+main food groups: 7 groups with smaller levels
+
+Sub-groups: 50
+
+Optimized diet
+
+- reduced proportion of animal based food (25% vs 43%) for energy
+- more grain and starches, lower cheese (not milk)
+- much less discretional (junk) food and soft drinks
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
