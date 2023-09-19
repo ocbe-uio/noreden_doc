@@ -139,4 +139,104 @@ inequalconstr(x = fd$intake)
 
 
 
+# ____________ ----
+# run algorithm ----
+
+
+
+
+# ____________ ----
+# trouble shooting ----
+
+
+# test different coefficients to standardize the contribution of energy, ghge etc
+
+energy_3fd_original <- fd$energy
+protein_3fd_original <- fd$protein
+ghge_3fd_original <- fd$ghge
+
+# divide by sd (not substracting mean, since we want positive values)
+energy_3fd_new <- energy_3fd_original/sd(energy_3fd_original)
+energy_3fd_new
+
+protein_3fd_new <- protein_3fd_original/sd(protein_3fd_original)
+protein_3fd_new
+
+ghge_3fd_new <- ghge_3fd_original/sd(ghge_3fd_original)
+ghge_3fd_new
+
+# construct new target: divide original by the sd of each column
+c3
+fd_5target <- fd[, c('energy', 'protein', 'fat', 'carbs', 'ghge')]
+fd_5target
+sd_coef <- apply(fd_5target, MARGIN = 2, sd)
+
+fd_5target_standard <- sweep(fd_5target, MARGIN = 2, 1/sd_coef, FUN = '*')
+# also the constraint
+# test the previous constraint
+
+
+c3 <- c3foods[, c('energy', 'protein', 'fat', 'carbs','ghge')]
+c3
+# c3_original <- copy(c3)
+
+# lower ghge
+c3$ghge <- c3$ghge * 0.9 # you can try different limits
+c3
+# use the standardized
+c3 <- sweep(c3, MARGIN = 2, 1/sd_coef, FUN = '*')
+
+# see if the constraints make sense with the new scale
+t(as.matrix(c(175, 154, 117))) %*% as.matrix(fd_5target_standard)
+# ok, seems to be consitent
+
+# try the new one ----
+
+
+# this one remains the same
+objective <- function(x)
+{
+  return ( (x[1]- fd$intake[1])^2 + 
+             (x[2]- fd$intake[2])^2 + 
+             (x[3]- fd$intake[3])^2)
+}
+
+
+# define the inequality constraints
+inequalconstr <- function (x) {
+  
+  fd <- fd_5target_standard # so that i don't need to change stuff later
+  constr <- c(
+    # energy
+    - x[1]*fd$energy[1] - x[2]*fd$energy[2] - x[3]*fd$energy[3] + c3$energy[1], # lower
+    x[1]*fd$energy[1] + x[2]*fd$energy[2] + x[3]*fd$energy[3] - c3$energy[2], # upper
+    
+    # protein
+    - x[1]*fd$protein[1] - x[2]*fd$protein[2] - x[3]*fd$protein[3] + c3$protein[1],
+    x[1]*fd$protein[1] + x[2]*fd$protein[2] + x[3]*fd$protein[3] - c3$protein[2],
+    
+    # # fat
+    # - x[1]*fd$fat[1] - x[2]*fd$fat[2] - x[3]*fd$fat[3]+ c3$fat[1],
+    # x[1]*fd$fat[1] + x[2]*fd$fat[2] + x[3]*fd$fat[3] - c3$fat[2],
+    # 
+    # # carbs
+    # - x[1]*fd$carbs[1] - x[2]*fd$carbs[2] - x[3]*fd$carbs[3]+ c3$carbs[1],
+    # x[1]*fd$carbs[1] + x[2]*fd$carbs[2] + x[3]*fd$carbs[3] - c3$carbs[2],
+    
+    # ghge
+    - x[1]*fd$ghge[1] - x[2]*fd$ghge[2] - x[3]*fd$ghge[3]+ c3$ghge[1],
+    x[1]*fd$ghge[1] + x[2]*fd$ghge[2] + x[3]*fd$ghge[3] - c3$ghge[2]
+  )
+  return (constr)
+}
+
+
+
+
+
+
+
+
+
+
 

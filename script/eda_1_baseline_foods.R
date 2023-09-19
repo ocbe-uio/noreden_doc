@@ -24,6 +24,7 @@ nut <- data.table(nut)
 
 
 
+
 # baseline ----
 
 baseline %>% colnames() %>% head # Nr, Totalg, 
@@ -124,6 +125,7 @@ plot(dt_nutri$BMI, dt_nutri$Totalg)
 # plot 1: totalg, bmi, gender, age ----
 
 plt <- ggplot(data = dt_nutri, mapping = aes(x = BMI, y = Totalg, color = Age))
+
 plt <- plt + geom_point(alpha = 0.8, size = 2)
 plt <- plt + facet_wrap( ~ Gender)
 plt <- plt + scale_colour_continuous(type = 'viridis')
@@ -212,16 +214,16 @@ plt <- plt + facet_wrap( ~ Gender)
 plt <- plt + scale_colour_continuous(type = 'viridis')
 plt <- plt + theme_bw()
 plt
-# plt <- plt + theme(
-#   axis.text = element_text(size = 12),
-#   axis.title = element_text(size = 12), 
-#   plot.title = element_text(size = 15)
-# )
-# plt <- plt + labs(
-#   x = 'BMI', 
-#   y = 'Totalg', 
-#   title = 'Totalg vs BMI by gender'
-# )
+plt <- plt + theme(
+  axis.text = element_text(size = 12),
+  axis.title = element_text(size = 12),
+  plot.title = element_text(size = 15)
+)
+plt <- plt + labs(
+  x = 'BMI',
+  y = 'Totalg',
+  title = 'Food: 6451 (Majones)'
+)
 plt
 
 

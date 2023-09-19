@@ -108,18 +108,69 @@ inequalconstr <- function (x) {
     - x[1]*cps$protein[1] - x[2]*cps$protein[2] - x[3]*cps$protein[3] + cstr$protein[1],
     x[1]*cps$protein[1] + x[2]*cps$protein[2] + x[3]*cps$protein[3] - cstr$protein[2],
     
-    # fat
-    - x[1]*cps$fat[1] - x[2]*cps$fat[2] - x[3]*cps$fat[3]+ cstr$fat[1],
-    x[1]*cps$fat[1] + x[2]*cps$fat[2] + x[3]*cps$fat[3] - cstr$fat[2],
-
-    # carbs
-    - x[1]*cps$carbs[1] - x[2]*cps$carbs[2] - x[3]*cps$carbs[3]+ cstr$carbs[1],
-    x[1]*cps$carbs[1] + x[2]*cps$carbs[2] + x[3]*cps$carbs[3] - cstr$carbs[2],
+    # # fat
+    # - x[1]*cps$fat[1] - x[2]*cps$fat[2] - x[3]*cps$fat[3]+ cstr$fat[1],
+    # x[1]*cps$fat[1] + x[2]*cps$fat[2] + x[3]*cps$fat[3] - cstr$fat[2],
+    # 
+    # # carbs
+    # - x[1]*cps$carbs[1] - x[2]*cps$carbs[2] - x[3]*cps$carbs[3]+ cstr$carbs[1],
+    # x[1]*cps$carbs[1] + x[2]*cps$carbs[2] + x[3]*cps$carbs[3] - cstr$carbs[2],
     
     # ghge
     - x[1]*cps$ghge[1] - x[2]*cps$ghge[2] - x[3]*cps$ghge[3]+ cstr$ghge[1],
     x[1]*cps$ghge[1] + x[2]*cps$ghge[2] + x[3]*cps$ghge[3] - cstr$ghge[2]
   )
+  return (constr)
+}
+
+
+# class(inequalconstr)
+
+# test functional approach ----
+# function factory?
+
+# objective2 <- function(x)
+# {
+#   p1 <- (x[1]- current_diet[1])^2
+#   p2 <- (x[2]- current_diet[2])^2
+#   p3 <- (x[3]- current_diet[3])^2
+#   
+#   l <- list(p1, p2, p3)
+#   f <- sum(unlist(p1, p2, p3))
+#   
+#   return (f)
+# }
+
+objective3 <- function(x)
+{
+  # this works
+  f <- sum((x- current_diet)^2)
+  return (f)
+}
+
+
+
+inequalconstr2 <- function (x) {
+  
+  cps <- contrib_pergram_std
+  
+  energy <- cps$energy
+  protein <- cps$protein
+  ghge <- cps$ghge
+  
+  constr <- c(
+    # energy
+    - sum(x * energy) + cstr$energy[1],
+    sum(x * energy) - cstr$energy[2],
+    
+    # protein
+    - sum(x * protein) + cstr$protein[1],
+    sum(x * protein) - cstr$protein[2],
+    
+    # ghge
+    - sum(x * ghge) + cstr$ghge[1],
+    sum(x * ghge) - cstr$ghge[2]
+    )
   return (constr)
 }
 
@@ -136,21 +187,34 @@ x0 <- c(175, 150, 110)
 opts <- list( "algorithm" = "NLOPT_GN_ISRES",
               "xtol_rel"= 1.0e-15,
               "maxeval"= 160000,
-              "tol_constraints_ineq" = rep( 1.0e-10, 10 ))
+              "tol_constraints_ineq" = rep( 1.0e-10, 6 ))
 
 # run the algorithm
 res <- nloptr::nloptr(
   x0          = x0,        # initial value for x
-  eval_f      = objective, # objective function
+  eval_f      = objective3, # objective function
   lb          = lb,        # lower bound for x
   ub          = ub,        # upper bound for x
-  eval_g_ineq = inequalconstr, # inequality constraint
+  eval_g_ineq = inequalconstr2, # inequality constraint
   opts        = opts       # options
 )
 
 print(res)
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+# _____________ ----
 # check output ----
 # save result
 res_diet <- res$solution
@@ -194,89 +258,6 @@ const_result
 
 
 
-
-
-# ____ DEV _____ -----
-# test different coefficients to standardize the contribution of energy, ghge etc
-
-energy_3fd_original <- fd$energy
-protein_3fd_original <- fd$protein
-ghge_3fd_original <- fd$ghge
-
-# divide by sd (not substracting mean, since we want positive values)
-energy_3fd_new <- energy_3fd_original/sd(energy_3fd_original)
-energy_3fd_new
-
-protein_3fd_new <- protein_3fd_original/sd(protein_3fd_original)
-protein_3fd_new
-
-ghge_3fd_new <- ghge_3fd_original/sd(ghge_3fd_original)
-ghge_3fd_new
-
-# construct new target: divide original by the sd of each column
-c3
-fd_5target <- fd[, c('energy', 'protein', 'fat', 'carbs', 'ghge')]
-fd_5target
-sd_coef <- apply(fd_5target, MARGIN = 2, sd)
-
-fd_5target_standard <- sweep(fd_5target, MARGIN = 2, 1/sd_coef, FUN = '*')
-# also the constraint
-# test the previous constraint
-
-
-c3 <- c3foods[, c('energy', 'protein', 'fat', 'carbs','ghge')]
-c3
-# c3_original <- copy(c3)
-
-# lower ghge
-c3$ghge <- c3$ghge * 0.9 # you can try different limits
-c3
-# use the standardized
-c3 <- sweep(c3, MARGIN = 2, 1/sd_coef, FUN = '*')
-
-# see if the constraints make sense with the new scale
-t(as.matrix(c(175, 154, 117))) %*% as.matrix(fd_5target_standard)
-# ok, seems to be consitent
-
-# try the new one ----
-
-
-# this one remains the same
-objective <- function(x)
-{
-  return ( (x[1]- fd$intake[1])^2 + 
-             (x[2]- fd$intake[2])^2 + 
-             (x[3]- fd$intake[3])^2)
-}
-
-
-# define the inequality constraints
-inequalconstr <- function (x) {
-  
-  fd <- fd_5target_standard # so that i don't need to change stuff later
-  constr <- c(
-    # energy
-    - x[1]*fd$energy[1] - x[2]*fd$energy[2] - x[3]*fd$energy[3] + c3$energy[1], # lower
-    x[1]*fd$energy[1] + x[2]*fd$energy[2] + x[3]*fd$energy[3] - c3$energy[2], # upper
-    
-    # protein
-    - x[1]*fd$protein[1] - x[2]*fd$protein[2] - x[3]*fd$protein[3] + c3$protein[1],
-    x[1]*fd$protein[1] + x[2]*fd$protein[2] + x[3]*fd$protein[3] - c3$protein[2],
-    
-    # # fat
-    # - x[1]*fd$fat[1] - x[2]*fd$fat[2] - x[3]*fd$fat[3]+ c3$fat[1],
-    # x[1]*fd$fat[1] + x[2]*fd$fat[2] + x[3]*fd$fat[3] - c3$fat[2],
-    # 
-    # # carbs
-    # - x[1]*fd$carbs[1] - x[2]*fd$carbs[2] - x[3]*fd$carbs[3]+ c3$carbs[1],
-    # x[1]*fd$carbs[1] + x[2]*fd$carbs[2] + x[3]*fd$carbs[3] - c3$carbs[2],
-    
-    # ghge
-    - x[1]*fd$ghge[1] - x[2]*fd$ghge[2] - x[3]*fd$ghge[3]+ c3$ghge[1],
-    x[1]*fd$ghge[1] + x[2]*fd$ghge[2] + x[3]*fd$ghge[3] - c3$ghge[2]
-  )
-  return (constr)
-}
 
 
 
