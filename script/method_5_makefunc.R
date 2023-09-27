@@ -53,7 +53,8 @@ select_intake <- function(dt, intake_names){
 
 
 select_intake(dt = input, intake_names = 'intake_mean')
-select_intake(dt = input, intake_names = c('intake_mean', 'intake_lwr', 'intake_upr'))
+select_intake(dt = input, 
+              intake_names = c('intake_mean', 'intake_lwr', 'intake_upr'))
 
 
 # f: nutconst selector ----
@@ -116,8 +117,7 @@ env_pu <- select_env_per_unit(dt = foods_selected,
 
 diet_contribution <- function(current_intake, 
                               dt_per_unit, 
-                              tag_outcome, 
-                              std_only = T){
+                              tag_outcome){
   
   # compute total contrib X foods (contrib_pu * intake)
   # current_intake <- mean_intake
@@ -131,12 +131,10 @@ diet_contribution <- function(current_intake,
   sd <- sd(dt_per_unit[[tag_outcome]])
   total_contrib_std <- total_contrib_raw / sd
   
-  if(std_only == T){
-    res <- total_contrib_std
-  }else{
-    res <- data.frame('total_contrib_raw' = total_contrib_raw, 
-                      'total_contrib_std' = total_contrib_std)
-  }
+  res <- data.frame('total_contrib_raw' = total_contrib_raw, 
+                    'total_contrib_std' = total_contrib_std, 
+                    'std_coef' = 1/sd)
+  
   
   return(res)
   
@@ -147,34 +145,14 @@ diet_contribution(current_intake = mean_intake,
                       dt_per_unit = nutri_pu, 
                       tag_outcome = 'energy')
 
-# diet_contribution(current_intake = mean_intake, 
-#                   dt_per_unit = nutri_pu, 
-#                   tag_outcome = 'energy', std_only = F)
-
-
-diet_contribution(current_intake = mean_intake, 
-                      dt_per_unit = nutri_pu, 
-                      tag_outcome = 'protein')
-
-diet_contribution(current_intake = mean_intake, 
-                      dt_per_unit = nutri_pu, 
-                      tag_outcome = 'fat')
-
-diet_contribution(current_intake = mean_intake, 
-                      dt_per_unit = nutri_pu, 
-                      tag_outcome = 'carbs')
-
-diet_contribution(current_intake = mean_intake, 
-                      dt_per_unit = env_pu, 
-                      tag_outcome = 'ghge')
-
-
 
 # f: set constraint -----
 # the constraints are based on the current diet contribution
 # for reduction (e.g. ghge) just set lower upper bound 
 
-set_constraint <- function(base_contrib, scale_min, scale_max){
+set_constraint <- function(base_contrib, 
+                           scale_min, 
+                           scale_max){
   
   const_min <- base_contrib * scale_min
   const_max <- base_contrib * scale_max
@@ -184,11 +162,102 @@ set_constraint <- function(base_contrib, scale_min, scale_max){
 }
 
 
+# COMPUTE CONSTRAINTS ----
+
+# first compute the basis (i.e. maximum total contrib)
+# inequality constraints are based on this value
+
+base_energy <- diet_contribution(current_intake = mean_intake, 
+                                 dt_per_unit = nutri_pu, 
+                                 tag_outcome = 'energy')
+
+base_protein <- diet_contribution(current_intake = mean_intake, 
+                                  dt_per_unit = nutri_pu, 
+                                  tag_outcome = 'protein')
+
+base_carbs <- diet_contribution(current_intake = mean_intake, 
+                                dt_per_unit = nutri_pu, 
+                                tag_outcome = 'carbs')
+
+base_fat <- diet_contribution(current_intake = mean_intake, 
+                              dt_per_unit = nutri_pu, 
+                              tag_outcome = 'fat')
+
+
+base_ghge <- diet_contribution(current_intake = mean_intake, 
+                               dt_per_unit = env_pu, 
+                               tag_outcome = 'ghge')
+
+# set constraint parameters:
+# 0.9, 1.0 for nutrients
+# ghge: 0.9, 1.0 for now
+# need to set to lower later
 # set_constraint(base_contrib = 701.908, scale_min = 0.9, scale_max = 1.0)
+lwrupr_energy <- set_constraint(base_contrib = base_energy$total_contrib_std, 
+                                scale_min = 0.9, 
+                                scale_max = 1.0)
+
+lwrupr_protein <- set_constraint(base_contrib = base_protein$total_contrib_std, 
+                                 scale_min = 0.9, 
+                                 scale_max = 1.0)
+
+
+lwrupr_carbs <- set_constraint(base_contrib = base_carbs$total_contrib_std, 
+                               scale_min = 0.9, 
+                               scale_max = 1.0)
+
+lwrupr_fat <- set_constraint(base_contrib = base_fat$total_contrib_std, 
+                             scale_min = 0.9, 
+                             scale_max = 1.0)
+# ghge_unchanged
+lwrupr_ghge <- set_constraint(base_contrib = base_ghge$total_contrib_std, 
+                              scale_min = 0.9, 
+                              scale_max = 1.0)
+# ghge reduced to 80%
+# lwrupr_ghge_reduced <- 0.8 * lwrupr_ghge
+
+
+std_coef_energy <- base_energy$std_coef
+std_coef_protein <- base_protein$std_coef
+std_coef_carbs <- base_carbs$std_coef
+std_coef_fat <- base_fat$std_coef
+std_coef_ghge <- base_ghge$std_coef
+
+lwrupr_energy_raw <- lwrupr_energy / std_coef_energy
+lwrupr_protein_raw <- lwrupr_protein / std_coef_protein
+lwrupr_carbs_raw <- lwrupr_carbs / std_coef_carbs
+lwrupr_fat_raw <- lwrupr_fat / std_coef_fat
+lwrupr_ghge_raw <- lwrupr_ghge / std_coef_ghge
+
+# also collect the total contrib for the current diet (raw)
+
+current_diet_contrib_df <- rbind(base_energy, 
+                                 base_protein, 
+                                 base_carbs, 
+                                 base_fat, 
+                                 base_ghge)
+
+current_diet_const_raw <- rbind(lwrupr_energy_raw, 
+                                lwrupr_protein_raw, 
+                                lwrupr_carbs_raw, 
+                                lwrupr_fat_raw, 
+                                lwrupr_ghge_raw)
+
+# give it a name
+current_diet_info <- cbind(tag_outcome = c('energy', 
+                                                 'protein', 
+                                                 'carbs', 
+                                                 'fat', 
+                                                 'ghge'),
+                                 current_diet_contrib_df, 
+                                 current_diet_const_raw)
+current_diet_info
 
 
 
 
+# _________________ ----
+# SET UP PARAMETERS ----
 
 # f: objective ----
 # define qp
@@ -207,32 +276,70 @@ f_objective <- function(x)
 
 
 
+
 # f: ineq const ----
 # define inequality constraints
 # should match the items from const computer
 # make a check for name
-
+# TO DO (future): make adding and removing constraints flexible
 
 f_inequalc <- function (x) {
   
-  # cps <- contrib_pergram_std
+  # x is the diet vector (target)
+  # contrib_per_unit
+  # pu_energy <- nutri_pu$energy
+  # pu_protein <- nutri_pu$protein
+  # pu_carbs <- nutri_pu$carbs
+  # pu_fat <- nutri_pu$fat
+  # ghge
+  # pu_ghge <- env_pu$ghge
+  
+  # if scaled:
+  pu_energy <- nutri_pu$energy * std_coef_energy
+  pu_protein <- nutri_pu$protein * std_coef_protein
+  # pu_carbs <- nutri_pu$carbs * std_coef_carbs
+  # pu_fat <- nutri_pu$fat * std_coef_fat
+  # ghge
+  pu_ghge <- env_pu$ghge * std_coef_ghge
+  
+  # constraints (lower, upper)
+  lwrc_energy <- lwrupr_energy$min
+  uprc_energy <- lwrupr_energy$max
+  
+  lwrc_protein <- lwrupr_protein$min
+  uprc_protein <- lwrupr_protein$max
+  
+  # lwrc_carbs <- lwrupr_carbs$min
+  # uprc_carbs <- lwrupr_carbs$max
   # 
-  # energy <- cps$energy
-  # protein <- cps$protein
-  # ghge <- cps$ghge
-  # 
+  # lwrc_fats <- lwrupr_fat$min
+  # uprc_fats <- lwrupr_fat$max
+  
+  lwrc_ghge <- lwrupr_ghge$min
+  uprc_ghge <- lwrupr_ghge$min
+  
+  # put constraints in a vector
   constr <- c(
     # energy
-    - sum(x * energy) + cstr$energy[1],
-    sum(x * energy) - cstr$energy[2],
+    - sum(x * pu_energy) + lwrc_energy,
+    sum(x * pu_energy) - uprc_energy,
     
     # protein
-    - sum(x * protein) + cstr$protein[1],
-    sum(x * protein) - cstr$protein[2],
+    - sum(x * pu_protein) + lwrc_protein,
+    sum(x * pu_protein) - uprc_protein,
+    
+    # # carbs
+    # - sum(x * pu_carbs) + lwrc_carbs,
+    # sum(x * pu_carbs) - uprc_carbs,
+    # 
+    # 
+    # # fat
+    # - sum(x * pu_fat) + lwrc_fat,
+    # sum(x * pu_fat) - uprc_fat,
     
     # ghge
-    - sum(x * ghge) + cstr$ghge[1],
-    sum(x * ghge) - cstr$ghge[2]
+    - sum(x * pu_ghge) + lwrc_ghge,
+    sum(x * pu_ghge) - uprc_ghge
   )
   return (constr)
 }
@@ -240,11 +347,130 @@ f_inequalc <- function (x) {
 
 
 # RUN ----
+# this is the 3 foods example
+
+df_intake <- select_intake(dt = foods_selected, 
+              intake_names = c('intake_mean', 'intake_lwr', 'intake_upr'))
+
+
+# Initial values
+# probably better to always start from the current diet
+x0 <- df_intake$intake_mean
+
+# lower and upper bounds of x (10 foods)
+lb <- df_intake$intake_lwr
+ub <- df_intake$intake_upr
+
+
+# number of constraints should be automatically set
+
+opts <- list( "algorithm" = "NLOPT_GN_ISRES",
+              "xtol_rel"= 1.0e-15,
+              "maxeval"= 160000,
+              "tol_constraints_ineq" = rep( 1.0e-10, 6))
+
+
+# set timer
+start_time <- Sys.time()
+# run the algorithm
+
+res <- nloptr::nloptr(
+  x0          = x0,        # initial value for x
+  eval_f      = f_objective, # objective function
+  lb          = lb,        # lower bound for x
+  ub          = ub,        # upper bound for x
+  eval_g_ineq = f_inequalc, # inequality constraint
+  opts        = opts       # options
+)
+
+end_time <- Sys.time()
+td <- end_time - start_time
+td
+
+
+print(res)
+
 
 
 # f: collect results ----
 
+collect_result <- function(result_obj, 
+                           food_names,
+                           current_diet,
+                           diet_bound_lwr, 
+                           diet_bound_upr){
+  
+  # food_names <- foods_selected$food
+  # put in a table
+  new_diet <- result_obj$solution
+  
+  diet_result <- data.frame(
+    food_name = food_names,
+    current = current_diet, 
+    new = new_diet, 
+    percent_change = round((new_diet - current_diet)/current_diet, 3),
+    diet_bound_lwr = diet_bound_lwr, 
+    diet_bound_upr = diet_bound_upr
+  )
+  
+  return(diet_result)
+}
 
+
+
+# f: validate new diet ----
+
+
+
+validate_diet <- function(new_diet, 
+                          nutri_pu_mat, 
+                          env_pu_mat, 
+                          current_diet_info){
+  
+  # on original scale is fine
+  # new_diet <- res$solution
+  # nutri_pu_mat <- nutri_pu
+  # env_pu_mat <- env_pu
+  
+  contrib_pu <- cbind(nutri_pu_mat, env_pu_mat)
+  tag_outcome <- colnames(contrib_pu)
+  
+  total_contrib <- t(as.matrix(new_diet)) %*% as.matrix(contrib_pu)
+  # add to the current
+  # tc: total contrib
+  tc_df <- cbind(current_diet_info, 
+                 tc_new_diet = t(total_contrib))
+  
+  
+  data.table::setDT(tc_df)
+  # drop some columns 
+  tc_df[, std_coef := NULL]
+  tc_df[, total_contrib_std := NULL]
+  
+  # compare
+  tc_df[, is_ok := 'Yes']
+  tc_df[tc_new_diet > max, is_ok := 'beyond_upper']
+  tc_df[tc_new_diet < min, is_ok := 'beyond_lower']
+  
+  # relative difference
+  tc_df[, dev_if_not_ok := 0]
+  tc_df[is_ok == 'beyond_upper', dev_if_not_ok := 
+              round((tc_new_diet - max)/max, 3)]
+  
+  tc_df[is_ok == 'beyond_lower', dev_if_not_ok := 
+              round((tc_new_diet - min)/min, 3)]
+  
+  tc_df <- as.data.frame(tc_df)
+  return(tc_df)
+  
+}
+
+
+
+tt <- validate_diet(new_diet = res$solution, 
+                    nutri_pu_mat = nutri_pu, 
+                    env_pu_mat = env_pu, 
+                    current_diet_info = current_diet_info)
 
 
 

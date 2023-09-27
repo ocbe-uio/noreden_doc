@@ -28,3 +28,44 @@ Also there will be groups that are absolutely necessary to keep
 
 75%
 
+
+
+## foods
+
+(Remove)
+
+potatoes
+
+Sugars 
+
+-----
+
+Other grains
+
+butter
+
+juice
+
+white meat
+
+cakes 
+
+-----
+
+legume
+
+nuts 
+
+creams
+
+
+
+### constraints
+
+drop sugar
+
+add Sat fat 
+
+vitamin c
+
+calcium 
