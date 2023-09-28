@@ -245,12 +245,12 @@ current_diet_const_raw <- rbind(lwrupr_energy_raw,
 
 # give it a name
 current_diet_info <- cbind(tag_outcome = c('energy', 
-                                                 'protein', 
-                                                 'carbs', 
-                                                 'fat', 
-                                                 'ghge'),
-                                 current_diet_contrib_df, 
-                                 current_diet_const_raw)
+                                           'protein', 
+                                           'carbs', 
+                                           'fat', 
+                                           'ghge'),
+                           current_diet_contrib_df, 
+                           current_diet_const_raw)
 current_diet_info
 
 
@@ -406,11 +406,12 @@ collect_result <- function(result_obj,
   
   diet_result <- data.frame(
     food_name = food_names,
-    current = current_diet, 
-    new = new_diet, 
-    percent_change = round((new_diet - current_diet)/current_diet, 3),
-    diet_bound_lwr = diet_bound_lwr, 
-    diet_bound_upr = diet_bound_upr
+    current = round(current_diet, 2), 
+    new = round(new_diet, 2), 
+    absolute_change = round(new_diet - current_diet, 2),
+    percent_change = 100*round((new_diet - current_diet)/current_diet, 3),
+    diet_bound_lwr = round(diet_bound_lwr, 2), 
+    diet_bound_upr = round(diet_bound_upr, 2)
   )
   
   return(diet_result)
@@ -447,6 +448,12 @@ validate_diet <- function(new_diet,
   tc_df[, std_coef := NULL]
   tc_df[, total_contrib_std := NULL]
   
+  # round to 2 digits
+  tc_df[, total_contrib_raw := round(total_contrib_raw, 2)]
+  tc_df[, min := round(min, 2)]
+  tc_df[, max := round(max, 2)]
+  tc_df[, tc_new_diet := round(tc_new_diet, 2)]
+  
   # compare
   tc_df[, is_ok := 'Yes']
   tc_df[tc_new_diet > max, is_ok := 'beyond_upper']
@@ -459,8 +466,10 @@ validate_diet <- function(new_diet,
   
   tc_df[is_ok == 'beyond_lower', dev_if_not_ok := 
               round((tc_new_diet - min)/min, 3)]
+
   
   tc_df <- as.data.frame(tc_df)
+  
   return(tc_df)
   
 }
