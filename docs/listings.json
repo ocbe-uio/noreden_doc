@@ -2,11 +2,12 @@
   {
     "listing": "/documentation/index.html",
     "items": [
-      "/documentation/understand_data.html",
-      "/documentation/define_problem.html",
-      "/documentation/small_demo.html",
-      "/documentation/troubleshoot_3foods.html",
-      "/documentation/part5_10foods.html"
+      "/documentation/1_understand_data.html",
+      "/documentation/2_define_problem.html",
+      "/documentation/3_small_demo.html",
+      "/documentation/4_troubleshoot_3foods.html",
+      "/documentation/5_10foods.html",
+      "/documentation/x_litreview.html"
     ]
   }
 ]

@@ -4,7 +4,7 @@
     "href": "documentation/index.html",
     "title": "Documentation",
     "section": "",
-    "text": "It is important to document while you go.\n\n\n\n\n\n\n\n\n\n\nTitle\n\n\n\n\n\n\nPart 1: Understand the current diet\n\n\n\n\nPart 2: Problem definition\n\n\n\n\nPart 3: A simple problem with 3 foods and 3 constraints\n\n\n\n\nPart 4: Troubleshoot part 3\n\n\n\n\nPart 5: 10 foods\n\n\n\n\n\n\nNo matching items"
+    "text": "It is important to document while you go.\n\n\n\n\n\n\n\n\n\n\nTitle\n\n\n\n\n\n\nPart 1: Understand the current diet\n\n\n\n\nPart 2: Problem definition\n\n\n\n\nPart 3: A simple problem with 3 foods and 3 constraints\n\n\n\n\nPart 4: Troubleshoot part 3\n\n\n\n\nPart 5: 10 foods\n\n\n\n\nLiterature review and article planning\n\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "index.html",
@@ -243,5 +243,103 @@
     "title": "Part 5: 10 foods",
     "section": "Example 2: reduce ghge to 85%",
     "text": "Example 2: reduce ghge to 85%\n\ncstr <- copy(const_lwrupr_std) # this line is important: it keeps a copy of the original values\ncstr$ghge <- cstr$ghge * 0.85 # reduce to 0.85\ncstr\n\n     energy   protein      fat    carbs     ghge\n1  982.5146  917.3123 521.5166 669.5269 541.0943\n2 1091.6828 1019.2359 579.4629 743.9188 601.2158\n\n# use the standardized food contribution per gram \n# contrib_pergram_std\n\n# define the inequality constraints\ninequalconstr <- function (x) {\n  \n  cps <- contrib_pergram_std\n  \n  constr <- c(\n    # energy\n    - x[1]*cps$energy[1] - x[2]*cps$energy[2] - x[3]*cps$energy[3] - x[4]*cps$energy[4] - x[5]*cps$energy[5] - x[6]*cps$energy[6] -  x[7]*cps$energy[7] - x[8]*cps$energy[8] - x[9]*cps$energy[9]- x[10]*cps$energy[10] + cstr$energy[1], # lower\n    x[1]*cps$energy[1] + x[2]*cps$energy[2] + x[3]*cps$energy[3] + x[4]*cps$energy[4] + x[5]*cps$energy[5] + x[6]*cps$energy[6] + x[7]*cps$energy[7] + x[8]*cps$energy[8] + x[9]*cps$energy[9] + x[10]*cps$energy[10] - cstr$energy[2], # upper\n    \n    # protein\n\n    - x[1]*cps$protein[1] - x[2]*cps$protein[2] - x[3]*cps$protein[3] - x[4]*cps$protein[4] - x[5]*cps$protein[5] - x[6]*cps$protein[6] -  x[7]*cps$protein[7] - x[8]*cps$protein[8] - x[9]*cps$protein[9]- x[10]*cps$protein[10] + cstr$protein[1], # lower\n    x[1]*cps$protein[1] + x[2]*cps$protein[2] + x[3]*cps$protein[3] + x[4]*cps$protein[4] + x[5]*cps$protein[5] + x[6]*cps$protein[6] + x[7]*cps$protein[7] + x[8]*cps$protein[8] + x[9]*cps$protein[9] + x[10]*cps$protein[10] - cstr$protein[2], # upper\n    \n    # fat\n\n    - x[1]*cps$fat[1] - x[2]*cps$fat[2] - x[3]*cps$fat[3] - x[4]*cps$fat[4] - x[5]*cps$fat[5] - x[6]*cps$fat[6] -  x[7]*cps$fat[7] - x[8]*cps$fat[8] - x[9]*cps$fat[9]- x[10]*cps$fat[10] + cstr$fat[1], # lower\n    x[1]*cps$fat[1] + x[2]*cps$fat[2] + x[3]*cps$fat[3] + x[4]*cps$fat[4] + x[5]*cps$fat[5] + x[6]*cps$fat[6] + x[7]*cps$fat[7] + x[8]*cps$fat[8] + x[9]*cps$fat[9] + x[10]*cps$fat[10] - cstr$fat[2], # upper\n    \n    # carbs\n\n    - x[1]*cps$carbs[1] - x[2]*cps$carbs[2] - x[3]*cps$carbs[3] - x[4]*cps$carbs[4] - x[5]*cps$carbs[5] - x[6]*cps$carbs[6] -  x[7]*cps$carbs[7] - x[8]*cps$carbs[8] - x[9]*cps$carbs[9]- x[10]*cps$carbs[10] + cstr$carbs[1], # lower\n    x[1]*cps$carbs[1] + x[2]*cps$carbs[2] + x[3]*cps$carbs[3] + x[4]*cps$carbs[4] + x[5]*cps$carbs[5] + x[6]*cps$carbs[6] + x[7]*cps$carbs[7] + x[8]*cps$carbs[8] + x[9]*cps$carbs[9] + x[10]*cps$carbs[10] - cstr$carbs[2], # upper\n    \n    # ghge\n    - x[1]*cps$ghge[1] - x[2]*cps$ghge[2] - x[3]*cps$ghge[3] - x[4]*cps$ghge[4] - x[5]*cps$ghge[5] - x[6]*cps$ghge[6] -  x[7]*cps$ghge[7] - x[8]*cps$ghge[8] - x[9]*cps$ghge[9]- x[10]*cps$ghge[10] + cstr$ghge[1], # lower\n    x[1]*cps$ghge[1] + x[2]*cps$ghge[2] + x[3]*cps$ghge[3] + x[4]*cps$ghge[4] + x[5]*cps$ghge[5] + x[6]*cps$ghge[6] + x[7]*cps$ghge[7] + x[8]*cps$ghge[8] + x[9]*cps$ghge[9] + x[10]*cps$ghge[10] - cstr$ghge[2] # upper\n    \n  )\n  return (constr)\n}\n\n# Initial values\nx0 <- fd$intake\n\n# lower and upper bounds of x (10 foods)\nlb <- fd$intake_lwr\nub <- fd$intake_upr\n\n\nopts <- list( \"algorithm\" = \"NLOPT_GN_ISRES\",\n              \"xtol_rel\"= 1.0e-15,\n              \"maxeval\"= 160000,\n              \"tol_constraints_ineq\" = rep( 1.0e-10, 10 ))\n\n# run the algorithm\nres <- nloptr::nloptr(\n  x0          = x0,        # initial value for x\n  eval_f      = objective, # objective function\n  lb          = lb,        # lower bound for x\n  ub          = ub,        # upper bound for x\n  eval_g_ineq = inequalconstr, # inequality constraint\n  opts        = opts       # options\n)\n\nprint(res)\n\n\nCall:\nnloptr::nloptr(x0 = x0, eval_f = objective, lb = lb, ub = ub, \n    eval_g_ineq = inequalconstr, opts = opts)\n\n\nMinimization using NLopt version 2.7.1 \n\nNLopt solver status: 5 ( NLOPT_MAXEVAL_REACHED: Optimization stopped because \nmaxeval (above) was reached. )\n\nNumber of Iterations....: 160000 \nTermination conditions:  xtol_rel: 1e-15    maxeval: 160000 \nNumber of inequality constraints:  10 \nNumber of equality constraints:    0 \nCurrent value of objective function:  1130.48051105124 \nCurrent value of controls: 173.0128 36.88276 30.21279 67.69178 167.5688 303.4997 67.78648 86.02761 \n21.26319 151.5235\n\n\nNow we check the results for the second problem.\n\n\n             name current       new percent_change lower_limit upper_limit\n1           Bread   175.4 173.01277         -0.014   18.831866   407.77324\n2          Cheese    43.4  36.88276         -0.150    4.659652   122.39639\n3            Eggs    24.6  30.21279          0.228    2.641185   101.99699\n4            Fish    69.5  67.69178         -0.026    7.461885   267.87632\n5  Fruit, berries   171.5 167.56876         -0.023   18.413142   480.13743\n6   Milk, yoghurt   306.1 303.49975         -0.008   32.864505   966.28731\n7        Potatoes    67.8  67.78648          0.000    7.279364   218.48830\n8        Red meat   117.6  86.02761         -0.268   12.250376   328.75242\n9   Sugar, sweets    16.9  21.26319          0.258    1.814473    69.78742\n10     Vegetables   154.6 151.52353         -0.020   16.598669   365.04187\n\n\n\n\n    new_diet const_lwr const_upr is_ok relative_dev\n1: 1036.9634  982.5146 1091.6828   Yes            0\n2:  932.5842  917.3123 1019.2359   Yes            0\n3:  521.5166  521.5166  579.4629   Yes            0\n4:  743.9188  669.5269  743.9188   Yes            0\n5:  601.2158  541.0943  601.2158   Yes            0"
+  },
+  {
+    "objectID": "shiny/oldfaithful.html",
+    "href": "shiny/oldfaithful.html",
+    "title": "Old Faithful",
+    "section": "",
+    "text": "Number of bins:"
+  },
+  {
+    "objectID": "documentation/x_literview.html",
+    "href": "documentation/x_literview.html",
+    "title": "Literature review and article planning",
+    "section": "",
+    "text": "In order to write an article, it is important to have a good collection of organized literature review."
+  },
+  {
+    "objectID": "documentation/x_literview.html#nutrition-x-sustainability",
+    "href": "documentation/x_literview.html#nutrition-x-sustainability",
+    "title": "Literature review and article planning",
+    "section": "Nutrition x sustainability",
+    "text": "Nutrition x sustainability"
+  },
+  {
+    "objectID": "documentation/x_literview.html#implementation",
+    "href": "documentation/x_literview.html#implementation",
+    "title": "Literature review and article planning",
+    "section": "Implementation",
+    "text": "Implementation"
+  },
+  {
+    "objectID": "notes_internal/scaling_up.html",
+    "href": "notes_internal/scaling_up.html",
+    "title": "Experiment plan",
+    "section": "",
+    "text": "1-28 (some are not really important)\nNo need to test ALL combinations\nAt this point, no need to do an extensive search. More important to know the runtime.\nStart from 5, 10, 12, 14, …, 20\nAlso there will be groups that are absolutely necessary to keep\n\n\n\n95%\n90%\n85%\n80%\n75%\n\n\n\n(Remove)\npotatoes\nSugars\n\nOther grains\nbutter\njuice\nwhite meat\ncakes\n\nlegume\nnuts\ncreams\n\n\ndrop sugar\nadd Sat fat\nvitamin c\ncalcium"
+  },
+  {
+    "objectID": "notes_internal/scaling_up.html#food-groups",
+    "href": "notes_internal/scaling_up.html#food-groups",
+    "title": "Experiment plan",
+    "section": "",
+    "text": "1-28 (some are not really important)\nNo need to test ALL combinations\nAt this point, no need to do an extensive search. More important to know the runtime.\nStart from 5, 10, 12, 14, …, 20\nAlso there will be groups that are absolutely necessary to keep"
+  },
+  {
+    "objectID": "notes_internal/scaling_up.html#ghge-reduction",
+    "href": "notes_internal/scaling_up.html#ghge-reduction",
+    "title": "Experiment plan",
+    "section": "",
+    "text": "95%\n90%\n85%\n80%\n75%"
+  },
+  {
+    "objectID": "notes_internal/scaling_up.html#foods",
+    "href": "notes_internal/scaling_up.html#foods",
+    "title": "Experiment plan",
+    "section": "",
+    "text": "(Remove)\npotatoes\nSugars\n\nOther grains\nbutter\njuice\nwhite meat\ncakes\n\nlegume\nnuts\ncreams\n\n\ndrop sugar\nadd Sat fat\nvitamin c\ncalcium"
+  },
+  {
+    "objectID": "notes_internal/scaling_up.html#add-constraint-vitamin-c",
+    "href": "notes_internal/scaling_up.html#add-constraint-vitamin-c",
+    "title": "Experiment plan",
+    "section": "Add constraint: vitamin C",
+    "text": "Add constraint: vitamin C\n25, 6, 0.95, ok, 10s\n25, 6, 0.75, ok, 10s"
+  },
+  {
+    "objectID": "notes_internal/scaling_up.html#add-constraint-calcium",
+    "href": "notes_internal/scaling_up.html#add-constraint-calcium",
+    "title": "Experiment plan",
+    "section": "Add constraint: calcium",
+    "text": "Add constraint: calcium\n25, 7, 0.95, 11s, ghge can not be satisfied, 11s\npossibly due to calcium constraint within animal product?"
+  },
+  {
+    "objectID": "notes_internal/pkg_design.html",
+    "href": "notes_internal/pkg_design.html",
+    "title": "Workflow",
+    "section": "",
+    "text": "Purpose: use the intake and nutrient/ghge to compute\n\nintake (unit)\nnutrient (per unit)\nghge (per unit)\n\nRequirement \n\nif want flexibility to add food later on, should be expecting both one food, and multiple foods\nalso flexibility on categories (carbs, protein, ghge, …)\n\n\n\n\nPurpose: find a solution\nThis part consists 4 parts\n\nset objective (qp on food intake)\nset constraints (upper and lower limit on food * contrib per intake)\nlower and upper bound for food intake\nrun nloptr::nloptr()\n\nRequirement\n\nthe first 3 steps need to be flexible\n\n\n\n\nPurpose: quickly identify if the result is desirable\nRequirement\n\nRuntime"
+  },
+  {
+    "objectID": "notes_internal/pkg_design.html#specify-food-information",
+    "href": "notes_internal/pkg_design.html#specify-food-information",
+    "title": "Workflow",
+    "section": "",
+    "text": "Purpose: use the intake and nutrient/ghge to compute\n\nintake (unit)\nnutrient (per unit)\nghge (per unit)\n\nRequirement \n\nif want flexibility to add food later on, should be expecting both one food, and multiple foods\nalso flexibility on categories (carbs, protein, ghge, …)"
+  },
+  {
+    "objectID": "notes_internal/pkg_design.html#run-optimization-with-target-constraints",
+    "href": "notes_internal/pkg_design.html#run-optimization-with-target-constraints",
+    "title": "Workflow",
+    "section": "",
+    "text": "Purpose: find a solution\nThis part consists 4 parts\n\nset objective (qp on food intake)\nset constraints (upper and lower limit on food * contrib per intake)\nlower and upper bound for food intake\nrun nloptr::nloptr()\n\nRequirement\n\nthe first 3 steps need to be flexible"
+  },
+  {
+    "objectID": "notes_internal/pkg_design.html#result-collection",
+    "href": "notes_internal/pkg_design.html#result-collection",
+    "title": "Workflow",
+    "section": "",
+    "text": "Purpose: quickly identify if the result is desirable\nRequirement\n\nRuntime"
   }
 ]

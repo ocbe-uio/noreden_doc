@@ -6,11 +6,12 @@ listing:
     image-height: 150px
     fields: [title]
     contents: 
-      - "understand_data.qmd"
-      - "define_problem.qmd"
-      - "small_demo.qmd"
-      - "troubleshoot_3foods.qmd"
-      - "part5_10foods.qmd"
+      - "1_understand_data.qmd"
+      - "2_define_problem.qmd"
+      - "3_small_demo.qmd"
+      - "4_troubleshoot_3foods.qmd"
+      - "5_10foods.qmd"
+      - "x_litreview.qmd"
     type: table
     grid-item-border: false
     sort-ui: false
