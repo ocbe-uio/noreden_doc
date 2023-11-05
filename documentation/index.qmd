@@ -12,6 +12,7 @@ listing:
       - "4_troubleshoot_3foods.qmd"
       - "5_10foods.qmd"
       - "x_litreview.qmd"
+      - "x_pkgdev_log.qmd"
     type: table
     grid-item-border: false
     sort-ui: false
