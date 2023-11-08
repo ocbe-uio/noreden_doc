@@ -24,9 +24,9 @@ setnames(input, '95thpercentile10MJ', 'intake_upr')
 
 
 
-target_foods <- c('Bread', 'Vegetables', 'Red meat')
-target_nutrients <- c('energy', 'protein', 'carbs', 'fat')
-target_envir <- c('ghge')
+# target_foods <- c('Bread', 'Vegetables', 'Red meat')
+# target_nutrients <- c('energy', 'protein', 'carbs', 'fat')
+# target_envir <- c('ghge')
 
 # f: food selector ----
 

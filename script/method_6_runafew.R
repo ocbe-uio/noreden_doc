@@ -29,23 +29,23 @@ target_foods <- c('Bread',
                   'Cheese', 
                   'Eggs', 
                   'Fruit, berries', 
-                  'Potatoes', 
-                  'Sugar, sweets', 
-                  'Other grains', 
-                  'Butter, margarine, oil',
-                  'Juice',
-                  'White meat',
-                  'Cakes',
-                  'Legumes',
-                  'Nuts',
-                  'Cream, cream desserts', 
-                  'Sauces', 
-                  'Snacks', 
-                  'Spices', 
-                  'Soda, saft', 
-                  'Non-dairy milk', 
-                  'Vegetarian products', 
-                  'Other'
+                  'Potatoes'#, 
+                  #'Sugar, sweets', 
+                  #'Other grains', 
+                  #'Butter, margarine, oil'#,
+                  #'Juice',
+                  #'White meat',
+                  #'Cakes',
+                  #'Legumes',
+                  #'Nuts',
+                  #'Cream, cream desserts', 
+                  #'Sauces', 
+                  #'Snacks', 
+                  #'Spices', 
+                  #'Soda, saft', 
+                  #'Non-dairy milk', 
+                  #'Vegetarian products', 
+                  #'Other'
                   )
 
 
@@ -70,7 +70,8 @@ target_envir <- c('ghge')
 # _____________--------
 # take out food and nut/env -----
 
-foods_selected <- select_food(dt = input, food_names = target_foods)
+foods_selected <- select_food(dt = input, 
+                              food_names = target_foods)
 foods_selected
 
 # use the smaller df to subset 
@@ -127,6 +128,9 @@ std_coef_vitaminc <- base_vitaminc$std_coef
 std_coef_calcium <- base_calcium$std_coef
 
 std_coef_ghge <- base_ghge$std_coef
+
+
+
 
 # lower, upper
 lwrupr_energy <- set_constraint(base_contrib = base_energy$total_contrib_std, 
@@ -213,7 +217,7 @@ current_diet_info <- cbind(tag_outcome = c('energy',
                            current_diet_contrib_df, 
                            current_diet_const_raw)
 current_diet_info
-
+# now this is a data frame 
 
 
 
@@ -244,15 +248,9 @@ f_inequalc <- function (x) {
   # if scaled:
   pu_energy <- nutri_pu$energy * std_coef_energy
   pu_protein <- nutri_pu$protein * std_coef_protein
-  pu_carbs <- nutri_pu$carbs * std_coef_carbs
-  pu_fat <- nutri_pu$fat * std_coef_fat
-  pu_vitaminc <- nutri_pu$vitaminc * std_coef_vitaminc
-  pu_calcium <- nutri_pu$calcium * std_coef_calcium
-  
+
   # ghge
   pu_ghge <- env_pu$ghge * std_coef_ghge
-  
-  
   
   # constraints (lower, upper)
   lwrc_energy <- lwrupr_energy$min
@@ -261,53 +259,89 @@ f_inequalc <- function (x) {
   lwrc_protein <- lwrupr_protein$min
   uprc_protein <- lwrupr_protein$max
   
-  lwrc_carbs <- lwrupr_carbs$min
-  uprc_carbs <- lwrupr_carbs$max
-
-  lwrc_fat <- lwrupr_fat$min
-  uprc_fat <- lwrupr_fat$max
-  
-  lwrc_vitaminc <- lwrupr_vitaminc$min
-  uprc_vitaminc <- lwrupr_vitaminc$max
-  
-  lwrc_calcium <- lwrupr_calcium$min
-  uprc_calcium <- lwrupr_calcium$max
-  
   lwrc_ghge <- lwrupr_ghge$min
   uprc_ghge <- lwrupr_ghge$min
   
+  
+  
   # put constraints in a vector
+  # connst_list <- list()
+  
+  # energy
+  ene1 <- - sum(x * pu_energy) + lwrc_energy
+  ene2 <- sum(x * pu_energy) - uprc_energy
+  
+  # protein
+  pro1 <- - sum(x * pu_protein) + lwrc_protein
+  pro2 <- sum(x * pu_protein) - uprc_protein
+  
+  # ghge
+  ghge1 <- - sum(x * pu_ghge) + lwrc_ghge
+  ghge2 <- sum(x * pu_ghge) - uprc_ghge
+  
+  
   constr <- c(
-    # energy
-    - sum(x * pu_energy) + lwrc_energy,
-    sum(x * pu_energy) - uprc_energy,
-    
-    # protein
-    - sum(x * pu_protein) + lwrc_protein,
-    sum(x * pu_protein) - uprc_protein,
-    
-    # carbs
-    - sum(x * pu_carbs) + lwrc_carbs,
-    sum(x * pu_carbs) - uprc_carbs,
-
-    # fat
-    - sum(x * pu_fat) + lwrc_fat,
-    sum(x * pu_fat) - uprc_fat,
-    
-    # vitaminc
-    - sum(x * pu_vitaminc) + lwrc_vitaminc,
-    sum(x * pu_vitaminc) - uprc_vitaminc,
-    
-    # calcium
-    - sum(x * pu_calcium) + lwrc_calcium,
-    sum(x * pu_calcium) - uprc_calcium,
-    
-    # ghge
-    - sum(x * pu_ghge) + lwrc_ghge,
-    sum(x * pu_ghge) - uprc_ghge
+    ene1, ene2, pro1, pro2, ghge1, ghge2
   )
   return (constr)
 }
+
+f_inequalc
+
+
+
+f_out <- function(x, constant){
+  f <- function(y){
+    res <- y ^ x + constant
+    return(res)
+  }
+  return(f)
+}
+
+# it creates a function that at its core, the inner function
+#f_out1 <- f_out(x = 2, constant = 1) # create a function that raise to the power of 2
+#f_out1(y=3)
+# 
+#f_out2 <- f_out(x=1, constant = 1) # create a function that raise to the power of 1
+# f_out2(y=3)
+
+# if scaled:
+#pu_energy <- nutri_pu$energy * std_coef_energy
+
+# constraints (lower, upper)
+#lwrc_energy <- lwrupr_energy$min
+#uprc_energy <- lwrupr_energy$max
+
+info_energy <- list(pu_energy = nutri_pu$energy * std_coef_energy, 
+                    lwrc_energy = lwrupr_energy$min, 
+                    uprc_energy = lwrupr_energy$max)
+
+f_factory <- function(namelist, datainfo){
+  
+  # namelist <- c('ene1')
+  
+  f_ineq <- function (x) {
+    
+    # energy
+    ene1 <- - sum(x * datainfo$pu_energy) + datainfo$lwrc_energy
+    ene2 <- sum(x * datainfo$pu_energy) - datainfo$uprc_energy
+    
+    # give name
+    constr_full <- c(
+      ene1 = ene1, 
+      ene2 = ene2
+    )
+    # select the ones that matter:
+    constr <- constr_full[namelist]
+    
+    return (constr)
+  }
+  return(f_ineq)
+}
+
+# in this way, the datainfo can also be scaled/unscaled.
+f_inequalc <- f_factory(namelist = 'ene1', datainfo = info_energy)
+f_inequalc <- f_factory(namelist = c('ene1', 'ene2'), datainfo = info_energy)
 
 
 
@@ -326,7 +360,7 @@ ub <- df_intake$intake_upr
 
 
 # number of constraints should be automatically set
-nc <- 14
+nc <- 2 # this should match the length 
 # nc <- 10
 opts <- list( "algorithm" = "NLOPT_GN_ISRES",
               "xtol_rel"= 1.0e-15,
@@ -377,6 +411,91 @@ new_diet_valid <- validate_diet(new_diet = res$solution,
 new_diet_valid
 
 
+# saveRDS(new_diet_info, file = './data_processed/demo_12foods_res1.rda')
+# saveRDS(new_diet_valid, file = './data_processed/demo_12foods_res2.rda')
+
+
+
+
+# lonng 
+# f_inequalc <- function (x) {
+#   
+#   # x is the diet vector (target)
+#   # contrib_per_unit
+#   # pu_energy <- nutri_pu$energy
+#   # pu_protein <- nutri_pu$protein
+#   # pu_carbs <- nutri_pu$carbs
+#   # pu_fat <- nutri_pu$fat
+#   # ghge
+#   # pu_ghge <- env_pu$ghge
+#   
+#   # if scaled:
+#   pu_energy <- nutri_pu$energy * std_coef_energy
+#   pu_protein <- nutri_pu$protein * std_coef_protein
+#   # pu_carbs <- nutri_pu$carbs * std_coef_carbs
+#   # pu_fat <- nutri_pu$fat * std_coef_fat
+#   # pu_vitaminc <- nutri_pu$vitaminc * std_coef_vitaminc
+#   # pu_calcium <- nutri_pu$calcium * std_coef_calcium
+#   
+#   # ghge
+#   pu_ghge <- env_pu$ghge * std_coef_ghge
+#   
+#   
+#   
+#   # constraints (lower, upper)
+#   lwrc_energy <- lwrupr_energy$min
+#   uprc_energy <- lwrupr_energy$max
+#   
+#   lwrc_protein <- lwrupr_protein$min
+#   uprc_protein <- lwrupr_protein$max
+#   
+#   # lwrc_carbs <- lwrupr_carbs$min
+#   # uprc_carbs <- lwrupr_carbs$max
+#   # 
+#   # lwrc_fat <- lwrupr_fat$min
+#   # uprc_fat <- lwrupr_fat$max
+#   # 
+#   # lwrc_vitaminc <- lwrupr_vitaminc$min
+#   # uprc_vitaminc <- lwrupr_vitaminc$max
+#   # 
+#   # lwrc_calcium <- lwrupr_calcium$min
+#   # uprc_calcium <- lwrupr_calcium$max
+#   # 
+#   lwrc_ghge <- lwrupr_ghge$min
+#   uprc_ghge <- lwrupr_ghge$min
+#   
+#   # put constraints in a vector
+#   constr <- c(
+#     # energy
+#     - sum(x * pu_energy) + lwrc_energy,
+#     sum(x * pu_energy) - uprc_energy,
+#     
+#     # protein
+#     - sum(x * pu_protein) + lwrc_protein,
+#     sum(x * pu_protein) - uprc_protein,
+#     
+#     # carbs
+#     # - sum(x * pu_carbs) + lwrc_carbs,
+#     # sum(x * pu_carbs) - uprc_carbs,
+#     
+#     # fat
+#     # - sum(x * pu_fat) + lwrc_fat,
+#     # sum(x * pu_fat) - uprc_fat,
+#     
+#     # vitaminc
+#     # - sum(x * pu_vitaminc) + lwrc_vitaminc,
+#     # sum(x * pu_vitaminc) - uprc_vitaminc,
+#     
+#     # calcium
+#     # - sum(x * pu_calcium) + lwrc_calcium,
+#     # sum(x * pu_calcium) - uprc_calcium,
+#     
+#     # ghge
+#     - sum(x * pu_ghge) + lwrc_ghge,
+#     sum(x * pu_ghge) - uprc_ghge
+#   )
+#   return (constr)
+# }
 
 
 
