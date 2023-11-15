@@ -4,7 +4,7 @@
     "href": "documentation/index.html",
     "title": "Documentation",
     "section": "",
-    "text": "It is important to document while you go.\n\n\n\n\n\n\n\n\n\n\nTitle\n\n\n\n\n\n\nPart 1: Understand the current diet\n\n\n\n\nPart 2: Problem definition\n\n\n\n\nPart 3: A simple problem with 3 foods and 3 constraints\n\n\n\n\nPart 4: Troubleshoot part 3\n\n\n\n\nPart 5: 10 foods\n\n\n\n\nLiterature review and article planning\n\n\n\n\nPackage development log\n\n\n\n\n\n\nNo matching items"
+    "text": "It is important to document while you go.\n\n\n\n\n\n\n\n\n\n\nTitle\n\n\n\n\n\n\nPart 1: Understand the current diet\n\n\n\n\nPart 2: Problem definition\n\n\n\n\nPart 3: A simple problem with 3 foods and 3 constraints\n\n\n\n\nPart 4: Troubleshoot part 3\n\n\n\n\nPart 5: 10 foods\n\n\n\n\nFlexible input with function factory\n\n\n\n\nLiterature review and article planning\n\n\n\n\nPackage development log\n\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "index.html",
@@ -376,5 +376,19 @@
     "title": "Package development log",
     "section": "Overview",
     "text": "Overview\nThe core functionalities contain the following steps:\n\nprovide food data\ncompute inequality constraints (based on current total contribution from the existing diet)\nalgorithm to find the new diet\nresult processing and presentation\n\nThe existing implementation is fixed: not functionalized. The target implementation should allow flexibility at each step.\n\nProvide food data\n\n\nCompute inequality constraints\nThe default inequality constraints are based on the current total contribution:\n\ncurrent diet (d)\ncontrib per unit for each target outcome (e.g. ghge, energy)\noption to scale / standardize\n\nInequality constraints depend on the above, plus the coefficients to set upper and lower. Probably a good idea to split upper and lower.\n\n\nOptimization algorithm\nThis step requires better functional programming: need to wrap the functions to generate multiple inequality formulae.\n\n\nOutput processing"
+  },
+  {
+    "objectID": "documentation/6_flexible_input.html",
+    "href": "documentation/6_flexible_input.html",
+    "title": "Flexible input with function factory",
+    "section": "",
+    "text": "When we want to make systematic production of constraints for the optimization, it is important to use functions. Given the special requirement as input when the constraint function enters the algorithm, where the argument is x and output is a scalar value, we need to treat this function as an object produced by our function factory - so that we can tweak the elements outside the function itself.\nThe basic structure looks like this.\nf_make_constraints &lt;- function(input_data, tag_outcomes){\n  \n  \n  # this is the function we want to return\n  f_ineq &lt;- function (x) {\n    \n    # a few computed constraints, where x is the new diet\n    # it should be the complete set of constrants, \n    # as we select in the last step from \n    tag1_const_lwr &lt;- - sum(x * input_data$per_unit_tag1) + input_data$lwrc_tag1\n    tag1_const_upr &lt;- sum(x * input_data$per_unit_tag1) - input_data$uprc_tag1\n    \n    tag2_const_lwr &lt;- - sum(x * input_data$per_unit_tag2) + input_data$lwrc_tag2\n    tag2_const_upr &lt;- sum(x * input_data$per_unit_tag2) - input_data$uprc_tag2\n\n    # collect in a named vector\n    constr_all &lt;- c(\n      tag1_lwr = tag1_const_lwr, \n      tag1_upr = tag1_const_upr, \n      tag2_lwr = tag2_const_lwr, \n      tag2_upr = tag2_const_upr\n    )\n    \n    # key step:\n    # select the ones that we want, for example, tag1\n    # need to watch out for the names \n    tags_lwr &lt;- paste0(tag_outcomes, '_lwr')\n    tags_upr &lt;- paste0(tag_outcomes, '_upr')\n    \n    constr &lt;- constr_all[c(tags_lwr, tags_upr)]\n    \n    return (constr)\n  }\n  \n  # possibly better to also return the input\n  return(f_ineq)\n}\nWhen calling function, can do this\n# in this setting, the input data must have the columns required by the ff\nf_inequalc_tag1 &lt;- f_make_constraints(tag_outcomes = 'tag1', input_data)\nf_inequalc_tag1_tag2 &lt;- f_make_constraints(tag_outcomes = c('tag1', 'tag2'), input_data)\nTO DO:"
+  },
+  {
+    "objectID": "documentation/6_flexible_input.html#an-example-of-a-function-factory",
+    "href": "documentation/6_flexible_input.html#an-example-of-a-function-factory",
+    "title": "Flexible input with function factory",
+    "section": "An example of a function factory",
+    "text": "An example of a function factory\n\nf_out &lt;- function(x, constant){\n  f &lt;- function(y){\n    res &lt;- y ^ x + constant\n    return(res)\n  }\n  return(f)\n}\n\n\n# it creates a function that at its core, the inner function\n# create a function that raise to the power of 2\n# 3^2 + 1\nf_out1 &lt;- f_out(x = 2, constant = 1) \nf_out1(y=3)\n\n[1] 10\n\n# create a function that raise to the power of 1\n# 3^1 + 1\nf_out2 &lt;- f_out(x=1, constant = 1) \nf_out2(y=3)\n\n[1] 4"
   }
 ]

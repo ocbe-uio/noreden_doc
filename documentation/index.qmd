@@ -11,6 +11,7 @@ listing:
       - "3_small_demo.qmd"
       - "4_troubleshoot_3foods.qmd"
       - "5_10foods.qmd"
+      - "6_flexible_input.qmd"
       - "x_litreview.qmd"
       - "x_pkgdev_log.qmd"
     type: table

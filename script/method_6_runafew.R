@@ -78,12 +78,21 @@ foods_selected
 mean_intake <- select_intake(dt = foods_selected, 
                              intake_names = 'intake_mean')
 
+
 nutri_pu <- select_nutrients_per_unit(dt = foods_selected, 
                                       nutrient_names = target_nutrients)
 
 env_pu <- select_env_per_unit(dt = foods_selected, 
                               env_names = target_envir)
 
+# nutri_pu and env_pu should be put together; while food intake separate
+pu <- cbind(food_name = target_foods, nutri_pu, env_pu)
+mean_intake <- cbind(food_name = target_foods, mean_intake)
+
+input_data <- list(current_diet = mean_intake, 
+                   unit_contrib = pu)
+input_data
+saveRDS(input_data, './data_processed/demo_9foods_input.rda')
 
 
 
@@ -133,6 +142,7 @@ std_coef_ghge <- base_ghge$std_coef
 
 
 # lower, upper
+# these are already standardized
 lwrupr_energy <- set_constraint(base_contrib = base_energy$total_contrib_std, 
                                 scale_min = 0.9, 
                                 scale_max = 1.0)
@@ -162,16 +172,6 @@ lwrupr_ghge <- set_constraint(base_contrib = base_ghge$total_contrib_std,
                               scale_min = 0.9, 
                               scale_max = 1.0)
 
-# ghge reduction
-# ghge_reduct_coef <- 1
-ghge_reduct_coef <- 0.95
-# ghge_reduct_coef <- 0.90
-# ghge_reduct_coef <- 0.85
-# ghge_reduct_coef <- 0.80
-# ghge_reduct_coef <- 0.75
-
-# ghge reduced x%
-lwrupr_ghge <- ghge_reduct_coef * lwrupr_ghge
 
 
 
@@ -198,7 +198,16 @@ current_diet_contrib_df <- rbind(base_energy,
                                  base_calcium,
                                  base_ghge)
 
-# NOTE: this ghge is already reduced, not raw
+current_diet_const_std <- rbind(lwrupr_energy, 
+                                lwrupr_protein, 
+                                lwrupr_carbs, 
+                                lwrupr_fat, 
+                                lwrupr_vitaminc, 
+                                lwrupr_calcium,
+                                lwrupr_ghge)
+
+colnames(current_diet_const_std) <- c('constr_min_std', 'cosntr_max_std')
+
 current_diet_const_raw <- rbind(lwrupr_energy_raw, 
                                 lwrupr_protein_raw, 
                                 lwrupr_carbs_raw, 
@@ -206,6 +215,9 @@ current_diet_const_raw <- rbind(lwrupr_energy_raw,
                                 lwrupr_vitaminc_raw, 
                                 lwrupr_calcium_raw,
                                 lwrupr_ghge_raw)
+
+colnames(current_diet_const_raw) <- c('constr_min_raw', 'constr_max_raw')
+
 # give it a name
 current_diet_info <- cbind(tag_outcome = c('energy', 
                                            'protein', 
@@ -215,10 +227,11 @@ current_diet_info <- cbind(tag_outcome = c('energy',
                                            'calcium',
                                            'ghge'),
                            current_diet_contrib_df, 
+                           current_diet_const_std,
                            current_diet_const_raw)
 current_diet_info
-# now this is a data frame 
 
+saveRDS(current_diet_info, './data_processed/demo_9foods_constraints.rda')
 
 
 # objective, inequalc ----
@@ -290,27 +303,7 @@ f_inequalc
 
 
 
-f_out <- function(x, constant){
-  f <- function(y){
-    res <- y ^ x + constant
-    return(res)
-  }
-  return(f)
-}
-
-# it creates a function that at its core, the inner function
-#f_out1 <- f_out(x = 2, constant = 1) # create a function that raise to the power of 2
-#f_out1(y=3)
-# 
-#f_out2 <- f_out(x=1, constant = 1) # create a function that raise to the power of 1
-# f_out2(y=3)
-
-# if scaled:
-#pu_energy <- nutri_pu$energy * std_coef_energy
-
-# constraints (lower, upper)
-#lwrc_energy <- lwrupr_energy$min
-#uprc_energy <- lwrupr_energy$max
+# (abstract: function factory) ----
 
 info_energy <- list(pu_energy = nutri_pu$energy * std_coef_energy, 
                     lwrc_energy = lwrupr_energy$min, 
