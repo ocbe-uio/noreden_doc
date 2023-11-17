@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>NorEden - Documentation</title>
+<title>NorEden - Note on the input data</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -20,6 +20,40 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -30,8 +64,6 @@ ul.task-list li input[type="checkbox"] {
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
-<script src="../site_libs/quarto-listing/list.min.js"></script>
-<script src="../site_libs/quarto-listing/quarto-listing.js"></script>
 <script src="../site_libs/quarto-html/quarto.js"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -61,38 +93,7 @@ ul.task-list li input[type="checkbox"] {
     "search-label": "Search"
   }
 }</script>
-<script>
 
-  window.document.addEventListener("DOMContentLoaded", function (_event) {
-    const listingTargetEl = window.document.querySelector('#listing-docs .list');
-    if (!listingTargetEl) {
-      // No listing discovered, do not attach.
-      return; 
-    }
-
-    const options = {
-      valueNames: ['listing-title',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-title-sort'] }],
-      
-      searchColumns: ["listing-title","listing-author"],
-    };
-
-    window['quarto-listings'] = window['quarto-listings'] || {};
-    window['quarto-listings']['listing-docs'] = new List('listing-docs', options);
-
-    if (window['quarto-listing-loaded']) {
-      window['quarto-listing-loaded']();
-    }
-  });
-
-  window.addEventListener('hashchange',() => {
-    if (window['quarto-listing-loaded']) {
-      window['quarto-listing-loaded']();
-    }
-  })
-  </script>
-
-  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
 <link rel="stylesheet" href="../styles.css">
 </head>
@@ -119,7 +120,7 @@ ul.task-list li input[type="checkbox"] {
  <span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link active" href="../documentation/index.html" rel="" target="" aria-current="page">
+    <a class="nav-link" href="../documentation/index.html" rel="" target="">
  <span class="menu-text">Documentation</span></a>
   </li>  
   <li class="nav-item">
@@ -138,14 +139,21 @@ ul.task-list li input[type="checkbox"] {
 <!-- sidebar -->
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        
-    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(9)</span></div></div></div>
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#what-does-the-algorithm-require" id="toc-what-does-the-algorithm-require" class="nav-link active" data-scroll-target="#what-does-the-algorithm-require">What does the algorithm require</a></li>
+  <li><a href="#how-are-constaints-computed" id="toc-how-are-constaints-computed" class="nav-link" data-scroll-target="#how-are-constaints-computed">How are constaints computed</a></li>
+  </ul>
+</nav>
+    </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Documentation</h1>
+<h1 class="title">Note on the input data</h1>
 </div>
 
 
@@ -160,74 +168,132 @@ ul.task-list li input[type="checkbox"] {
 
 </header>
 
-<p>It is important to document while you go.</p>
-
-
-
-
-<div class="quarto-listing quarto-listing-container-table" id="listing-docs">
-
-<table class="quarto-listing-table table">
-<thead>
-<tr>
-<th>
-Title
-</th>
-</tr>
-</thead>
-<tbody class="list">
-<tr data-index="0" data-listing-file-modified-sort="1686054483724" data-listing-reading-time-sort="9" data-listing-title-sort="Part 1: Understand the current diet" data-listing-filename-sort="1_understand_data.qmd">
-<td>
-<a href="../documentation/1_understand_data.html" class="title listing-title">Part 1: Understand the current diet</a>
-</td>
-</tr>
-<tr data-index="1" data-listing-file-modified-sort="1686053407533" data-listing-reading-time-sort="2" data-listing-title-sort="Part 2: Problem definition" data-listing-filename-sort="2_define_problem.qmd">
-<td>
-<a href="../documentation/2_define_problem.html" class="title listing-title">Part 2: Problem definition</a>
-</td>
-</tr>
-<tr data-index="2" data-listing-file-modified-sort="1686045497960" data-listing-reading-time-sort="8" data-listing-title-sort="Part 3: A simple problem with 3 foods and 3 constraints" data-listing-filename-sort="3_small_demo.qmd">
-<td>
-<a href="../documentation/3_small_demo.html" class="title listing-title">Part 3: A simple problem with 3 foods and 3 constraints</a>
-</td>
-</tr>
-<tr data-index="3" data-listing-file-modified-sort="1693145360773" data-listing-reading-time-sort="10" data-listing-title-sort="Part 4: Troubleshoot part 3" data-listing-filename-sort="4_troubleshoot_3foods.qmd">
-<td>
-<a href="../documentation/4_troubleshoot_3foods.html" class="title listing-title">Part 4: Troubleshoot part 3</a>
-</td>
-</tr>
-<tr data-index="4" data-listing-file-modified-sort="1694684430861" data-listing-reading-time-sort="10" data-listing-title-sort="Part 5: 10 foods" data-listing-filename-sort="5_10foods.qmd">
-<td>
-<a href="../documentation/5_10foods.html" class="title listing-title">Part 5: 10 foods</a>
-</td>
-</tr>
-<tr data-index="5" data-listing-file-modified-sort="1700238171295" data-listing-reading-time-sort="3" data-listing-title-sort="Note on the input data" data-listing-filename-sort="6_standard_input.qmd">
-<td>
-<a href="../documentation/6_standard_input.html" class="title listing-title">Note on the input data</a>
-</td>
-</tr>
-<tr data-index="6" data-listing-file-modified-sort="1700231810639" data-listing-reading-time-sort="3" data-listing-title-sort="Flexible input with function factory" data-listing-filename-sort="7_func_factory.qmd">
-<td>
-<a href="../documentation/7_func_factory.html" class="title listing-title">Flexible input with function factory</a>
-</td>
-</tr>
-<tr data-index="7" data-listing-file-modified-sort="1699115576656" data-listing-reading-time-sort="1" data-listing-title-sort="Literature review and article planning" data-listing-filename-sort="x_litreview.qmd">
-<td>
-<a href="../documentation/x_litreview.html" class="title listing-title">Literature review and article planning</a>
-</td>
-</tr>
-<tr data-index="8" data-listing-file-modified-sort="1699182497991" data-listing-reading-time-sort="1" data-listing-title-sort="Package development log" data-listing-filename-sort="x_pkgdev_log.qmd">
-<td>
-<a href="../documentation/x_pkgdev_log.html" class="title listing-title">Package development log</a>
-</td>
-</tr>
-</tbody>
-
-</table>
-<div class="listing-no-matching d-none">
-No matching items
+<p>This is the current implementation of input needed for the optimization algorithm.</p>
+<section id="what-does-the-algorithm-require" class="level2">
+<h2 class="anchored" data-anchor-id="what-does-the-algorithm-require">What does the algorithm require</h2>
+<p>The current aim of optimization is to find a set of values (‘diet’) that is <strong>similar to the current diet</strong>, yet satisfies some constraints on <strong>nutrition</strong> and <strong>environment impact</strong>.</p>
+<p>For the <strong>objective</strong> function,</p>
+<ul>
+<li>a vector of current diet (in grams), <code>diet0</code>. This is used to compute the deviation (sum of squares) between the new (target) and current.</li>
+</ul>
+<p>For the <strong>inequality constraints</strong> (standaradized or original),</p>
+<ul>
+<li>a list of constraint values, ordered by <code>tag_outcome</code> (e.g.&nbsp;energy, ghge)</li>
+<li>inside each <code>tag_outcome</code> such as energy,
+<ul>
+<li><code>unit_contrib</code> for each food: a vector of size n</li>
+<li><code>lwr</code>, <code>upr</code>: constraint lower and upper bound. This is after reduction.</li>
+</ul></li>
+</ul>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
 </div>
-</div></main> <!-- /main -->
+<div class="callout-title-container flex-fill">
+Constraint bounds
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The values of constraint bounds need to be pre-computed before entering the algorithm - that means, setting the reduction on <code>ghge</code> is already done.</p>
+</div>
+</div>
+</section>
+<section id="how-are-constaints-computed" class="level2">
+<h2 class="anchored" data-anchor-id="how-are-constaints-computed">How are constaints computed</h2>
+<p><img src="fig_input_diagram.png" width="800"></p>
+<p>The <strong>total contribution</strong> of a diet is a weighted sum of all food intake (diet, in gram) and contribution to this particular nutrition / environment impact outcome (<code>tag_outcome</code>). For instance, in total, the current diet of 188g bread and 165g red meat contributes to X1 units of energy; X2 units of ghge.</p>
+<p>The <strong>current diet</strong> is the average for each food group among all subjects who we collected data from. The <code>lwr</code>, <code>upr</code> of the current are used to limit the search region for the new diet. In the current implementation, they are 5% and 95% quantiles from all the subject.</p>
+<p>The <strong>inequality constraints</strong> (e.g.&nbsp;energy) requires two values: <code>constr_min, constr_max</code>. This means that the computed total contribution of the new diet need to be between these two. In the current implementation:</p>
+<ul>
+<li>minimum (lower bound) is 0.9 times of the total contribution</li>
+<li>maximum (upper bound) is the same of the total contribution</li>
+<li>if we want to reduce <code>ghge</code>, then multiply a factor to the two values above.</li>
+</ul>
+<p>In addition to the raw values, we also implement a standardized version for each of the <code>tag_outcome</code>.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Rationale for standardization
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>We wish to have roughly the same scale for different <code>tag_outcomes</code>. The current implementation takes the standard deviation <em>across all foods</em> for a specific tag (e.g.&nbsp;energy), then divide by this value. This is only ONE of the many ways to standardize for numerical stability.</p>
+<p>Alternatively, it is also possible to multiply a fixed constant such as 1000 to <code>ghge</code>. The interpretation could be better. As long the original diet vector is intact (meaning that the ratio between the original food 1, food 2 are unchanged), one can artificially modify the coefficients as they wish.</p>
+<p>However, it is important to keep consistency in the values and the inequality function!</p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>demo_input <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">'data/demo_9foods_input.rda'</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>demo_input<span class="sc">$</span>current_diet</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       food_name intake_mean intake_lwr intake_upr
+1          Bread   188.31866  18.831866      343.8
+2     Vegetables    72.79364   7.279364      230.7
+3       Red meat   165.98669  16.598669      419.7
+4  Milk, yoghurt   184.13142  18.413142      552.7
+5           Fish   126.26154  12.626154      299.6
+6         Cheese    74.61885   7.461885      302.9
+7           Eggs    26.41185   2.641185      111.6
+8 Fruit, berries   328.64505  32.864505      900.6
+9       Potatoes    46.59652   4.659652      121.6</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>demo_input<span class="sc">$</span>unit_contrib</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       food_name    energy     protein       carbs         fat    vitaminc
+1          Bread 10.695553 0.091220068 0.441277081 0.030216648 0.005701254
+2     Vegetables  3.790560 0.020648968 0.178466077 0.007374631 0.132743363
+3       Red meat  1.565330 0.014877102 0.049805951 0.008408797 0.206985770
+4  Milk, yoghurt  2.728863 0.007580175 0.134110787 0.004081633 0.198250729
+5           Fish  8.341837 0.172619048 0.013605442 0.139455782 0.042517007
+6         Cheese  6.086331 0.169784173 0.024460432 0.074820144 0.000000000
+7           Eggs  6.178862 0.130081301 0.004065041 0.105691057 0.000000000
+8 Fruit, berries  1.979745 0.035935969 0.055864097 0.011107481 0.000000000
+9       Potatoes 13.502304 0.216589862 0.048387097 0.241935484 0.000000000
+     calcium    ghge
+1 0.33637400 0.00107
+2 0.08849558 0.00037
+3 0.25873221 0.00103
+4 0.15160350 0.00072
+5 0.11054422 0.01294
+6 0.24460432 0.00311
+7 0.52845529 0.00215
+8 1.28062725 0.00143
+9 6.58986175 0.01030</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>demo_constraints <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">'data/demo_9foods_constraints.rda'</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>demo_constraints</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  tag_outcome total_contrib_raw total_contrib_std    std_coef constr_min_std
+1      energy       6002.791497         1460.2828   0.2432673      1314.2545
+2     protein         82.349152         1034.1940  12.5586475       930.7746
+3       carbs        153.317587         1108.5790   7.2306054       997.7211
+4         fat         49.280653          606.6639  12.3103864       545.9975
+5    vitaminc         86.965858          976.6934  11.2307682       879.0241
+6     calcium        914.751986          434.7877   0.4753067       391.3090
+7        ghge          3.404557          736.7069 216.3885105       663.0362
+  cosntr_max_std constr_min_raw constr_max_raw
+1      1460.2828    5402.512347    6002.791497
+2      1034.1940      74.114237      82.349152
+3      1108.5790     137.985828     153.317587
+4       606.6639      44.352588      49.280653
+5       976.6934      78.269272      86.965858
+6       434.7877     823.276788     914.751986
+7       736.7069       3.064101       3.404557</code></pre>
+</div>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {

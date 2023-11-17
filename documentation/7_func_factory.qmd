@@ -17,28 +17,36 @@ The basic structure looks like this.
 #| echo: true
 #| eval: false
 
-f_make_constraints <- function(input_data, tag_outcomes){
+f_make_constraint_function <- function(constraint_values, tag_outcomes){
   
+  # constraint_values <- constval$val_std
+  # tag_outcomes <- c('energy', 'ghge')
   
   # this is the function we want to return
-  f_ineq <- function (x) {
+  f_constr <- function (x) {
     
+    energy <- constraint_values$energy
+    protein <- constraint_values$protein
+
     # a few computed constraints, where x is the new diet
     # it should be the complete set of constrants, 
     # as we select in the last step from 
-    tag1_const_lwr <- - sum(x * input_data$per_unit_tag1) + input_data$lwrc_tag1
-    tag1_const_upr <- sum(x * input_data$per_unit_tag1) - input_data$uprc_tag1
+    energy_output_lwr <- - sum(x * energy$unit_contrib) + energy$lwr
+    energy_output_upr <- sum(x * energy$unit_contrib) - energy$upr
     
-    tag2_const_lwr <- - sum(x * input_data$per_unit_tag2) + input_data$lwrc_tag2
-    tag2_const_upr <- sum(x * input_data$per_unit_tag2) - input_data$uprc_tag2
-
+    protein_output_lwr <- - sum(x * protein$unit_contrib) + protein$lwr
+    protein_output_upr <- sum(x * protein$unit_contrib) - protein$upr
+    
+    
     # collect in a named vector
     constr_all <- c(
-      tag1_lwr = tag1_const_lwr, 
-      tag1_upr = tag1_const_upr, 
-      tag2_lwr = tag2_const_lwr, 
-      tag2_upr = tag2_const_upr
-    )
+      energy_lwr = energy_output_lwr, 
+      energy_upr = energy_output_upr, 
+      
+      protein_lwr = protein_output_lwr, 
+      protein_upr = protein_output_upr 
+      
+     )
     
     # key step:
     # select the ones that we want, for example, tag1
@@ -48,12 +56,18 @@ f_make_constraints <- function(input_data, tag_outcomes){
     
     constr <- constr_all[c(tags_lwr, tags_upr)]
     
+    # res <- list(constr = constr, 
+    #             tags_lwr = tags_lwr, 
+    #             tags_upr = tags_upr)
+    
     return (constr)
   }
   
   # possibly better to also return the input
-  return(f_ineq)
+  
+  return(f_constr)
 }
+
 ```
 
 When calling function, can do this
@@ -64,14 +78,10 @@ When calling function, can do this
 #| eval: false
 
 # in this setting, the input data must have the columns required by the ff
-f_inequalc_tag1 <- f_make_constraints(tag_outcomes = 'tag1', input_data)
-f_inequalc_tag1_tag2 <- f_make_constraints(tag_outcomes = c('tag1', 'tag2'), input_data)
+  f_ineq <- f_make_constraint_function(
+    constraint_values = constraint_val, # list of constraints
+    tag_outcomes = tag_outcomes)
 ```
-
-TO DO: 
-
-* add name checker for the input
-* add return arguments for reference 
 
 
 

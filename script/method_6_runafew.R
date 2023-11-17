@@ -75,8 +75,8 @@ foods_selected <- select_food(dt = input,
 foods_selected
 
 # use the smaller df to subset 
-mean_intake <- select_intake(dt = foods_selected, 
-                             intake_names = 'intake_mean')
+current_diet <- select_intake(dt = foods_selected, 
+                             intake_names = c('intake_mean', 'intake_lwr', 'intake_upr'))
 
 
 nutri_pu <- select_nutrients_per_unit(dt = foods_selected, 
@@ -87,9 +87,9 @@ env_pu <- select_env_per_unit(dt = foods_selected,
 
 # nutri_pu and env_pu should be put together; while food intake separate
 pu <- cbind(food_name = target_foods, nutri_pu, env_pu)
-mean_intake <- cbind(food_name = target_foods, mean_intake)
+current_diet <- cbind(food_name = target_foods, mean_intake)
 
-input_data <- list(current_diet = mean_intake, 
+input_data <- list(current_diet = current_diet, 
                    unit_contrib = pu)
 input_data
 saveRDS(input_data, './data_processed/demo_9foods_input.rda')
@@ -99,7 +99,7 @@ saveRDS(input_data, './data_processed/demo_9foods_input.rda')
 # compute constraint ----
 # compute current contribution to configure the constraint
 
-base_energy <- diet_contribution(current_intake = mean_intake, 
+base_energy <- diet_contribution(current_intake = cd$intake_mean, 
                                  dt_per_unit = nutri_pu, 
                                  tag_outcome = 'energy')
 
@@ -206,7 +206,7 @@ current_diet_const_std <- rbind(lwrupr_energy,
                                 lwrupr_calcium,
                                 lwrupr_ghge)
 
-colnames(current_diet_const_std) <- c('constr_min_std', 'cosntr_max_std')
+colnames(current_diet_const_std) <- c('constr_min_std', 'constr_max_std')
 
 current_diet_const_raw <- rbind(lwrupr_energy_raw, 
                                 lwrupr_protein_raw, 
