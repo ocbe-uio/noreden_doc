@@ -2,19 +2,36 @@
 # load raw data ----
 library(data.table)
 library(readxl)
-
+library(dplyr)
 # load 28 foods
 # this is not part of the function
 input <- read_excel("data_example/input_0915.xlsx")
 input <- setDT(input)
 input
 
-# change variable name
-setnames(input, 'Vitamin C', 'vitaminc')
-setnames(input, 'Calcium', 'calcium')
-setnames(input, 'Mean10MJ', 'intake_mean')
-setnames(input, '0.1xmean10MJ', 'intake_lwr')
-setnames(input, '95thpercentile10MJ', 'intake_upr')
+# change variale names
+
+input_new <- rename(input, intake_mean = Mean10MJ) |> 
+  rename(intake_lwr = `0.1xmean10MJ`) |> 
+  rename(intake_upr = `95thpercentile10MJ`) |> 
+  rename(vitaminc = `Vitamin C`) |> 
+  rename(calcium = `Calcium`) |> 
+  rename(food_name = foods)
+
+colnames(input_new)
+
+# split the data in two files: intake + per unit contrib
+
+d_intake <- select(input_new, c('food_name', 'intake_mean', 'intake_lwr', 'intake_upr'))
+
+d_perunit_contrib <- select(input_new, 
+                            c('food_name', 'energy', 'protein', 'carbs', 'sugar', 
+                              'fiber', 'fat', 'vitaminc', 'calcium', 'ghge'))
+
+
+saveRDS(d_intake, './data_processed/d_diet.rda')
+saveRDS(d_perunit_contrib, './data_processed/d_perunit_contrib.rda')
+
 
 
 # set parameters ----

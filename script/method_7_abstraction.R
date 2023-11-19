@@ -1,3 +1,114 @@
+# this is the script where we make the whole workflow in functions
+
+# ____ STEP 1: INPUT ____ ----
+
+d_diet <- readRDS('./data_processed/d_diet.rda')
+d_perunit_contrib <- readRDS('./data_processed/d_perunit_contrib.rda')
+
+d_perunit_contrib |> head()
+
+
+
+# use the 9 food example
+
+tag_food_9 <- c('Bread', 
+              'Vegetables', 
+              'Red meat', 
+              'Milk, yoghurt', 
+              'Fish', 
+              'Cheese', 
+              'Eggs', 
+              'Fruit, berries', 
+              'Potatoes'
+)
+
+tag_outcome_9 <- c('energy',
+                   'protein', 
+                   'carbs', 
+                   'sugar', 
+                   'fiber', 
+                   'fat', 
+                   'vitaminc', 
+                   'calcium', 
+                   'ghge')
+
+
+
+
+# ____ STEP 2: COMPUTE CONSTR ____ ----
+
+# we supply the entire dataset for all nutrients when computing the constraints
+# need to specify reduction factor on ghge 
+
+
+# d_diet
+
+# filter(d_diet, food_name %in% tag_food)
+# filter(d_perunit_contrib, food_name %in% tag_food)
+
+
+diet_s <- select_diet(data_diet = d_diet, tag_food = tag_food_9)
+
+puc_s <- select_perunit(data_perunit_contrib = d_perunit_contrib, 
+               tag_food = tag_food_9, 
+               tag_outcome = tag_outcome_9)
+
+
+tc <- total_contrib(data_diet = diet_s, 
+              data_perunit_contrib = puc_s)
+
+
+# standardized total contrib
+stdcoef_9 <- get_stdcoef(data_perunit_contrib = d_perunit_contrib)
+
+coefs <- stdcoef_9$std_coef
+
+cd_unit_contrib_std <- makestd_unit_contrib(
+  uc_raw = puc_s,
+  std_coef = coefs)
+puc_s_std <- cd_unit_contrib_std$uc_std
+
+tc_std <- total_contrib(data_diet = diet_s, 
+                    data_perunit_contrib = puc_s_std)
+
+
+# alternatively, directly use tc multiply by coef
+tc$total_contrib$total_contrib * coefs$std_coef
+# ok 
+
+
+
+# COMPUTE CONSTRAINTS ----
+
+# first compute the basis (i.e. maximum total contrib)
+# inequality constraints are based on this value
+
+# the constraints are based on the current diet contribution
+# for reduction (e.g. ghge) just set lower upper bound 
+
+set_constraint <- function(base_contrib, 
+                           scale_min, 
+                           scale_max){
+  
+  const_min <- base_contrib * scale_min
+  const_max <- base_contrib * scale_max
+  res <- data.frame(min = const_min, 
+                    max = const_max)
+  return(res)
+}
+
+
+base_energy <- diet_contribution(current_intake = mean_intake, 
+                                 dt_per_unit = nutri_pu, 
+                                 tag_outcome = 'energy')
+
+
+
+
+
+
+
+# ____ STEP 3: ALGO ____ ----
 # require 
 # nutri_pu (per unit contribution) or envir_pu
 # lwrupr_energy (computed as constraints)
@@ -87,15 +198,112 @@ collect_result(result_obj = res$run_optim,
 
 
 
+# _________ ----
+#  utility  ----
 
-# utility ----
+select_diet <- function(data_diet, tag_food){
+  
+  diet_selected <- dplyr::filter(data_diet, food_name %in% tag_food) |> 
+    dplyr::select(dplyr::all_of(c('food_name','intake_mean')))
+  
+  return(diet_selected)
+}
 
-makestd_unit_contrib <- function(uc_raw, std_coef, arg = F){
+
+
+select_perunit <- function(data_perunit_contrib, 
+                           tag_food, 
+                           tag_outcome){
+  
+  perunit_selected <- dplyr::filter(data_perunit_contrib, 
+                                    food_name %in% tag_food) |> 
+    dplyr::select(dplyr::all_of(c('food_name', tag_outcome)))
+  
+  return(perunit_selected)
+}
+
+
+
+total_contrib <- function(data_diet, 
+                          data_perunit_contrib){
+  
+  # compute total contrib X foods (contrib_pu * intake)
+  # data_diet <- diet_s
+  # data_perunit_contrib <- puc_s
+  
+  # check if names match 
+  if(!all.equal(data_diet$food_name, data_perunit_contrib$food_name)){
+    stop('Food names do not match, check input data')
+  }
+  # at least have mean intake in the diet data
+  if(!'intake_mean' %in% colnames(data_diet)){
+    stop('Need to supply intake_mean for diet computation')
+  }
+  
+  # remove food_nname for computation
+  uc_tb <- dplyr::select(data_perunit_contrib, -c('food_name'))
+  
+  # total contrib
+  # 1:9 times 9:9
+  tc <- t(as.matrix(data_diet$intake_mean)) %*% as.matrix(uc_tb)
+  
+  tag_outcome <- colnames(uc_tb)
+  food_name <- data_diet$food_name
+  # make it in df 
+  tc_table <- data.frame(tag_outcome = tag_outcome, 
+                         total_contrib = as.numeric(tc))
+  
+  # print(tc_table)
+  res <- list(total_contrib = tc_table, 
+              tag_food = food_name, 
+              tag_outcome = tag_outcome)
+  return(res)
+  
+}
+
+
+
+get_stdcoef <- function(data_perunit_contrib, 
+                        method = 'sd'){
+  
+  # data_perunit_contrib <- puc_s
+  
+  if('food_name' %in% colnames(data_perunit_contrib)){
+    uc_tb <- dplyr::select(data_perunit_contrib, -c('food_name'))
+  }else{
+    uc_tb <- data_perunit_contrib
+  }
+  
+  # take the smaller subset
+  
+  if(method == 'sd'){
+    # print('Method: divide by standard deviation of current diet wrt tag_outcome')
+    stopifnot('Must have more than 1 food to compute sd' = 
+                nrow(uc_tb)>1)
+    
+    sd_vec <- apply(uc_tb, MARGIN = 2, sd)
+    std_coef <- 1/sd_vec
+  }
+  
+  tag_outcome <- colnames(uc_tb)
+  
+  std_df <- data.frame(tag_outcome = tag_outcome, 
+                       std_coef = as.numeric(std_coef))
+  
+  res <- list(std_coef = std_df, 
+              method = method)
+  
+  return(res)
+}
+
+
+makestd_unit_contrib <- function(uc_raw, std_coef){
   
   # check tag_outcome name consistency
   if('food_name' %in% colnames(uc_raw)){
-    
     uc_tb <- dplyr::select(uc_raw, -c('food_name'))
+  }else{
+    uc_tb <- uc_raw
   }
   if(!all.equal(colnames(uc_tb), std_coef$tag_outcome)){
     stop('tag_outcome names do not match')
@@ -112,14 +320,12 @@ makestd_unit_contrib <- function(uc_raw, std_coef, arg = F){
                        uc_tb_std)
   }
   
-  if(arg == T){
-    res <- list(uc_raw = uc_raw, 
+
+  res <- list(uc_raw = uc_raw, 
                 std_coef = std_coef,
                 uc_std = uc_tb_std)
     
-  }else{
-    res <- list(uc_std = uc_tb_std)
-  }
+
   return(res)
 }
 # example:
