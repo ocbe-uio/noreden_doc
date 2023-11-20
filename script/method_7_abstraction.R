@@ -32,6 +32,16 @@ tag_outcome_9 <- c('energy',
                    'calcium', 
                    'ghge')
 
+# reduce ghge to 0.8
+
+constr_coef_df <- set_constr_coef(tag_outcome = tag_outcome_9, 
+                                  coef_lwr = rep(0.9, length(tag_outcome_9)), 
+                                  coef_upr = rep(1.0, length(tag_outcome_9)))
+
+
+constr_coef_df_red <- reduce_constr(data_constr_coef = constr_df, 
+                                    tag_outcome_reduce = 'ghge', 
+                                    coef_reduce = 0.9)
 
 
 
@@ -47,18 +57,23 @@ tag_outcome_9 <- c('energy',
 # filter(d_perunit_contrib, food_name %in% tag_food)
 
 
-diet_s <- select_diet(data_diet = d_diet, tag_food = tag_food_9)
+diet_s <- select_diet(data_diet = d_diet,
+                      tag_food = tag_food_9)
 
 puc_s <- select_perunit(data_perunit_contrib = d_perunit_contrib, 
-               tag_food = tag_food_9, 
-               tag_outcome = tag_outcome_9)
+                        tag_food = tag_food_9, 
+                        tag_outcome = tag_outcome_9)
 
-
+# compute total contrib for selected foods and tag_outcomes
 tc <- total_contrib(data_diet = diet_s, 
-              data_perunit_contrib = puc_s)
+                    data_perunit_contrib = puc_s)
+
+# compute constraints
+cd_constr_raw_red <- compute_constr(data_total_contrib = tc$total_contrib, 
+                                    data_constr_coef = constr_coef_df_red)
 
 
-# standardized total contrib
+# standardized total contrib (sd)
 stdcoef_9 <- get_stdcoef(data_perunit_contrib = d_perunit_contrib)
 
 coefs <- stdcoef_9$std_coef
@@ -69,16 +84,15 @@ cd_unit_contrib_std <- makestd_unit_contrib(
 puc_s_std <- cd_unit_contrib_std$uc_std
 
 tc_std <- total_contrib(data_diet = diet_s, 
-                    data_perunit_contrib = puc_s_std)
+                        data_perunit_contrib = puc_s_std)
 
 
 # alternatively, directly use tc multiply by coef
-tc$total_contrib$total_contrib * coefs$std_coef
+# tc$total_contrib$total_contrib * coefs$std_coef
 # ok 
 
 
 
-# COMPUTE CONSTRAINTS ----
 
 # first compute the basis (i.e. maximum total contrib)
 # inequality constraints are based on this value
@@ -86,24 +100,14 @@ tc$total_contrib$total_contrib * coefs$std_coef
 # the constraints are based on the current diet contribution
 # for reduction (e.g. ghge) just set lower upper bound 
 
-set_constraint <- function(base_contrib, 
-                           scale_min, 
-                           scale_max){
-  
-  const_min <- base_contrib * scale_min
-  const_max <- base_contrib * scale_max
-  res <- data.frame(min = const_min, 
-                    max = const_max)
-  return(res)
-}
 
 
-base_energy <- diet_contribution(current_intake = mean_intake, 
-                                 dt_per_unit = nutri_pu, 
-                                 tag_outcome = 'energy')
+cd_constr_std <- compute_constr(data_total_contrib = tc_std$total_contrib, 
+               data_constr_coef = constr_coef_df)
 
 
-
+cd_constr_std_red <- compute_constr(data_total_contrib = tc_std$total_contrib, 
+               data_constr_coef = constr_coef_df_red)
 
 
 
@@ -114,25 +118,28 @@ base_energy <- diet_contribution(current_intake = mean_intake,
 # lwrupr_energy (computed as constraints)
 
 
-demo_input <- readRDS('./data_processed/demo_9foods_input.rda')
-demo_constraints <- readRDS('./data_processed/demo_9foods_constraints.rda')
+# demo_input <- readRDS('./data_processed/demo_9foods_input.rda')
+# demo_constraints <- readRDS('./data_processed/demo_9foods_constraints.rda')
 
 
 # hot fix:
-colnames(demo_constraints)[
-  which(colnames(demo_constraints)=='cosntr_max_std')] <- 'constr_max_std'
+# colnames(demo_constraints)[
+#   which(colnames(demo_constraints)=='cosntr_max_std')] <- 'constr_max_std'
 # these constraints need to have an additional column that has the reduction 
 
 
 # in this example: 9 foods, 7 constraints (might not need to be used for all)
 
+
+
 # set param ----- 
 # cd: current diet
-cd <- as.data.frame(demo_input$current_diet)
-cd_unit_contrib <- as.data.frame(demo_input$unit_contrib)
-cd_constr <- as.data.frame(demo_constraints)
+# cd <- as.data.frame(demo_input$current_diet)
+# cd_unit_contrib <- as.data.frame(demo_input$unit_contrib)
+# cd_constr <- as.data.frame(demo_constraints)
 
 
+cd <- diet_s
 
 # diet: 
 # initial values
@@ -144,13 +151,23 @@ lb <- cd$intake_lwr
 ub <- cd$intake_upr
 
 
+# unit contrib
+cd_unit_contrib_raw <- puc_s
+cd_unit_contrib_std <- puc_s_std
+
+
 # constraints: 
 # by tag (e.g. energy, protein)
-constval <- constr_by_tag(d_unit_contrib = cd_unit_contrib, 
-                          d_constr = cd_constr)
+constval <- values_by_tag_outcome(data_unit_contrib = cd_unit_contrib_std, 
+                                  data_constr = cd_constr_std)
 
-constval$val_std
-constval$val_std$energy
+
+constval$food_name
+constval$tag_outcome
+constval$val
+constval$val$energy
+
+
 
 
 
@@ -167,7 +184,7 @@ fo <- f_make_objective_function(diet0 = x0)
 tags <- c('energy', 'protein', 'ghge')
 
 f_inequalc <- f_make_constraint_function(
-  constraint_values = constval$val_std, 
+  constraint_values = constval$val, 
   tag_outcomes = tags)
 
 # f_inequalc(x = x0)
@@ -182,29 +199,43 @@ res <- find_new_diet(diet0 = cd$intake_mean,
                      diet0_upr = cd$intake_upr, 
                      diet0_lwr = cd$intake_lwr, 
                      tag_outcomes = c('energy', 'protein', 'ghge'), 
-                     constraint_val = constval$val_std, 
+                     constraint_val = constval$val, 
                      print_runtime = T)
 
 res
 
 
-collect_result(result_obj = res$run_optim, 
-               food_names = foods_selected$foods,
-               current_diet = cd$intake_mean,
-               diet_bound_lwr = cd$intake_lwr, 
-               diet_bound_upr = cd$intake_upr)
+diet_s
 
 
+new_diet <- return_new_diet(result_obj = res$run_optim, data_current_diet = diet_s)
+compare_new_diet(data_new_diet = new_diet, data_current_diet = diet_s)
+
+
+
+validate_diet_contrib(data_new_diet = new_diet, 
+                      data_unit_contrib = puc_s,
+                      data_constr = cd_constr_raw_red)
 
 
 
 # _________ ----
 #  utility  ----
 
-select_diet <- function(data_diet, tag_food){
+select_diet <- function(data_diet, tag_food, minmax = T){
   
   diet_selected <- dplyr::filter(data_diet, food_name %in% tag_food) |> 
     dplyr::select(dplyr::all_of(c('food_name','intake_mean')))
+  
+  if(minmax == T){
+    
+    diet_selected <- dplyr::filter(data_diet, food_name %in% tag_food) |> 
+      dplyr::select(dplyr::all_of(c('food_name',
+                                    'intake_mean', 
+                                    'intake_lwr', 
+                                    'intake_upr')))
+    
+  }
   
   return(diet_selected)
 }
@@ -223,8 +254,40 @@ select_perunit <- function(data_perunit_contrib,
 }
 
 
+set_constr_coef <- function(tag_outcome, coef_lwr, coef_upr){
+  
+  constr_coef <- data.frame(tag_outcome = tag_outcome, 
+                            coef_constrlwr = coef_lwr, 
+                            coef_construpr = coef_upr)
+  
+  return(constr_coef)
+}
 
-total_contrib <- function(data_diet, 
+
+reduce_constr <- function(data_constr_coef, tag_outcome_reduce, coef_reduce){
+  
+  # data_constr_coef <- constr_df
+  # tag_outcome_reduce <- 'ghge'
+  # coef_reduce <- 0.8  
+  
+  id <- which(data_constr_coef$tag_outcome == tag_outcome_reduce)
+  
+  # multiply by a factor
+  data_constr_coef[id, ]$coef_constrlwr <- 
+    data_constr_coef[id, ]$coef_constrlwr *coef_reduce
+  
+  data_constr_coef[id, ]$coef_construpr <- 
+    data_constr_coef[id, ]$coef_construpr *coef_reduce
+  
+  return(data_constr_coef)
+  
+}
+
+
+
+
+
+compute_total_contrib <- function(data_diet, 
                           data_perunit_contrib){
   
   # compute total contrib X foods (contrib_pu * intake)
@@ -263,7 +326,7 @@ total_contrib <- function(data_diet,
 
 
 
-get_stdcoef <- function(data_perunit_contrib, 
+compute_stdcoef <- function(data_perunit_contrib, 
                         method = 'sd'){
   
   # data_perunit_contrib <- puc_s
@@ -297,7 +360,8 @@ get_stdcoef <- function(data_perunit_contrib,
 }
 
 
-makestd_unit_contrib <- function(uc_raw, std_coef){
+
+compute_std_unit_contrib <- function(uc_raw, std_coef){
   
   # check tag_outcome name consistency
   if('food_name' %in% colnames(uc_raw)){
@@ -328,6 +392,8 @@ makestd_unit_contrib <- function(uc_raw, std_coef){
 
   return(res)
 }
+
+
 # example:
 # coefs <- cd_constr[, c('tag_outcome', 'std_coef')]
 # cd_unit_contrib_std <- makestd_unit_contrib(
@@ -339,66 +405,81 @@ makestd_unit_contrib <- function(uc_raw, std_coef){
 
 
 
-constr_by_tag <- function(d_unit_contrib, d_constr){
+compute_constr <- function(data_total_contrib, 
+                           data_constr_coef){
+  
+  # data_total_contrib <- tc_std$total_contrib
+  # data_constr_coef <- constr_df
+  
+  # check if names are consistent
+  if(sum(data_total_contrib$tag_outcome %in% data_constr_coef$tag_outcome) !=
+     nrow(data_constr_coef)){
+    stop('tag_outcome do not match, check')
+  }
+  
+  d <- dplyr::left_join(data_total_contrib, data_constr_coef, by = 'tag_outcome')
+  # multiply
+  d$constr_lwr <- d$total_contrib * d$coef_constrlwr
+  d$constr_upr <- d$total_contrib * d$coef_construpr
+  
+  
+  return(d)
+}
+
+
+
+
+
+
+
+values_by_tag_outcome <- function(data_unit_contrib, data_constr){
   # this should be independent of whether std or not
-  # return both
   
-  # d_unit_contrib <- cd_unit_contrib
-  # d_constr <- cd_constr
+  # data_unit_contrib <- cd_unit_contrib_std
+  # data_constr <- cd_constr_std
   
-  # compute contrib (std)
-  # we need standardized contrib per unit
-  coefs <- d_constr[, c('tag_outcome', 'std_coef')]
-  d_unit_contrib_std <- makestd_unit_contrib(
-    uc_raw = d_unit_contrib, # original
-    std_coef = coefs)$uc_std
+  food_name <- data_unit_contrib$food_name
+  tag_outcome_uc <- colnames(data_unit_contrib)[colnames(data_unit_contrib)!='food_name']
+  tag_outcome_constr <- data_constr$tag_outcome
   
-  food_names <- d_unit_contrib$food_name
-  tag_outcomes <- d_constr$tag_outcome
+  if(sum(tag_outcome_uc %in% tag_outcome_constr) != length(tag_outcome_uc)){
+    stop('tag_outcome do not match. check')
+  }
   
-  val_raw <- list()
-  val_std <- list()
-  for (i in 1:length(tag_outcomes)){
+  to <- tag_outcome_uc
+  
+  val <- list()
+  for (i in 1:length(to)){
     
     # i <- 1
     # per unit contrib (n foods)
     # select the column with matching tag_outcome
     # d_unit_contrib[, 2]
-    id <- which(colnames(d_unit_contrib) == tag_outcomes[i])
-    unit_contrib_raw <- d_unit_contrib[, id]
-    unit_contrib_std <- d_unit_contrib_std[, id]
+    id <- which(colnames(data_unit_contrib) == to[i])
+    unit_contrib <- data_unit_contrib[, id]
     
     # lwr, upr constraint (n tag)
-    id2 <- which(d_constr$tag_outcome == tag_outcomes[i])
-    lwr_raw <- d_constr[id2, ]$constr_min_raw
-    upr_raw <- d_constr[id2, ]$constr_max_raw
+    id2 <- which(data_constr$tag_outcome == to[i])
+    lwr <- data_constr[id2, ]$constr_lwr
+    upr <- data_constr[id2, ]$constr_upr
     
-    lwr_std <- d_constr[id2, ]$constr_min_std
-    upr_std <- d_constr[id2, ]$constr_max_std
-    
-    val_raw[[i]] <- list(unit_contrib = unit_contrib_raw, 
-                         lwr = lwr_raw, 
-                         upr = upr_raw)
-    
-    val_std[[i]] <- list(unit_contrib = unit_contrib_std, 
-                         lwr = lwr_std, 
-                         upr = upr_std)
+    val[[i]] <- list(unit_contrib = unit_contrib, 
+                     lwr = lwr, 
+                     upr = upr)
   }
   
-  names(val_raw) <- tag_outcomes
-  names(val_std) <- tag_outcomes
+  names(val) <- to
   
-  return(list(food_names = food_names, 
-              tag_outcomes = tag_outcomes, 
-              val_raw = val_raw, 
-              val_std = val_std))
+  return(list(food_name = food_name, 
+              tag_outcome = to, 
+              val = val))
   
 }
 
 
 # example
-# constr_by_tag(d_unit_contrib = cd_unit_contrib, 
-#               d_constr = cd_constr)
+# values_by_tag_outcome(data_unit_contrib = cd_unit_contrib_std, 
+#                       data_constr = cd_constr_std)
 
 
 
@@ -579,5 +660,85 @@ find_new_diet <- function(diet0,
 }
 
 
+
+
+
+return_new_diet <- function(result_obj, data_current_diet){
+  
+  new_diet <- result_obj$solution
+  
+  res <- data.frame(food_name = data_current_diet$food_name, 
+                    new = new_diet, 
+                    current = data_current_diet$intake_mean)
+  return(res)
+}
+
+compare_new_diet <- function(data_new_diet, 
+                             data_current_diet){
+  
+  # data_current_diet <- diet_s
+  # data_new_diet <- new_diet
+  # check current diet names, should have mean and lwr upr
+  coln_input <- c('food_name', 'intake_mean', 'intake_lwr', 'intake_upr')
+  if(sum(coln_input %in% colnames(data_current_diet)) != length(coln_input)){
+    stop('Must supply food_name, mean and lwr upr in the current diet data')
+  }
+  # remove current, since we add it back from the other table
+  data_new_diet <- dplyr::select(data_new_diet, -current)
+  
+  d <- dplyr::left_join(data_new_diet, data_current_diet, by = 'food_name')
+  
+  d <- dplyr::rename(d, 
+                     current = intake_mean, 
+                     current_lwr = intake_lwr, 
+                     current_upr = intake_upr)
+  d <- dplyr::mutate(d, 
+                     abs_change = (new - current), 
+                     perc_change = (new - current)/current)
+  
+  return(d)
+}
+
+
+
+validate_diet_contrib <- function(data_new_diet, 
+                                  data_unit_contrib, 
+                                  data_constr){
+  
+  # on original scale is fine
+  # data_new_diet <- new_diet
+  # data_unit_contrib <- puc_s
+  
+  # data_constr <- cd_constr_raw_red # original
+  
+  # compute new total contri 
+  # consistent name
+  d <- dplyr::select(data_new_diet, 
+                     food_name,
+                     intake_mean = new)
+  tc_new <- compute_total_contrib(data_diet = d, 
+                                  data_perunit_contrib = data_unit_contrib)
+  
+  d_tc_new <- tc_new$total_contrib
+  d_tc_new <- dplyr::rename(d_tc_new, total_contrib_new = total_contrib)
+  
+  # put together, modify name
+  tc_both <- dplyr::left_join(d_tc_new, data_constr, by = 'tag_outcome')
+  
+  tc_both <- mutate(tc_both, check = dplyr::case_when(
+    total_contrib_new > constr_upr ~ 'beyond_upper', 
+    total_contrib_new < constr_lwr ~ 'beyond_lwr',
+    .default = 'ok'
+  ))
+  
+  tc_both <- mutate(tc_both, deviation = dplyr::case_when(
+    check == 'beyond_upper' ~ round((total_contrib_new - constr_upr)/constr_upr,3), 
+    check == 'beyond_lower' ~ round((total_contrib_new - constr_lwr)/constr_lwr,3), 
+    .default = 0
+  ))
+  
+  return(tc_both)
+  
+}
 
 
