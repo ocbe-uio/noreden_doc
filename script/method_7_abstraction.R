@@ -32,29 +32,23 @@ tag_outcome_9 <- c('energy',
                    'calcium', 
                    'ghge')
 
-# reduce ghge to 0.8
-
+# set constraint coefficients
 constr_coef_df <- set_constr_coef(tag_outcome = tag_outcome_9, 
                                   coef_lwr = rep(0.9, length(tag_outcome_9)), 
                                   coef_upr = rep(1.0, length(tag_outcome_9)))
+constr_coef_df
 
-
-constr_coef_df_red <- reduce_constr(data_constr_coef = constr_df, 
+# reduce ghge to 0.9
+constr_coef_df_red <- reduce_constr(data_constr_coef = constr_coef_df, 
                                     tag_outcome_reduce = 'ghge', 
                                     coef_reduce = 0.9)
-
+constr_coef_df_red
 
 
 # ____ STEP 2: COMPUTE CONSTR ____ ----
 
 # we supply the entire dataset for all nutrients when computing the constraints
 # need to specify reduction factor on ghge 
-
-
-# d_diet
-
-# filter(d_diet, food_name %in% tag_food)
-# filter(d_perunit_contrib, food_name %in% tag_food)
 
 
 diet_s <- select_diet(data_diet = d_diet,
@@ -64,44 +58,44 @@ puc_s <- select_perunit(data_perunit_contrib = d_perunit_contrib,
                         tag_food = tag_food_9, 
                         tag_outcome = tag_outcome_9)
 
+diet_s
+puc_s
+
 # compute total contrib for selected foods and tag_outcomes
-tc <- total_contrib(data_diet = diet_s, 
+tc <- compute_total_contrib(data_diet = diet_s, 
                     data_perunit_contrib = puc_s)
 
+tc
+
 # compute constraints
+# with reduced ghge
 cd_constr_raw_red <- compute_constr(data_total_contrib = tc$total_contrib, 
                                     data_constr_coef = constr_coef_df_red)
 
 
+cd_constr_raw_red
+
 # standardized total contrib (sd)
-stdcoef_9 <- get_stdcoef(data_perunit_contrib = d_perunit_contrib)
+stdcoef_9 <- compute_stdcoef(data_perunit_contrib = puc_s)
+stdcoef_9
 
-coefs <- stdcoef_9$std_coef
 
-cd_unit_contrib_std <- makestd_unit_contrib(
+cd_unit_contrib_std <- compute_std_unit_contrib(
   uc_raw = puc_s,
-  std_coef = coefs)
+  std_coef = stdcoef_9$std_coef)
+cd_unit_contrib_std
+
 puc_s_std <- cd_unit_contrib_std$uc_std
-
-tc_std <- total_contrib(data_diet = diet_s, 
+# total contrib (std)
+tc_std <- compute_total_contrib(data_diet = diet_s, 
                         data_perunit_contrib = puc_s_std)
-
+tc_std
 
 # alternatively, directly use tc multiply by coef
 # tc$total_contrib$total_contrib * coefs$std_coef
 # ok 
 
-
-
-
-# first compute the basis (i.e. maximum total contrib)
-# inequality constraints are based on this value
-
-# the constraints are based on the current diet contribution
-# for reduction (e.g. ghge) just set lower upper bound 
-
-
-
+# constraints based on std total contrib
 cd_constr_std <- compute_constr(data_total_contrib = tc_std$total_contrib, 
                data_constr_coef = constr_coef_df)
 
@@ -109,35 +103,14 @@ cd_constr_std <- compute_constr(data_total_contrib = tc_std$total_contrib,
 cd_constr_std_red <- compute_constr(data_total_contrib = tc_std$total_contrib, 
                data_constr_coef = constr_coef_df_red)
 
-
+cd_constr_std_red
 
 
 # ____ STEP 3: ALGO ____ ----
-# require 
-# nutri_pu (per unit contribution) or envir_pu
-# lwrupr_energy (computed as constraints)
-
-
-# demo_input <- readRDS('./data_processed/demo_9foods_input.rda')
-# demo_constraints <- readRDS('./data_processed/demo_9foods_constraints.rda')
-
-
-# hot fix:
-# colnames(demo_constraints)[
-#   which(colnames(demo_constraints)=='cosntr_max_std')] <- 'constr_max_std'
-# these constraints need to have an additional column that has the reduction 
-
-
-# in this example: 9 foods, 7 constraints (might not need to be used for all)
-
 
 
 # set param ----- 
 # cd: current diet
-# cd <- as.data.frame(demo_input$current_diet)
-# cd_unit_contrib <- as.data.frame(demo_input$unit_contrib)
-# cd_constr <- as.data.frame(demo_constraints)
-
 
 cd <- diet_s
 
@@ -152,14 +125,15 @@ ub <- cd$intake_upr
 
 
 # unit contrib
-cd_unit_contrib_raw <- puc_s
+# cd_unit_contrib_raw <- puc_s
 cd_unit_contrib_std <- puc_s_std
 
 
 # constraints: 
 # by tag (e.g. energy, protein)
+# use reduced value: cd_constr_std_red
 constval <- values_by_tag_outcome(data_unit_contrib = cd_unit_contrib_std, 
-                                  data_constr = cd_constr_std)
+                                  data_constr = cd_constr_std_red)
 
 
 constval$food_name
@@ -198,21 +172,22 @@ f_inequalc <- f_make_constraint_function(
 res <- find_new_diet(diet0 = cd$intake_mean, 
                      diet0_upr = cd$intake_upr, 
                      diet0_lwr = cd$intake_lwr, 
-                     tag_outcomes = c('energy', 'protein', 'ghge'), 
+                     tag_outcomes = tags, 
                      constraint_val = constval$val, 
                      print_runtime = T)
 
 res
 
 
-diet_s
+new_diet <- return_new_diet(result_obj = res$run_optim, 
+                            data_current_diet = diet_s)
+new_diet
+compare_new_diet(data_new_diet = new_diet, 
+                 data_current_diet = diet_s)
 
 
-new_diet <- return_new_diet(result_obj = res$run_optim, data_current_diet = diet_s)
-compare_new_diet(data_new_diet = new_diet, data_current_diet = diet_s)
 
-
-
+# here can validate using the raw tc (so it's more interpretable)
 validate_diet_contrib(data_new_diet = new_diet, 
                       data_unit_contrib = puc_s,
                       data_constr = cd_constr_raw_red)
