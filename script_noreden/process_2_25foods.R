@@ -2,7 +2,7 @@
 
 # raw data:
 # library(readxl)
-# aggregated_foods <- read_excel("data_example/aggregated_foods.xlsx")
+# aggregated_foods <- read_excel("data_raw/aggregated_foods.xlsx")
 # library(magrittr)
 # library(data.table)
 

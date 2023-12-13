@@ -4,8 +4,8 @@ library(tidyr)
 
 
 # food group reference -----
-group_names <- readxl::read_excel("data_example/Food groups.xlsx", skip = 1)
-group_foods <- readxl::read_excel("data_example/Food groups.xlsx", 
+group_names <- readxl::read_excel("data_raw/Food groups.xlsx", skip = 1)
+group_foods <- readxl::read_excel("data_raw/Food groups.xlsx", 
                                   sheet = "Report", skip = 3)
 
 # group names

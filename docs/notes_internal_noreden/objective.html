@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>NorEden</title>
+<title>NorEden – objective</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -23,21 +23,22 @@ ul.task-list li input[type="checkbox"] {
 </style>
 
 
-<script src="site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="site_libs/quarto-nav/headroom.min.js"></script>
-<script src="site_libs/clipboard/clipboard.min.js"></script>
-<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="site_libs/quarto-search/fuse.min.js"></script>
-<script src="site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="./">
-<script src="site_libs/quarto-html/quarto.js"></script>
-<script src="site_libs/quarto-html/popper.min.js"></script>
-<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
-<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -59,18 +60,20 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="../styles.css">
 </head>
 
-<body class="nav-fixed fullcontent">
+<body class="nav-fixed">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
     <nav class="navbar navbar-expand-lg navbar-dark ">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container">
-    <a class="navbar-brand" href="./index.html">
+    <a class="navbar-brand" href="../index.html">
     <span class="navbar-title">NorEden</span>
     </a>
   </div>
@@ -81,19 +84,19 @@ ul.task-list li input[type="checkbox"] {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link active" href="./index.html" rel="" target="" aria-current="page">
+    <a class="nav-link" href="../index.html" rel="" target="">
  <span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./noreden/index.html" rel="" target="">
+    <a class="nav-link" href="../noreden/index.html" rel="" target="">
  <span class="menu-text">Noreden</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./norkost/index.html" rel="" target="">
+    <a class="nav-link" href="../norkost/index.html" rel="" target="">
  <span class="menu-text">Norkost</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./about.html" rel="" target="">
+    <a class="nav-link" href="../about.html" rel="" target="">
  <span class="menu-text">About</span></a>
   </li>  
 </ul>
@@ -107,36 +110,188 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#food-groups" id="toc-food-groups" class="nav-link active" data-scroll-target="#food-groups">Food groups</a>
+  <ul class="collapse">
+  <li><a href="#objective" id="toc-objective" class="nav-link" data-scroll-target="#objective">Objective</a></li>
+  <li><a href="#contraints-5-categories" id="toc-contraints-5-categories" class="nav-link" data-scroll-target="#contraints-5-categories">Contraints, 5 categories</a></li>
+  </ul></li>
+  <li><a href="#formulation-qp" id="toc-formulation-qp" class="nav-link" data-scroll-target="#formulation-qp">Formulation (QP)</a>
+  <ul class="collapse">
+  <li><a href="#minimize" id="toc-minimize" class="nav-link" data-scroll-target="#minimize">minimize</a></li>
+  <li><a href="#subject-to" id="toc-subject-to" class="nav-link" data-scroll-target="#subject-to">subject to</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 
 
-<div class="quarto-about-trestles">
-  <div class="about-entity">
-<header id="title-block-header" class="quarto-title-block default">
-<div class="quarto-title">
-<h1 class="title">NorEden</h1>
-</div>
-<div class="quarto-title-meta">
-  </div>
-</header>
-    <div class="about-links">
-  <a href="https://github.com/andreaczhang/noreden_dev" class="about-link" rel="" target="">
-    <i class="bi bi-github"></i>
-     <span class="about-link-text">Github</span>
-  </a>
-</div>
-  </div>
-  <div class="about-contents"><div id="hero-heading">
-<p>Welcome. This is the development documentation website for NorEden Project.</p>
-</div></div>
-</div>
+<p>energy composition</p>
+<ul>
+<li>energy</li>
+<li>macronutrients</li>
+</ul>
+<p>epi</p>
+<ul>
+<li>follow fbdg guideline (except red meat recommendation)</li>
+<li>fruit, portions of low fat, fish, whole grain products</li>
+</ul>
+<p>Acceptability</p>
+<ul>
+<li>in terms of diet weight, within common range (e.g.&nbsp;not 5 apples a day)</li>
+</ul>
+<p>cost</p>
+<section id="food-groups" class="level2">
+<h2 class="anchored" data-anchor-id="food-groups">Food groups</h2>
+<table class="table">
+<thead>
+<tr class="header">
+<th>Food groups</th>
+<th>Energy</th>
+<th>Protein</th>
+<th>Fat</th>
+<th>Carb</th>
+<th>GHGE</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Bread</td>
+<td>10.6956</td>
+<td>0.0912</td>
+<td>0.0302</td>
+<td>0.4413</td>
+<td>0.0011</td>
+</tr>
+<tr class="even">
+<td>Vegetables</td>
+<td>1.5653</td>
+<td>0.0149</td>
+<td>0.0084</td>
+<td>0.0498</td>
+<td>0.0010</td>
+</tr>
+<tr class="odd">
+<td>Fruit, berries</td>
+<td>2.7289</td>
+<td>0.0076</td>
+<td>0.0041</td>
+<td>0.1341</td>
+<td>0.0007</td>
+</tr>
+<tr class="even">
+<td>Meat</td>
+<td>7.7432</td>
+<td>0.1800</td>
+<td>0.1211</td>
+<td>0.0113</td>
+<td>0.0110</td>
+</tr>
+<tr class="odd">
+<td>Fish</td>
+<td>6.0863</td>
+<td>0.1698</td>
+<td>0.0748</td>
+<td>0.0245</td>
+<td>0.0031</td>
+</tr>
+<tr class="even">
+<td>Milk, yogurt</td>
+<td>1.9797</td>
+<td>0.0359</td>
+<td>0.0111</td>
+<td>0.0559</td>
+<td>0.0014</td>
+</tr>
+</tbody>
+</table>
+<section id="objective" class="level3">
+<h3 class="anchored" data-anchor-id="objective">Objective</h3>
+<p>minimize deviation from current diet</p>
+<p>(x1 - 175.4)^2 +</p>
+<p>(x2 - 154.6)^2 +</p>
+<p>(x3 - 171.5)^2 +</p>
+<p>(x4 - 151.1)^2 +</p>
+<p>(x5 - 69.5)^2 +</p>
+<p>(x6 - 306.1)^2</p>
+</section>
+<section id="contraints-5-categories" class="level3">
+<h3 class="anchored" data-anchor-id="contraints-5-categories">Contraints, 5 categories</h3>
+<p>(intake g 3681.2 )</p>
+<p>Energy kj 9314</p>
+<p>protein g 97.7</p>
+<p>fat g 86.3</p>
+<p>carbs g 235.1</p>
+<p>GHGE &lt;= 4.7</p>
+<table class="table">
+<thead>
+<tr class="header">
+<th>Constraint</th>
+<th>Energy</th>
+<th>Protein</th>
+<th>Fat</th>
+<th>Carb</th>
+<th>GHGE</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Lower</td>
+<td>9000</td>
+<td>55</td>
+<td>61.8</td>
+<td>250</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td>Upper</td>
+<td>10000</td>
+<td>111.5</td>
+<td>98.8</td>
+<td>334.6</td>
+<td>4.7</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="formulation-qp" class="level1">
+<h1>Formulation (QP)</h1>
+<section id="minimize" class="level3">
+<h3 class="anchored" data-anchor-id="minimize">minimize</h3>
+<p>$(x_1 - 175.4)^2 + (x_2 - 154.6)^2 + … $</p>
+<p>in total 25 food groups</p>
+</section>
+<section id="subject-to" class="level3">
+<h3 class="anchored" data-anchor-id="subject-to">subject to</h3>
+<p>energy</p>
+<p><span class="math inline">\(e_1 x_1 + e_2 x_2 + ... e_{25}x_{25} &gt;9000\)</span></p>
+<p><span class="math inline">\(e_1 x_1 + e_2 x_2 + ... e_{25}x_{25} &lt;10000\)</span></p>
+<p>protein</p>
+<p><span class="math inline">\(p_1 x_1 + p_2 x_2 + ... p_{25}x_{25} &gt;55\)</span></p>
+<p><span class="math inline">\(p_1 x_1 + p_2 x_2 + ... p_{25}x_{25} &lt;111.5\)</span></p>
+<p>fat</p>
+<p><span class="math inline">\(f_1 x_1 + f_2 x_2 + ... f_{25}x_{25} &gt;61.8\)</span></p>
+<p><span class="math inline">\(f_1 x_1 + f_2 x_2 + ... f_{25}x_{25} &lt;98.8\)</span></p>
+<p>carb</p>
+<p><span class="math inline">\(c_1 x_1 + c_2 x_2 + ... c_{25}x_{25} &gt;250\)</span></p>
+<p><span class="math inline">\(c_1 x_1 + c_2 x_2 + ... c_{25}x_{25} &lt;334.6\)</span></p>
+<p>ghge</p>
+<p><span class="math inline">\(g_1 x_1 + g_2 x_2 + ... g_{25}x_{25} &gt;0\)</span></p>
+<p><span class="math inline">\(g_1 x_1 + g_2 x_2 + ... g_{25}x_{25} &lt;4.7\)</span></p>
+<p>and non negativity</p>
+<p>$x_1, …, x_{25}&gt;=0 $</p>
 
 
-
-
+</section>
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -159,6 +314,13 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }
   }
   toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
   const isCodeAnnotation = (el) => {
     for (const clz of el.classList) {
       if (clz.startsWith('code-annotation-')) {                     

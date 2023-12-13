@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>NorEden</title>
+<title>NorEden - Documentation</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -23,21 +23,24 @@ ul.task-list li input[type="checkbox"] {
 </style>
 
 
-<script src="site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="site_libs/quarto-nav/headroom.min.js"></script>
-<script src="site_libs/clipboard/clipboard.min.js"></script>
-<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="site_libs/quarto-search/fuse.min.js"></script>
-<script src="site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="./">
-<script src="site_libs/quarto-html/quarto.js"></script>
-<script src="site_libs/quarto-html/popper.min.js"></script>
-<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
-<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-listing/list.min.js"></script>
+<script src="../site_libs/quarto-listing/quarto-listing.js"></script>
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -58,19 +61,50 @@ ul.task-list li input[type="checkbox"] {
     "search-label": "Search"
   }
 }</script>
+<script>
 
+  window.document.addEventListener("DOMContentLoaded", function (_event) {
+    const listingTargetEl = window.document.querySelector('#listing-docs .list');
+    if (!listingTargetEl) {
+      // No listing discovered, do not attach.
+      return; 
+    }
 
-<link rel="stylesheet" href="styles.css">
+    const options = {
+      valueNames: ['listing-title',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-title-sort'] }],
+      
+      searchColumns: ["listing-title","listing-author"],
+    };
+
+    window['quarto-listings'] = window['quarto-listings'] || {};
+    window['quarto-listings']['listing-docs'] = new List('listing-docs', options);
+
+    if (window['quarto-listing-loaded']) {
+      window['quarto-listing-loaded']();
+    }
+  });
+
+  window.addEventListener('hashchange',() => {
+    if (window['quarto-listing-loaded']) {
+      window['quarto-listing-loaded']();
+    }
+  })
+  </script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="../styles.css">
 </head>
 
-<body class="nav-fixed fullcontent">
+<body class="nav-fixed">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
     <nav class="navbar navbar-expand-lg navbar-dark ">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container">
-    <a class="navbar-brand" href="./index.html">
+    <a class="navbar-brand" href="../index.html">
     <span class="navbar-title">NorEden</span>
     </a>
   </div>
@@ -81,19 +115,19 @@ ul.task-list li input[type="checkbox"] {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link active" href="./index.html" rel="" target="" aria-current="page">
+    <a class="nav-link" href="../index.html" rel="" target="">
  <span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./noreden/index.html" rel="" target="">
+    <a class="nav-link active" href="../noreden/index.html" rel="" target="" aria-current="page">
  <span class="menu-text">Noreden</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./norkost/index.html" rel="" target="">
+    <a class="nav-link" href="../norkost/index.html" rel="" target="">
  <span class="menu-text">Norkost</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./about.html" rel="" target="">
+    <a class="nav-link" href="../about.html" rel="" target="">
  <span class="menu-text">About</span></a>
   </li>  
 </ul>
@@ -107,38 +141,97 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        
+    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(9)</span></div></div></div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-
-
-<div class="quarto-about-trestles">
-  <div class="about-entity">
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">NorEden</h1>
+<h1 class="title">Documentation</h1>
 </div>
+
+
+
 <div class="quarto-title-meta">
+
+    
+  
+    
   </div>
+  
+
 </header>
-    <div class="about-links">
-  <a href="https://github.com/andreaczhang/noreden_dev" class="about-link" rel="" target="">
-    <i class="bi bi-github"></i>
-     <span class="about-link-text">Github</span>
-  </a>
+
+<p>It is important to document while you go.</p>
+
+
+
+
+<div class="quarto-listing quarto-listing-container-table" id="listing-docs">
+
+<table class="quarto-listing-table table">
+<thead>
+<tr>
+<th>
+Title
+</th>
+</tr>
+</thead>
+<tbody class="list">
+<tr data-index="0" data-listing-file-modified-sort="1686054483724" data-listing-reading-time-sort="9" data-listing-title-sort="Part 1: Understand the current diet" data-listing-filename-sort="1_understand_data.qmd">
+<td>
+<a href="../noreden/1_understand_data.html" class="title listing-title">Part 1: Understand the current diet</a>
+</td>
+</tr>
+<tr data-index="1" data-listing-file-modified-sort="1686053407533" data-listing-reading-time-sort="2" data-listing-title-sort="Part 2: Problem definition" data-listing-filename-sort="2_define_problem.qmd">
+<td>
+<a href="../noreden/2_define_problem.html" class="title listing-title">Part 2: Problem definition</a>
+</td>
+</tr>
+<tr data-index="2" data-listing-file-modified-sort="1686045497960" data-listing-reading-time-sort="8" data-listing-title-sort="Part 3: A simple problem with 3 foods and 3 constraints" data-listing-filename-sort="3_small_demo.qmd">
+<td>
+<a href="../noreden/3_small_demo.html" class="title listing-title">Part 3: A simple problem with 3 foods and 3 constraints</a>
+</td>
+</tr>
+<tr data-index="3" data-listing-file-modified-sort="1693145360773" data-listing-reading-time-sort="10" data-listing-title-sort="Part 4: Troubleshoot part 3" data-listing-filename-sort="4_troubleshoot_3foods.qmd">
+<td>
+<a href="../noreden/4_troubleshoot_3foods.html" class="title listing-title">Part 4: Troubleshoot part 3</a>
+</td>
+</tr>
+<tr data-index="4" data-listing-file-modified-sort="1694684430861" data-listing-reading-time-sort="10" data-listing-title-sort="Part 5: 10 foods" data-listing-filename-sort="5_10foods.qmd">
+<td>
+<a href="../noreden/5_10foods.html" class="title listing-title">Part 5: 10 foods</a>
+</td>
+</tr>
+<tr data-index="5" data-listing-file-modified-sort="1700238171295" data-listing-reading-time-sort="3" data-listing-title-sort="Note on the input data" data-listing-filename-sort="6_standard_input.qmd">
+<td>
+<a href="../noreden/6_standard_input.html" class="title listing-title">Note on the input data</a>
+</td>
+</tr>
+<tr data-index="6" data-listing-file-modified-sort="1700231810639" data-listing-reading-time-sort="3" data-listing-title-sort="Flexible input with function factory" data-listing-filename-sort="7_func_factory.qmd">
+<td>
+<a href="../noreden/7_func_factory.html" class="title listing-title">Flexible input with function factory</a>
+</td>
+</tr>
+<tr data-index="7" data-listing-file-modified-sort="1699115576656" data-listing-reading-time-sort="1" data-listing-title-sort="Literature review and article planning" data-listing-filename-sort="x_litreview.qmd">
+<td>
+<a href="../noreden/x_litreview.html" class="title listing-title">Literature review and article planning</a>
+</td>
+</tr>
+<tr data-index="8" data-listing-file-modified-sort="1699182497991" data-listing-reading-time-sort="1" data-listing-title-sort="Package development log" data-listing-filename-sort="x_pkgdev_log.qmd">
+<td>
+<a href="../noreden/x_pkgdev_log.html" class="title listing-title">Package development log</a>
+</td>
+</tr>
+</tbody>
+
+</table>
+<div class="listing-no-matching d-none">
+No matching items
 </div>
-  </div>
-  <div class="about-contents"><div id="hero-heading">
-<p>Welcome. This is the development documentation website for NorEden Project.</p>
-</div></div>
-</div>
-
-
-
-
-
-</main> <!-- /main -->
+</div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
@@ -159,6 +252,13 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }
   }
   toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
   const isCodeAnnotation = (el) => {
     for (const clz of el.classList) {
       if (clz.startsWith('code-annotation-')) {                     

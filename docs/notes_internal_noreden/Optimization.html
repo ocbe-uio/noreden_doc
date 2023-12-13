@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>NorEden</title>
+<title>NorEden – optimization</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -23,21 +23,22 @@ ul.task-list li input[type="checkbox"] {
 </style>
 
 
-<script src="site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="site_libs/quarto-nav/headroom.min.js"></script>
-<script src="site_libs/clipboard/clipboard.min.js"></script>
-<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="site_libs/quarto-search/fuse.min.js"></script>
-<script src="site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="./">
-<script src="site_libs/quarto-html/quarto.js"></script>
-<script src="site_libs/quarto-html/popper.min.js"></script>
-<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
-<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -60,17 +61,17 @@ ul.task-list li input[type="checkbox"] {
 }</script>
 
 
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="../styles.css">
 </head>
 
-<body class="nav-fixed fullcontent">
+<body class="nav-fixed">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
     <nav class="navbar navbar-expand-lg navbar-dark ">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container">
-    <a class="navbar-brand" href="./index.html">
+    <a class="navbar-brand" href="../index.html">
     <span class="navbar-title">NorEden</span>
     </a>
   </div>
@@ -81,19 +82,19 @@ ul.task-list li input[type="checkbox"] {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link active" href="./index.html" rel="" target="" aria-current="page">
+    <a class="nav-link" href="../index.html" rel="" target="">
  <span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./noreden/index.html" rel="" target="">
+    <a class="nav-link" href="../noreden/index.html" rel="" target="">
  <span class="menu-text">Noreden</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./norkost/index.html" rel="" target="">
+    <a class="nav-link" href="../norkost/index.html" rel="" target="">
  <span class="menu-text">Norkost</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./about.html" rel="" target="">
+    <a class="nav-link" href="../about.html" rel="" target="">
  <span class="menu-text">About</span></a>
   </li>  
 </ul>
@@ -107,36 +108,75 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#linear-programming-lp" id="toc-linear-programming-lp" class="nav-link active" data-scroll-target="#linear-programming-lp">Linear programming LP</a></li>
+  <li><a href="#quadratic-programming" id="toc-quadratic-programming" class="nav-link" data-scroll-target="#quadratic-programming">Quadratic programming</a></li>
+  <li><a href="#nonlinear-optimizaion-more-general-than-qp" id="toc-nonlinear-optimizaion-more-general-than-qp" class="nav-link" data-scroll-target="#nonlinear-optimizaion-more-general-than-qp">Nonlinear optimizaion (more general than QP)</a></li>
+  <li><a href="#option-1-constoptim" id="toc-option-1-constoptim" class="nav-link" data-scroll-target="#option-1-constoptim">Option 1: constOptim</a></li>
+  <li><a href="#option-2-nloptr" id="toc-option-2-nloptr" class="nav-link" data-scroll-target="#option-2-nloptr">Option 2: nloptr</a></li>
+  <li><a href="#option-3-quadprog" id="toc-option-3-quadprog" class="nav-link" data-scroll-target="#option-3-quadprog">Option 3: quadprog</a></li>
+  </ul>
+</nav>
+    </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 
 
-<div class="quarto-about-trestles">
-  <div class="about-entity">
-<header id="title-block-header" class="quarto-title-block default">
-<div class="quarto-title">
-<h1 class="title">NorEden</h1>
-</div>
-<div class="quarto-title-meta">
-  </div>
-</header>
-    <div class="about-links">
-  <a href="https://github.com/andreaczhang/noreden_dev" class="about-link" rel="" target="">
-    <i class="bi bi-github"></i>
-     <span class="about-link-text">Github</span>
-  </a>
-</div>
-  </div>
-  <div class="about-contents"><div id="hero-heading">
-<p>Welcome. This is the development documentation website for NorEden Project.</p>
-</div></div>
-</div>
+<p>https://cran.r-project.org/web/views/Optimization.html</p>
+<section id="linear-programming-lp" class="level2">
+<h2 class="anchored" data-anchor-id="linear-programming-lp">Linear programming LP</h2>
+<p>Objective linear, constraints linear equalities or inequalities</p>
+<p>maximise f(x) = cx</p>
+<p>s.t. Ax &lt;= b</p>
+<p>x&gt;= 0</p>
+</section>
+<section id="quadratic-programming" class="level2">
+<h2 class="anchored" data-anchor-id="quadratic-programming">Quadratic programming</h2>
+<p>some QP are convex, some not</p>
+<p>Constraints: linear equality or inequality</p>
+<p>minimize 1/2 x^t Q x + c^t x</p>
+<p>s.t. Ax &lt; b</p>
+</section>
+<section id="nonlinear-optimizaion-more-general-than-qp" class="level2">
+<h2 class="anchored" data-anchor-id="nonlinear-optimizaion-more-general-than-qp">Nonlinear optimizaion (more general than QP)</h2>
+<p>minimize f(x)</p>
+<p>s.t. g(x) &lt;= 0</p>
+<p>h(x) = 0</p>
+<p>xl &lt;= x &lt;= xu</p>
+<hr>
+</section>
+<section id="option-1-constoptim" class="level1">
+<h1>Option 1: constOptim</h1>
+<p>insert function</p>
+<p><code>stats::constrOptim()</code> (underneath running <code>optim</code>)</p>
+<ul>
+<li>minimize a problem <code>f</code>.</li>
+<li><code>theta</code>: starting values of length p, must be in feasible region</li>
+<li><code>f</code>, <code>grad</code>: function and gradient. gradient can be NULL</li>
+<li><code>ui</code>: constraint matrix, k by p</li>
+<li><code>ci</code>: constraint vector, length k</li>
+</ul>
+<p>feasible region defined by <code>ui %*% theta - ci &gt;=0</code></p>
+<p>objective function f should retutrn a scalar result</p>
+</section>
+<section id="option-2-nloptr" class="level1">
+<h1>Option 2: nloptr</h1>
+<p>https://cran.r-project.org/web/packages/nloptr/vignettes/nloptr.html</p>
+<p>insert function (and gradient)</p>
+<p>Need to compute the jacobian for constraints (or not?)</p>
+</section>
+<section id="option-3-quadprog" class="level1">
+<h1>Option 3: quadprog</h1>
+<p>Insert matrix instead of function, so need to convert the problem by ourselves.</p>
+<p>solves min(-d^b + 0.5 b^t D b) s.t. A^t b &gt;= b0</p>
 
 
-
-
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -159,6 +199,13 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }
   }
   toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
   const isCodeAnnotation = (el) => {
     for (const clz of el.classList) {
       if (clz.startsWith('code-annotation-')) {                     

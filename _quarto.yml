@@ -11,8 +11,11 @@ website:
       - href: index.qmd
         text: Home
 
-      - href: documentation/index.qmd
-        text: Documentation
+      - href: noreden/index.qmd
+        text: Noreden
+        
+      - href: norkost/index.qmd
+        text: Norkost
 
       - href: about.qmd
         text: About

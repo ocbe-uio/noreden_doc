@@ -8,13 +8,13 @@ library(data.table)
 # demographics
 # all foods 
 
-baseline <- read_excel("data_example/Condensed dataset NOR-Eden optimization.xlsx", 
+baseline <- read_excel("data_raw/Condensed dataset NOR-Eden optimization.xlsx", 
                         sheet = "Data N3 baseline diet")
 
-demographics <- read_excel("data_example/Condensed dataset NOR-Eden optimization.xlsx", 
+demographics <- read_excel("data_raw/Condensed dataset NOR-Eden optimization.xlsx", 
                        sheet = "Data N3 demographic variables")
 
-nut <- read_excel("data_example/Condensed dataset NOR-Eden optimization.xlsx", 
+nut <- read_excel("data_raw/Condensed dataset NOR-Eden optimization.xlsx", 
                   sheet = "Database KBS all foods nutr-ICs")
 
 # use data.table format

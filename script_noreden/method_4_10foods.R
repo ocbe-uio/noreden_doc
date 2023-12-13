@@ -25,7 +25,7 @@ fd
 
 
 # constraints for food (this is used in opt, for possible values to take)
-const_realistic <- read_excel("data_example/Realism constraints Rcplex 11.09.xlsx")
+const_realistic <- read_excel("data_raw/Realism constraints Rcplex 11.09.xlsx")
 const_realistic <- setDT(const_realistic)
 const_realistic
 # change colnames

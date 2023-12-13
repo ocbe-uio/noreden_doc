@@ -12,5 +12,29 @@
       "/documentation/x_litreview.html",
       "/documentation/x_pkgdev_log.html"
     ]
+  },
+  {
+    "listing": "/norkost/index.html",
+    "items": [
+      "/norkost/1_problem.html"
+    ]
+  },
+  {
+    "listing": "/norkost/1_problem.html",
+    "items": []
+  },
+  {
+    "listing": "/noreden/index.html",
+    "items": [
+      "/noreden/1_understand_data.html",
+      "/noreden/2_define_problem.html",
+      "/noreden/3_small_demo.html",
+      "/noreden/4_troubleshoot_3foods.html",
+      "/noreden/5_10foods.html",
+      "/noreden/6_standard_input.html",
+      "/noreden/7_func_factory.html",
+      "/noreden/x_litreview.html",
+      "/noreden/x_pkgdev_log.html"
+    ]
   }
 ]

@@ -5,7 +5,7 @@ library(readxl)
 library(dplyr)
 # load 28 foods
 # this is not part of the function
-input <- read_excel("data_example/input_0915.xlsx")
+input <- read_excel("data_raw/input_0915.xlsx")
 input <- setDT(input)
 input
 
