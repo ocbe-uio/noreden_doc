@@ -3,7 +3,7 @@
 .RData
 .Ruserdata
 
-data_raw/
+
 data_processed/
 
 /.quarto/

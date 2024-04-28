@@ -1,8 +1,8 @@
 # initial exploration of norkost data
 library(data.table)
 
-norkost1 <- read_excel("data_raw/norkost/norkost1.xlsx")
-norkost2 <- read_excel("data_raw/norkost/norkost2.xlsx")
+norkost1 <- readxl::read_excel("~/Documents/Data/uio_norkost/norkost1.xlsx")
+norkost2 <- readxl::read_excel("~/Documents/Data/uio_norkost/norkost2.xlsx")
 
 norkost1 <- data.table(norkost1)
 norkost2 <- data.table(norkost2)
@@ -115,3 +115,56 @@ freq_edu_weekday <- table(norkost1$Utdanning_nas_stat_høy_lav,
                           norkost1$Ukedag_numerisk)
 
 freq_edu_weekday/nrow(norkost1)
+
+
+
+
+
+# weighting ----
+
+library(dplyr)
+
+# Set seed for reproducibility
+set.seed(123)
+
+# Simulate survey data with age groups (18-30, 31-50, 51-60)
+n <- 100  # Number of individuals in survey
+age_groups <- sample(c("18-30", "31-50", "51-60"), n, replace = TRUE)
+
+# Simulate population proportions
+pi_1 <- 0.35  # Proportion of population aged 18-30
+pi_2 <- 0.50  # Proportion of population aged 31-50
+pi_3 <- 0.15  # Proportion of population aged 51-60
+
+# Calculate sample proportions from survey data
+sample_proportions <- table(age_groups) / n
+# 0.33, 0.32, 0.35
+# 31-50 underrepresented, while 51-60 over
+
+
+# Calculate inverse probability weights based on age groups
+inverse_weights <- case_when(
+  age_groups == "18-30" ~ 1 / pi_1,
+  age_groups == "31-50" ~ 1 / pi_2,
+  age_groups == "51-60" ~ 1 / pi_3
+)
+
+
+# weighted average
+
+df <- data.frame(
+  v = c(100, 100, 200), 
+  w = c(1, 1, 1), 
+  popw = c(0.35, 0.5, 0.15), 
+  invw = c(1/0.35, 1/0.5, 1/0.15)
+)
+
+df
+
+crude_mean <- mean(df$v)
+?mean
+
+weighted.mean(df$v, w = df$w)
+weighted.mean(df$v, w = df$popw)
+weighted.mean(df$v, w = df$invw)
+(sum(df$v * 1/df$popw))/(sum(1/df$popw))
