@@ -103,8 +103,10 @@ summary_table
 
 # can extract info easily
 s1 <- summary_table[sexc == 'total' & label == 'keep_zero'] 
-s1[order(pzero)]
+s1[order(pzero, Mean)]
 
+s1zero <- summary_table[sexc == 'total' & label == 'rm_zero'] 
+s1zero[order(Mean)]
 
 
 
