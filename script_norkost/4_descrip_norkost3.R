@@ -52,10 +52,11 @@ d[sex == 2, sexc := 'f']
 # use the function 
 
 colnames(d)
+head(d)
+
 
 intake_summary(dt = d, foodname = 'BROD')
 intake_summary(dt = d, foodname = 'POTET')
-
 
 intake_summary(dt = d, foodname = 'TE')
 
@@ -138,6 +139,56 @@ vis_point(data = d, foodname = 'OST')
 vis_point(data = d, foodname = 'KJOTT')
 
 
+
+
+# SPADE: take out variables ----
+
+
+head(d)
+
+dtest <- d[, .(
+  Nr, age, record, Ukedag, sex, sexc, 
+  GRSAK, FRUKTB, KJOTT, FISK
+)]
+
+
+dtest
+# write.csv(dtest, file = '~/Documents/Data/uio_norkost/food_test_spade.csv')
+
+
+# meat
+# pzero is 0.12, not so sparse
+# might treat as frequently consumed food
+intake_summary(dt = dtest, foodname = 'KJOTT') # meat
+vis_distribution(data = dtest, foodname = 'KJOTT')
+vis_point(data = dtest, foodname = 'KJOTT')
+
+
+
+# fish
+# pzero is 0.55
+# mean 67 (incl zero), max 1443, q90 225
+# mean 150 (excl zero), median 120, q90 320
+intake_summary(dt = dtest, foodname = 'FISK') # fish
+vis_distribution(data = dtest, foodname = 'FISK')
+vis_point(data = dtest, foodname = 'FISK')
+
+
+# vegetables
+# pzero 0.09
+# mean 154, median 131, max 1284, p90 315
+intake_summary(dt = dtest, foodname = 'GRSAK') # veg
+vis_distribution(data = dtest, foodname = 'GRSAK')
+vis_point(data = dtest, foodname = 'GRSAK')
+
+# fruit
+# pzero 0.21
+intake_summary(dt = dtest, foodname = 'FRUKTB') # fruit
+vis_distribution(data = dtest, foodname = 'FRUKTB')
+vis_point(data = dtest, foodname = 'FRUKTB')
+
+
+# nut?
 
 
 
