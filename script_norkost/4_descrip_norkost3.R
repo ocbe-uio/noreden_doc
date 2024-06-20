@@ -123,9 +123,13 @@ vis_distribution(data = d, foodname = 'BROD')
 vis_distribution(data = d, foodname = 'TE')
 vis_distribution(data = d, foodname = 'EGG')
 
+# above 300, above 450
 vis_distribution(data = d, foodname = 'FISK')
 vis_distribution(data = d, foodname = 'OST')
+
+# above 350
 vis_distribution(data = d, foodname = 'KJOTT')
+
 
 # scatter
 
