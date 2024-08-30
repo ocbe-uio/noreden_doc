@@ -1,4 +1,4 @@
-# norkost 4 data
+# norkost 4 data (foods)
 library(readxl)
 library(data.table)
 library(ggplot2)
