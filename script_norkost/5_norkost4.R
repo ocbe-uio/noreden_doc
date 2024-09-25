@@ -3,12 +3,52 @@ library(readxl)
 library(data.table)
 library(ggplot2)
 
-norkost4 <- read_excel("~/Documents/Data/uio_norkost/norkost4_0621.xlsx", sheet = "Inntak N4")
+norkost4 <- read_excel("~/Documents/Data/uio_norkost/norkost4_0621.xlsx", 
+                       sheet = "Inntak N4")
 # norkost4 <- readxl::read_excel("~/Documents/Data/uio_norkost/norkost4.xlsx")
 norkost4 <- data.table(norkost4)
 
 norkost4
 colnames(norkost4)
+
+
+
+# ________ ----
+# sep 11 ----
+# additional analysis: milk dairy, fish
+# merge into the same dataframe?
+fish_2409 <- read_excel("~/Documents/Data/uio_norkost/fish_2409.xlsx")
+
+
+# merge data
+norkost4 <- dplyr::left_join(norkost4, fish_2409)
+colnames(norkost4)
+head(norkost4)
+
+# ________ ----
+# 2024.9.25 ----
+
+meat_2409 <- read_excel("~/Documents/Data/uio_norkost/milk_meat_2409.xlsx")
+head(meat_2409)
+# drop milk
+meat_2409 <- meat_2409[, -4]
+colnames(meat_2409)[1] <- 'Nr' # need to change
+
+
+# milk use this one
+milk_2409 <- read_excel("~/Documents/Data/uio_norkost/milk_2409.xlsx")
+head(milk_2409)
+colnames(milk_2409)[2] <- 'Nr' # need to change ID to Nr
+
+
+# merge data
+norkost4 <- dplyr::left_join(norkost4, meat_2409)
+norkost4 <- dplyr::left_join(norkost4, milk_2409)
+
+colnames(norkost4)
+
+
+
 
 # rename variables
 
@@ -23,11 +63,24 @@ setnames(norkost4, old = 'Sum_fettred_melk_yoghurt', new = 'milk_dairy')
 setnames(norkost4, old = 'Usaltede_nøtter', new = 'nuts_nosalt')
 setnames(norkost4, old = 'Alle_nøtter', new = 'nuts_all')
 
+# two new: 9.11
+setnames(norkost4, old = 'All fisk vektendret', new = 'fish_2409')
+setnames(norkost4, old = 'Porsjoner meieri', new = 'dairy_portion')
+
+
+# two new: 9.25
+setnames(norkost4, old = 'Meieriporsjoner', new = 'dairy_240925')
+setnames(norkost4, old = 'Bearbeidet kjøtt', new = 'procmeat_240925')
+
+
+
 # demographics
 setnames(norkost4, old = 'Løpedag', new = 'round')
 setnames(norkost4, old = 'Kjønn', new = 'sex')
 setnames(norkost4, old = 'Alder_v_første_kont', new = 'age')
 # setnames(norkost4, old = 'ID', new = 'Nr') # to be consistent
+
+class(norkost4)
 
 # set sex: 1 male 2 female
 norkost4[sex == 1, sexc := 'male']
@@ -170,8 +223,19 @@ plt
 vis_point(data = norkost4, foodname = 'milk_dairy')
 
 
-# save 
+# ______ ----
+# save ----
 write.csv(norkost4, file = '~/Documents/Data/uio_norkost/norkost4_spade.csv')
+
+norkost4
+
+
+
+
+
+
+
+
 
 
 

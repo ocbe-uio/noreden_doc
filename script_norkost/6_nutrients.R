@@ -51,6 +51,34 @@ write.csv(dn, file = '~/Documents/Data/uio_norkost/nutrient_nosup_spade.csv')
 write.csv(dw, file = '~/Documents/Data/uio_norkost/nutrient_wsup_spade.csv')
 
 
+# _______ -----
+# 2024.9.25 ----
+# analysis for four new variables
+
+d <- read_excel("~/Documents/Data/uio_norkost/nutrients_2409.xlsx")
+head(d)
+
+d <- data.table(d)
+colnames(d)
+
+setnames(d, old = 'Løpedag', new = 'round')
+setnames(d, old = 'Kjønn', new = 'sex')
+setnames(d, old = 'Tilsatt sukker med tilskudd', new = 'tilsatt_sukker_med_tilskudd')
+setnames(d, old = 'Fritt sukker med tilskudd', new = 'fritt_sukker_med_tilskudd')
+setnames(d, old = 'Tilsatt sukker uten tilskudd', new = 'tilsatt_sukker_uten_tilskudd')
+setnames(d, old = 'Fritt sukker uten tilskudd', new = 'fritt_sukker_uten_tilskudd')
+setnames(d, old = 'Kobber med tilskudd', new = 'kobber_med_tilskudd')
+
+
+write.csv(d, file = '~/Documents/Data/uio_norkost/nutrient_2409.csv')
+
+
+
+
+
+
+
+
 
 
 

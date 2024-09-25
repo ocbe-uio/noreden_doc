@@ -150,3 +150,21 @@ More analysis
 
 
 
+## 2024.8.30
+
+- investigate the sex label difference: do the results differ much if use male label
+
+
+
+## 2024.9.20
+
+average for foods (spade adjusted mean) - remove milk 
+
+men women both
+
+dairy portion has new data - also new threshold
+
+processed meat - spade adjusted mean 
+
+Nutrients, use new data, keep the same analysis
+
