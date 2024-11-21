@@ -1,0 +1,113 @@
+                           nutrient     new_diet const_lwr const_upr        is_ok relative_dev
+ 1:                     Energy (MJ) 1.353071e+01     10.00 1.000e+01 beyond upper        0.353
+ 2:               Protein, g, upper 1.296743e+02     59.90 1.198e+02 beyond upper        0.082
+ 3:               Protein, g, lower 1.296743e+02     59.90 1.198e+02 beyond upper        0.082
+ 4:         Carbohydrates, g, upper 3.649119e+02    269.50 3.593e+02 beyond upper        0.016
+ 5:         Carbohydrates, g, lower 3.649119e+02    269.50 3.593e+02 beyond upper        0.016
+ 6:                  Added sugar, g 3.338896e+01      0.00 5.990e+01          Yes        0.000
+ 7:                Dietary fiber, g 5.233217e+01     30.00 1.000e+04          Yes        0.000
+ 8:                   Fat, g, upper 1.251818e+02     66.30 1.061e+02 beyond upper        0.180
+ 9:                   Fat, g, lower 1.251818e+02     66.30 1.061e+02 beyond upper        0.180
+10:        Saturated fatty acids, g 3.578503e+01      0.00 2.650e+01 beyond upper        0.350
+11:            Trans fatty acids, g 7.614509e-01      0.00 2.650e+00          Yes        0.000
+12:              n-3 fatty acids, g 4.871356e+00      2.65 1.000e+04          Yes        0.000
+13:                          ALA, g 3.682867e+00      1.30 1.000e+04          Yes        0.000
+14:                  MUFA, g, upper 5.259145e+01     26.50 5.305e+01          Yes        0.000
+15:                  MUFA, g, lower 5.259145e+01     26.50 5.305e+01          Yes        0.000
+16:                  PUFA, g, upper 2.715518e+01     13.30 2.650e+01 beyond upper        0.025
+17:                  PUFA, g, lower 2.715518e+01     13.30 2.650e+01 beyond upper        0.025
+18:                Vitamin A, RE µg 9.560961e+02    750.00 3.000e+03          Yes        0.000
+19:              Vitamin E, alfa-TE 2.595676e+01     10.50 3.000e+02          Yes        0.000
+20:        Thiamin (Vitamin B1), mg 2.448024e+00      1.00 1.000e+04          Yes        0.000
+21:     Riboflavin (Vitamin B2), mg 2.459360e+00      1.60 1.000e+04          Yes        0.000
+22:                      Niacin, NE 2.805957e+01     16.00 1.000e+04          Yes        0.000
+23:                  Vitamin B6, mg 2.438072e+00      1.70 1.200e+01          Yes        0.000
+24:                      Folate, µg 4.485112e+02    330.00 1.000e+04          Yes        0.000
+25:                 Vitamin B12, µg 8.051454e+00      4.00 1.000e+04          Yes        0.000
+26:                   Vitamin C, mg 1.479685e+02    102.50 1.000e+04          Yes        0.000
+27:                   Vitamin D, µg 9.846891e+00      7.50 1.000e+02          Yes        0.000
+28:                      Sodium, mg 3.370786e+03   1500.00 2.300e+03 beyond upper        0.466
+29:                   Potassium, mg 6.256744e+03      3.50 1.000e+04          Yes        0.000
+30:                     Calcium, mg 1.188898e+03    967.00 2.500e+03          Yes        0.000
+31:                   Magnesium, mg 6.933350e+02    325.00 1.000e+04          Yes        0.000
+32:                  Phosphorus, mg 2.670600e+03    520.00 3.000e+03          Yes        0.000
+33:                        Iron, mg 1.786597e+01     10.80 6.000e+01          Yes        0.000
+34:                        Zinc, mg 1.451122e+01     11.20 2.500e+01          Yes        0.000
+35:                      Iodine, µg 2.350641e+02    150.00 9.000e+02          Yes        0.000
+36:                    Selenium, µg 8.328558e+01     82.50 2.550e+02          Yes        0.000
+37:                      Copper, µg 2.689734e+00      0.90 5.000e+00          Yes        0.000
+38:                      Alcohol, g 0.000000e+00      0.00 0.000e+00          Yes        0.000
+39:                 GHGE, kg CO2-eq 5.373112e+00      0.00 3.350e+00 beyond upper        0.604
+40:                      FE, g P-eq 1.246236e-03      0.00 1.150e-03 beyond upper        0.084
+41:                      ME, g N-eq 6.952380e-03      0.00 4.900e-03 beyond upper        0.419
+42:                    TA, g SO2-eq 5.725817e-02      0.00 5.500e-02 beyond upper        0.041
+43:                          WU, m2 6.808608e-01      0.00 5.900e-01 beyond upper        0.154
+44:                         LU, m3a 6.625156e+00      0.00 5.820e+00 beyond upper        0.138
+45:                 Whole grains, g 1.589894e+02     90.00 0.000e+00 beyond upper          Inf
+46:                  Total fruit, g 2.680000e+02    250.00 1.000e+04          Yes        0.000
+47:             Total vegetables, g 2.654000e+02    250.00 1.000e+04          Yes        0.000
+48:         Total dairy, minimum, g 4.736000e+02    350.00 5.000e+02          Yes        0.000
+49:         Total dairy, maximum, g 4.736000e+02    350.00 5.000e+02          Yes        0.000
+50:          Total fish, minimum, g 9.810000e+01     52.00 7.800e+01 beyond upper        0.258
+51:          Total fish, maximum, g 9.810000e+01     52.00 7.800e+01 beyond upper        0.258
+52:      Total red meat, maximum, g 1.059000e+02      0.00 7.250e+01 beyond upper        0.461
+53: Total ruminant meat, minimum, g 7.095000e+01     62.10 7.250e+01          Yes        0.000
+                           nutrient     new_diet const_lwr const_upr        is_ok relative_dev
+                     Foodgroup Baseline    New Percent_change Lower_limit Upper_limit
+1                   Bread fine     81.2   25.8         -0.682        8.12       232.9
+2                 Bread coarse    110.6  228.9          1.070       11.06       275.5
+3                 Flour grains      3.6   16.6          3.611        0.36        19.6
+4                         Rice      9.4    2.8         -0.702        0.94        50.6
+5                        Pasta     10.6   64.9          5.123        1.06        58.7
+6            Breakfast cereals     16.4   98.0          4.976        1.64        94.4
+7       Cakes cookies crackers     41.2   26.9         -0.347        4.12       156.9
+8          Potatoes raw boiled     71.8  218.9          2.049        7.18       225.5
+9               Potatoes fried      3.8   25.1          5.605        0.38        37.8
+10                     Legumes      4.2   13.5          2.214        0.42        30.7
+11       Vegetables dark green     15.8   56.1          2.551        1.58        80.4
+12       Vegetables red orange     75.6  138.1          0.827        7.56       197.6
+13            Vegetables other     76.8   28.9         -0.624        7.68       213.1
+14            Vegetables salad     12.5   42.3          2.384        1.25        58.8
+15                        Nuts      3.9   38.7          8.923       20.00        30.0
+16                       Seeds      0.5    9.0         17.000        0.05         1.0
+17                       Juice    120.2   17.3         -0.856       12.02       100.0
+18                     Berries     18.4   54.5          1.962        1.84        80.9
+19                 Pomme stone     80.6   33.9         -0.579        8.06       307.3
+20                 Fruit other     97.9  166.9          0.705        9.79       343.1
+21                 Dried fruit      2.8   12.7          3.536        0.28        19.1
+22      Meat dairy substitutes      3.7   57.3         14.486        0.37         1.0
+23   Ruminant meat unprocessed     22.1   40.5          0.833        2.21       146.1
+24     Ruminant meat processed     23.5    5.9         -0.749        2.35       132.0
+25            Pork unprocessed     20.5    4.8         -0.766        2.05       133.0
+26              Pork processed     22.5    5.6         -0.751        2.25        82.0
+27    Red meat mixed processed     33.0   49.1          0.488        3.30       144.5
+28      White meat unprocessed     32.9    4.3         -0.869        3.29       167.7
+29        White meat processed      5.5    3.9         -0.291        0.55        33.3
+30      Other meat unprocessed      3.6    4.7          0.306        0.36         1.0
+31        Other meat processed      1.2    0.2         -0.833        0.12         1.0
+32                   Fish lean     46.2   51.2          0.108        4.62       238.9
+33                  Fish fatty     27.9   44.6          0.599       34.70       138.0
+34             Shellfish other      5.7    2.3         -0.596        0.57        40.8
+35                        Eggs     27.4   76.4          1.788        2.74        55.0
+36                Milk low fat    253.6  313.0          0.234       25.36       831.9
+37               Milk high fat     24.8   95.2          2.839        2.48       170.7
+38             Dairy fermented     49.8   16.0         -0.679        4.98       246.7
+39                 Dairy other     24.7   47.2          0.911        2.47        99.3
+40                Cheese fresh      5.6    2.2         -0.607        0.56        34.9
+41                Cheese brown      7.0    3.1         -0.557        0.70        33.2
+42                Cheese other     35.6   12.1         -0.660        3.56        99.5
+43            Fats plant based     16.0   44.2          1.763       25.00        43.3
+44           Fats animal based     15.5    3.5         -0.774        1.55        51.0
+45                       Water   1403.8 1403.8          0.000     1403.80      1403.8
+46                  Coffee tea    832.6  749.5         -0.100      713.80       832.6
+47 Soft drinks sugar sweetened    125.6   36.9         -0.706       12.56       599.1
+48      Soft drinks sugar free    135.7   86.3         -0.364       13.57       818.1
+49         Alcoholic beverages    135.3    0.0         -1.000        0.00       674.6
+50                Sugar sweets     17.8    5.4         -0.697        1.78        66.0
+51                      Snacks      4.9    3.7         -0.245        0.49        36.5
+52                      Spices      1.0    1.0          0.000        1.00         1.0
+53        Sauces miscellaneous     27.6    7.1         -0.743        2.76       101.1
+[1] 739.498
+[1] 14.25121
+[1] -12.91118
+[1] -27.79126

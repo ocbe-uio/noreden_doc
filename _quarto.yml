@@ -14,11 +14,8 @@ website:
       - href: noreden/index.qmd
         text: Noreden
         
-      - href: norkost/index.qmd
-        text: Norkost
-
-      - href: about.qmd
-        text: About
+#      - href: about.qmd
+#        text: About
 
 format:
   html:
