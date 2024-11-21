@@ -4,21 +4,21 @@
     "href": "documentation/index.html",
     "title": "Documentation",
     "section": "",
-    "text": "It is important to document while you go.\n\n\n\n\n\n\n\n\n\nTitle\n\n\n\n\n\n\nPart 1: Understand the current diet\n\n\n\n\nPart 2: Problem definition\n\n\n\n\nPart 3: A simple problem with 3 foods and 3 constraints\n\n\n\n\nPart 4: Troubleshoot part 3\n\n\n\n\nPart 5: 10 foods\n\n\n\n\nNote on the input data\n\n\n\n\nFlexible input with function factory\n\n\n\n\nLiterature review and article planning\n\n\n\n\nPackage development log\n\n\n\n\n\nNo matching items"
+    "text": "The documentation site is undergoing big changes.\n\n\n\n\n\n\n\n\n\nTitle\n\n\n\n\n\n\nOptimization problem in Rcplex\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "index.html",
     "href": "index.html",
-    "title": "NorEden",
+    "title": "Noreden",
     "section": "",
-    "text": "Project Repository\n  \n  \n    \n     Software\n  \n\n  \n  \nWelcome. This is the development documentation website for NorEden Project."
+    "text": "Repository\n  \n  \n    \n     Software\n  \n\n  \n  \nWelcome. This is the development documentation website for Noreden Project."
   },
   {
     "objectID": "about.html",
     "href": "about.html",
-    "title": "About",
+    "title": "About Noreden",
     "section": "",
-    "text": "This is the development documentation site for NorEden Project."
+    "text": "About the project"
   },
   {
     "objectID": "documentation/define_problem.html",
@@ -37,58 +37,58 @@
   {
     "objectID": "notes_internal/resources.html",
     "href": "notes_internal/resources.html",
-    "title": "NorEden",
+    "title": "Nutrition",
     "section": "",
     "text": "Nutrition\nhttps://cran.r-project.org/web/packages/NutrienTrackeR/NutrienTrackeR.pdf\n\n\nOptimization\nhttps://cran.r-project.org/web/views/Optimization.html\nhttps://www.mlstack.cafe/interview-questions/optimisation\nhttps://www.techinterviewhandbook.org/algorithms/math/"
   },
   {
     "objectID": "notes_internal/literature.html",
     "href": "notes_internal/literature.html",
-    "title": "NorEden",
+    "title": "Cleghorn 2022",
     "section": "",
     "text": "Cleghorn 2022\nOptimise NZ versio nof EAT-lancet diet\nModel impact on population health\nConstraints\n\npopulation diet meets the nutritional recommendations\ndiet related greenhouse gas emission within boundary\ndiet cost witthin baseline cost of average diet\n\n\nDIET multi-state life-table modelling\npopulation (4.4m), modeled until deah/110 yo + sex, age, ethnicity\ndietary risk factors: red meat, processed meat, sugar beverage, sodium, low fruit, …\n9 diseases: coronary heart disease, stroke, …\n\n\n\nWalker 2021\nPuLP (python), linear optimizationn to determine the lowest possible impact diet for each scenario\nenv impact:\n\nClimate change\nbiodiversity loss\n\n\n\nNordman 2023\nOptimization targets (via QP)\n\nNutrient only\nnurient, health-based targets for food amounts\nGHGE only\nNutrient, health, GHGE\n\nCurrent GHGE: 4.37 kg CO2-eq\nmain food groups: 7 groups with smaller levels\nSub-groups: 50\nOptimized diet\n\nreduced proportion of animal based food (25% vs 43%) for energy\nmore grain and starches, lower cheese (not milk)\nmuch less discretional (junk) food and soft drinks"
   },
   {
     "objectID": "notes_internal/objective.html",
     "href": "notes_internal/objective.html",
-    "title": "NorEden",
+    "title": "Formulation (QP)",
     "section": "",
     "text": "energy composition\nepi\nAcceptability\ncost"
   },
   {
     "objectID": "notes_internal/objective.html#food-groups",
     "href": "notes_internal/objective.html#food-groups",
-    "title": "NorEden",
+    "title": "Formulation (QP)",
     "section": "Food groups",
-    "text": "Food groups\n\n\n\nFood groups\nEnergy\nProtein\nFat\nCarb\nGHGE\n\n\n\n\nBread\n10.6956\n0.0912\n0.0302\n0.4413\n0.0011\n\n\nVegetables\n1.5653\n0.0149\n0.0084\n0.0498\n0.0010\n\n\nFruit, berries\n2.7289\n0.0076\n0.0041\n0.1341\n0.0007\n\n\nMeat\n7.7432\n0.1800\n0.1211\n0.0113\n0.0110\n\n\nFish\n6.0863\n0.1698\n0.0748\n0.0245\n0.0031\n\n\nMilk, yogurt\n1.9797\n0.0359\n0.0111\n0.0559\n0.0014\n\n\n\n\nObjective\nminimize deviation from current diet\n(x1 - 175.4)^2 +\n(x2 - 154.6)^2 +\n(x3 - 171.5)^2 +\n(x4 - 151.1)^2 +\n(x5 - 69.5)^2 +\n(x6 - 306.1)^2\n\n\nContraints, 5 categories\n(intake g 3681.2 )\nEnergy kj 9314\nprotein g 97.7\nfat g 86.3\ncarbs g 235.1\nGHGE <= 4.7\n\n\n\nConstraint\nEnergy\nProtein\nFat\nCarb\nGHGE\n\n\n\n\nLower\n9000\n55\n61.8\n250\n0\n\n\nUpper\n10000\n111.5\n98.8\n334.6\n4.7"
+    "text": "Food groups\n\n\n\nFood groups\nEnergy\nProtein\nFat\nCarb\nGHGE\n\n\n\n\nBread\n10.6956\n0.0912\n0.0302\n0.4413\n0.0011\n\n\nVegetables\n1.5653\n0.0149\n0.0084\n0.0498\n0.0010\n\n\nFruit, berries\n2.7289\n0.0076\n0.0041\n0.1341\n0.0007\n\n\nMeat\n7.7432\n0.1800\n0.1211\n0.0113\n0.0110\n\n\nFish\n6.0863\n0.1698\n0.0748\n0.0245\n0.0031\n\n\nMilk, yogurt\n1.9797\n0.0359\n0.0111\n0.0559\n0.0014\n\n\n\n\nObjective\nminimize deviation from current diet\n(x1 - 175.4)^2 +\n(x2 - 154.6)^2 +\n(x3 - 171.5)^2 +\n(x4 - 151.1)^2 +\n(x5 - 69.5)^2 +\n(x6 - 306.1)^2\n\n\nContraints, 5 categories\n(intake g 3681.2 )\nEnergy kj 9314\nprotein g 97.7\nfat g 86.3\ncarbs g 235.1\nGHGE &lt;= 4.7\n\n\n\nConstraint\nEnergy\nProtein\nFat\nCarb\nGHGE\n\n\n\n\nLower\n9000\n55\n61.8\n250\n0\n\n\nUpper\n10000\n111.5\n98.8\n334.6\n4.7"
   },
   {
     "objectID": "notes_internal/Optimization.html",
     "href": "notes_internal/Optimization.html",
-    "title": "NorEden",
+    "title": "Option 1: constOptim",
     "section": "",
     "text": "https://cran.r-project.org/web/views/Optimization.html"
   },
   {
     "objectID": "notes_internal/Optimization.html#linear-programming-lp",
     "href": "notes_internal/Optimization.html#linear-programming-lp",
-    "title": "NorEden",
+    "title": "Option 1: constOptim",
     "section": "Linear programming LP",
-    "text": "Linear programming LP\nObjective linear, constraints linear equalities or inequalities\nmaximise f(x) = cx\ns.t. Ax <= b\nx>= 0"
+    "text": "Linear programming LP\nObjective linear, constraints linear equalities or inequalities\nmaximise f(x) = cx\ns.t. Ax &lt;= b\nx&gt;= 0"
   },
   {
     "objectID": "notes_internal/Optimization.html#quadratic-programming",
     "href": "notes_internal/Optimization.html#quadratic-programming",
-    "title": "NorEden",
+    "title": "Option 1: constOptim",
     "section": "Quadratic programming",
-    "text": "Quadratic programming\nsome QP are convex, some not\nConstraints: linear equality or inequality\nminimize 1/2 x^t Q x + c^t x\ns.t. Ax < b"
+    "text": "Quadratic programming\nsome QP are convex, some not\nConstraints: linear equality or inequality\nminimize 1/2 x^t Q x + c^t x\ns.t. Ax &lt; b"
   },
   {
     "objectID": "notes_internal/Optimization.html#nonlinear-optimizaion-more-general-than-qp",
     "href": "notes_internal/Optimization.html#nonlinear-optimizaion-more-general-than-qp",
-    "title": "NorEden",
+    "title": "Option 1: constOptim",
     "section": "Nonlinear optimizaion (more general than QP)",
-    "text": "Nonlinear optimizaion (more general than QP)\nminimize f(x)\ns.t. g(x) <= 0\nh(x) = 0\nxl <= x <= xu"
+    "text": "Nonlinear optimizaion (more general than QP)\nminimize f(x)\ns.t. g(x) &lt;= 0\nh(x) = 0\nxl &lt;= x &lt;= xu"
   },
   {
     "objectID": "documentation/understand_data.html",
@@ -1146,5 +1146,33 @@
     "title": "Software",
     "section": "",
     "text": "This is the documentation on the noreden software"
+  },
+  {
+    "objectID": "documentation/optimization_problem.html",
+    "href": "documentation/optimization_problem.html",
+    "title": "Optimization problem in Rcplex",
+    "section": "",
+    "text": "Resources: official Rcplex vignette, page 2.\nThe CPLEX solver aims to solve the optimisation problem:\n\\[min \\frac{1}{2} x' Q x + c'x\\] subject to\n\\[Ax \\leq b\\]\n\\[lb \\leq x \\leq ub\\]\n\n\nlibrary(tidyverse)\nlibrary(palmerpenguins)\n1penguins |&gt;\n2  mutate(\n    bill_ratio = bill_depth_mm / bill_length_mm,\n    bill_area  = bill_depth_mm * bill_length_mm\n  )\n3head(penguins)\n\n\n1\n\nTake penguins, and then,\n\n2\n\nadd new columns for the bill ratio and bill area.\n\n3\n\nshow the first 6 lines"
+  },
+  {
+    "objectID": "notes_internal/x_organise_code.html",
+    "href": "notes_internal/x_organise_code.html",
+    "title": "Notes",
+    "section": "",
+    "text": "Attaching a copy of the code with annotations. Also adding a file that includes the input files I’ve used for one of my analyses - I have copies of the same input files with some small changes made for each of the 4 diet scenarios I’ve run. Within each scenario there are 9 files that represent the different step-wise carbon footprint constraints (0%, -5%, -10%, -15%, -20%) etc. In each of these files you’ll find the code I ran for that specific iteration, along with the input data, nutrient constraints, nutrient reference values (for comparing results to), and realism constraints. Just adding these so you can see the way the data has been set up.\nOne important element in Rcplex is that the constraint matrix needs to have the same dimensions vertically and horizontally. So if there are 20 rows of nutrient constraints, there need to be 20 columns of nutrient input data, etc."
+  },
+  {
+    "objectID": "notes_internal/x_organise_code.html#objective-function",
+    "href": "notes_internal/x_organise_code.html#objective-function",
+    "title": "Notes",
+    "section": "Objective function",
+    "text": "Objective function\nobs here is the same as first column in realism\nif we have 53 food groups, 10 nutrients:\ndimension requirement:\nobjective: min 1/2 x_transpose Qmat x + c_transpose x\n\nx, x_transpose: vector, 53 by 1; 1 by 53\nQmat (diagnal matrix), 53 by 53\nc, c_transpose: 53 by 1; 1 by 53\n\ninequality constraint: Amat x &lt;= b\n\nAmat: 10 by 53\nx: 53 by 1\nb: 10 by 1\n\nconstraint on x bounds\n\nlb: 53 by 1\nub: 53 by 1"
+  },
+  {
+    "objectID": "notes_internal/x_organise_code.html#result-processing",
+    "href": "notes_internal/x_organise_code.html#result-processing",
+    "title": "Notes",
+    "section": "Result processing",
+    "text": "Result processing\n\nNutrients\ndiet\ndiet departure\nruminant meat departure\nred meat departure\ntotal meat departure"
   }
 ]

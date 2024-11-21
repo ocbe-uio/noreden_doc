@@ -1,5 +1,5 @@
 # specify the location of the data file
-d <- readRDS('d.RData')
+d <- readRDS('dev/d.RData')
 
 # check if the data is correctly loaded
 d$cvec

@@ -1,0 +1,48 @@
+---
+title: "Optimization problem in `Rcplex`"
+format: 
+  html:
+    code-fold: false
+    code-tools: false
+    code-annotations: select
+editor: source
+---
+
+
+Resources: official [Rcplex vignette](https://cran.r-project.org/web/packages/Rcplex/Rcplex.pdf), page 2.
+
+
+The CPLEX solver aims to solve the optimisation problem: 
+
+$$min \frac{1}{2} x' Q x + c'x$$
+subject to 
+
+$$Ax \leq b$$
+
+$$lb \leq x \leq ub$$
+
+![](fig_input_dim.png)
+
+
+
+
+
+
+
+
+```{r}
+#| eval: false
+#| echo: true
+library(tidyverse)
+library(palmerpenguins)
+penguins |>                                      # <1>
+  mutate(                                        # <2>
+    bill_ratio = bill_depth_mm / bill_length_mm, # <2>
+    bill_area  = bill_depth_mm * bill_length_mm  # <2>
+  )                                              # <2>
+head(penguins)                                   # <3>
+```
+1. Take `penguins`, and then,
+2. add new columns for the bill ratio and bill area.
+3. show the first 6 lines
+

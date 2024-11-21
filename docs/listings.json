@@ -2,15 +2,7 @@
   {
     "listing": "/documentation/index.html",
     "items": [
-      "/documentation/1_understand_data.html",
-      "/documentation/2_define_problem.html",
-      "/documentation/3_small_demo.html",
-      "/documentation/4_troubleshoot_3foods.html",
-      "/documentation/5_10foods.html",
-      "/documentation/6_standard_input.html",
-      "/documentation/7_func_factory.html",
-      "/documentation/x_litreview.html",
-      "/documentation/x_pkgdev_log.html"
+      "/documentation/optimization_problem.html"
     ]
   },
   {

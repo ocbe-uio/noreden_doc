@@ -136,8 +136,12 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#nutrition" id="toc-nutrition" class="nav-link active" data-scroll-target="#nutrition">Nutrition</a></li>
-  <li><a href="#optimization" id="toc-optimization" class="nav-link" data-scroll-target="#optimization">Optimization</a></li>
+  <li><a href="#aims" id="toc-aims" class="nav-link active" data-scroll-target="#aims">Aims</a></li>
+  <li><a href="#notes" id="toc-notes" class="nav-link" data-scroll-target="#notes">Notes</a>
+  <ul class="collapse">
+  <li><a href="#objective-function" id="toc-objective-function" class="nav-link" data-scroll-target="#objective-function">Objective function</a></li>
+  <li><a href="#result-processing" id="toc-result-processing" class="nav-link" data-scroll-target="#result-processing">Result processing</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -147,17 +151,92 @@ ul.task-list li input[type="checkbox"] {
 
 
 
-<section id="nutrition" class="level1">
-<h1>Nutrition</h1>
-<p>https://cran.r-project.org/web/packages/NutrienTrackeR/NutrienTrackeR.pdf</p>
+<p>Attaching a copy of the code with annotations. Also adding a file that includes the input files I’ve used for one of my analyses - I have copies of the same input files with some small changes made for each of the 4 diet scenarios I’ve run. Within each scenario there are <strong>9 files that represent the different step-wise carbon footprint constraints (0%, -5%, -10%, -15%, -20%)</strong> etc. In each of these files you’ll find the code I ran for that specific iteration, along with the input data, nutrient constraints, nutrient reference values (for comparing results to), and realism constraints. Just adding these so you can see the way the data has been set up.</p>
+<p>One important element in Rcplex is that the constraint matrix needs to have the same dimensions vertically and horizontally. So if there are 20 rows of nutrient constraints, there need to be 20 columns of nutrient input data, etc.</p>
+<section id="aims" class="level3">
+<h3 class="anchored" data-anchor-id="aims">Aims</h3>
+<ol type="A">
+<li>The code will be more understandable for someone who is seeing it for the first time. So sort an ‘insert X here’ type of vibe with explanation. And with <strong>illustrations</strong> of how the input data/files need to be set up.</li>
+</ol>
+<ol start="2" type="a">
+<li>That we can develop the code further so it can be suitable also for <strong>individual level optimization</strong>, using individual food intake and nutrient needs instead of basing everything on the population level average. This will involve writing the <strong>loop code</strong> so the model runs continuously through the list of &gt;1000 individuals, and troubleshooting hiccups the model might meet like people whose diets can’t be optimized etc. Also need to set it up so that the model knows which nutrient and realism constraints to use – since the realism constraints are based on individual level food intake, and the nutrient constraints will be based on a combination of gender and age.</li>
+</ol>
 </section>
-<section id="optimization" class="level1">
-<h1>Optimization</h1>
-<p>https://cran.r-project.org/web/views/Optimization.html</p>
-<p>https://www.mlstack.cafe/interview-questions/optimisation</p>
-<p>https://www.techinterviewhandbook.org/algorithms/math/</p>
+<section id="notes" class="level1">
+<h1>Notes</h1>
+<blockquote class="blockquote">
+<ol type="1">
+<li>different settings: which <code>.xlsx</code> have different values?</li>
+<li>change col names: I suggest source it from a table so it’s more readable</li>
+<li>note that size of Amat: doesn’t have to be a square 53 by 53, but need to match the number of nutrients</li>
+<li>figure out the metrics after computation, what kind of reporting</li>
+</ol>
+</blockquote>
+<p>9 folders for each setting</p>
+<ul>
+<li>meat reduction</li>
+<li>meat redistribution</li>
+<li>meat max</li>
+<li>meat current</li>
+</ul>
+<section id="input.xlsx" class="level4">
+<h4 class="anchored" data-anchor-id="input.xlsx">Input.xlsx</h4>
+<p>53 food groups, inputs should be the same across all settings</p>
+<p>why is it called <strong>constraint matrix</strong>?</p>
+</section>
+<section id="nutrient-dir" class="level4">
+<h4 class="anchored" data-anchor-id="nutrient-dir">Nutrient dir</h4>
+<p>2 columns, one per nutrient (not food)</p>
+<ul>
+<li>Dir: E, L, R (equal, less equal, greater equal)</li>
+<li>rhs</li>
+</ul>
+</section>
+<section id="realism" class="level4">
+<h4 class="anchored" data-anchor-id="realism">Realism</h4>
+<p>53 food groups, mean, 10%, 95% of current intake (based on survey)</p>
+<ul>
+<li>mean</li>
+<li>10%</li>
+<li>95%</li>
+</ul>
+</section>
+<section id="objective-function" class="level2">
+<h2 class="anchored" data-anchor-id="objective-function">Objective function</h2>
+<p><strong>obs</strong> here is the same as first column in <code>realism</code></p>
+<p>if we have <strong>53 food groups, 10 nutrients</strong>:</p>
+<p>dimension requirement:</p>
+<p>objective: min 1/2 x_transpose Qmat x + c_transpose x</p>
+<ul>
+<li>x, x_transpose: vector, 53 by 1; 1 by 53</li>
+<li>Qmat (diagnal matrix), 53 by 53</li>
+<li>c, c_transpose: 53 by 1; 1 by 53</li>
+</ul>
+<p>inequality constraint: Amat x &lt;= b</p>
+<ul>
+<li>Amat: 10 by 53</li>
+<li>x: 53 by 1</li>
+<li>b: 10 by 1</li>
+</ul>
+<p>constraint on x bounds</p>
+<ul>
+<li>lb: 53 by 1</li>
+<li>ub: 53 by 1</li>
+</ul>
+</section>
+<section id="result-processing" class="level2">
+<h2 class="anchored" data-anchor-id="result-processing">Result processing</h2>
+<ul>
+<li>Nutrients</li>
+<li>diet</li>
+<li>diet departure</li>
+<li>ruminant meat departure</li>
+<li>red meat departure</li>
+<li>total meat departure</li>
+</ul>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->
