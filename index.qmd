@@ -1,18 +1,22 @@
 ---
-title: "NorEden"
+title: "Noreden"
+image: misc/noreden2.png
 about:
   id: hero-heading
   template: trestles
-  # image-shape: rectangle
+  image-shape: rectangle
   links:
     - icon: github
-      text: Github
+      text: Repository
       href: https://github.com/andreaczhang/noreden_dev
+    - icon: github
+      text: Software
+      href: https://github.com/andreaczhang/noreden
 ---
 
 ::: {#hero-heading}
 
-Welcome. This is the development documentation website for NorEden Project.
+Welcome. This is the development documentation website for Noreden Project.
 
 :::
 

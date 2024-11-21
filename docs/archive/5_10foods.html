@@ -440,9 +440,9 @@ Number of Iterations....: 160000
 Termination conditions:  xtol_rel: 1e-15    maxeval: 160000 
 Number of inequality constraints:  10 
 Number of equality constraints:    0 
-Current value of objective function:  333.43482898391 
-Current value of controls: 174.6664 34.52358 24.20929 66.90563 170.1641 304.9358 67.96913 102.1114 
-15.30293 153.3331</code></pre>
+Current value of objective function:  333.453953531023 
+Current value of controls: 174.6512 34.47073 24.18368 66.96662 170.151 304.9251 67.96771 102.1279 15.35428 
+153.3486</code></pre>
 </div>
 </div>
 <p>Now we print out the results in a more readable way</p>
@@ -463,16 +463,16 @@ Current value of controls: 174.6664 34.52358 24.20929 66.90563 170.1641 304.9358
 <span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>diet_result</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>             name current       new percent_change lower_limit upper_limit
-1           Bread   175.4 174.66638         -0.004   18.831866   407.77324
-2          Cheese    43.4  34.52358         -0.205    4.659652   122.39639
-3            Eggs    24.6  24.20929         -0.016    2.641185   101.99699
-4            Fish    69.5  66.90563         -0.037    7.461885   267.87632
-5  Fruit, berries   171.5 170.16415         -0.008   18.413142   480.13743
-6   Milk, yoghurt   306.1 304.93575         -0.004   32.864505   966.28731
-7        Potatoes    67.8  67.96913          0.002    7.279364   218.48830
-8        Red meat   117.6 102.11136         -0.132   12.250376   328.75242
-9   Sugar, sweets    16.9  15.30293         -0.095    1.814473    69.78742
-10     Vegetables   154.6 153.33308         -0.008   16.598669   365.04187</code></pre>
+1           Bread   175.4 174.65125         -0.004   18.831866   407.77324
+2          Cheese    43.4  34.47073         -0.206    4.659652   122.39639
+3            Eggs    24.6  24.18368         -0.017    2.641185   101.99699
+4            Fish    69.5  66.96662         -0.036    7.461885   267.87632
+5  Fruit, berries   171.5 170.15104         -0.008   18.413142   480.13743
+6   Milk, yoghurt   306.1 304.92508         -0.004   32.864505   966.28731
+7        Potatoes    67.8  67.96771          0.002    7.279364   218.48830
+8        Red meat   117.6 102.12788         -0.132   12.250376   328.75242
+9   Sugar, sweets    16.9  15.35428         -0.091    1.814473    69.78742
+10     Vegetables   154.6 153.34856         -0.008   16.598669   365.04187</code></pre>
 </div>
 </div>
 <div class="cell">
@@ -500,10 +500,10 @@ Current value of controls: 174.6664 34.52358 24.20929 66.90563 170.1641 304.9358
 <pre><code>Index: &lt;is_ok&gt;
     new_diet const_lwr const_upr  is_ok relative_dev
        &lt;num&gt;     &lt;num&gt;     &lt;num&gt; &lt;char&gt;        &lt;num&gt;
-1: 1034.0674  982.5146 1091.6828    Yes            0
-2:  949.5498  917.3123 1019.2359    Yes            0
+1: 1034.1342  982.5146 1091.6828    Yes            0
+2:  949.5431  917.3123 1019.2359    Yes            0
 3:  521.5166  521.5166  579.4629    Yes            0
-4:  732.8358  669.5269  743.9188    Yes            0
+4:  732.9418  669.5269  743.9188    Yes            0
 5:  636.5815  572.9233  636.5815    Yes            0</code></pre>
 </div>
 </div>
@@ -596,25 +596,25 @@ Number of Iterations....: 160000
 Termination conditions:  xtol_rel: 1e-15    maxeval: 160000 
 Number of inequality constraints:  10 
 Number of equality constraints:    0 
-Current value of objective function:  1130.7631790014 
-Current value of controls: 173.2095 37.04426 30.2285 67.62501 167.5981 303.4959 67.8251 85.94574 21.08664 
-151.6257</code></pre>
+Current value of objective function:  1130.07723624611 
+Current value of controls: 172.9834 36.42209 30.73556 67.67675 167.417 303.3886 67.60507 86.28209 21.40758 
+151.5364</code></pre>
 </div>
 </div>
 <p>Now we check the results for the second problem.</p>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
 <pre><code>             name current       new percent_change lower_limit upper_limit
-1           Bread   175.4 173.20950         -0.012   18.831866   407.77324
-2          Cheese    43.4  37.04426         -0.146    4.659652   122.39639
-3            Eggs    24.6  30.22850          0.229    2.641185   101.99699
-4            Fish    69.5  67.62501         -0.027    7.461885   267.87632
-5  Fruit, berries   171.5 167.59805         -0.023   18.413142   480.13743
-6   Milk, yoghurt   306.1 303.49594         -0.009   32.864505   966.28731
-7        Potatoes    67.8  67.82510          0.000    7.279364   218.48830
-8        Red meat   117.6  85.94574         -0.269   12.250376   328.75242
-9   Sugar, sweets    16.9  21.08664          0.248    1.814473    69.78742
-10     Vegetables   154.6 151.62566         -0.019   16.598669   365.04187</code></pre>
+1           Bread   175.4 172.98342         -0.014   18.831866   407.77324
+2          Cheese    43.4  36.42209         -0.161    4.659652   122.39639
+3            Eggs    24.6  30.73556          0.249    2.641185   101.99699
+4            Fish    69.5  67.67675         -0.026    7.461885   267.87632
+5  Fruit, berries   171.5 167.41696         -0.024   18.413142   480.13743
+6   Milk, yoghurt   306.1 303.38857         -0.009   32.864505   966.28731
+7        Potatoes    67.8  67.60507         -0.003    7.279364   218.48830
+8        Red meat   117.6  86.28209         -0.266   12.250376   328.75242
+9   Sugar, sweets    16.9  21.40758          0.267    1.814473    69.78742
+10     Vegetables   154.6 151.53638         -0.020   16.598669   365.04187</code></pre>
 </div>
 </div>
 <div class="cell">
@@ -622,10 +622,10 @@ Current value of controls: 173.2095 37.04426 30.2285 67.62501 167.5981 303.4959 
 <pre><code>Index: &lt;is_ok&gt;
     new_diet const_lwr const_upr  is_ok relative_dev
        &lt;num&gt;     &lt;num&gt;     &lt;num&gt; &lt;char&gt;        &lt;num&gt;
-1: 1037.0552  982.5146 1091.6828    Yes            0
-2:  932.8798  917.3123 1019.2359    Yes            0
+1: 1036.9677  982.5146 1091.6828    Yes            0
+2:  932.6577  917.3123 1019.2359    Yes            0
 3:  521.5166  521.5166  579.4629    Yes            0
-4:  743.9188  669.5269  743.9188    Yes            0
+4:  743.9186  669.5269  743.9188    Yes            0
 5:  601.2158  541.0943  601.2158    Yes            0</code></pre>
 </div>
 </div>

@@ -1,0 +1,399 @@
+---
+title: "Part 5: 10 foods"
+format: 
+  html:
+    code-fold: false
+    code-tools: false
+editor: source
+---
+
+Select 10 foods: bread, cheese, eggs, fish, fruit and berries, milk and yoghurt, potatoes, red meat, sugar and sweets, vegetables.
+
+
+```{r}
+#| label: small-demo
+#| echo: true
+#| eval: true
+library(data.table)
+fd <- read.csv('data/foods_0914.csv', sep = ',')
+setDT(fd) # use data.table format
+fd
+
+contrib_pergram <- fd[, .(energy, protein, fat, carbs, sugar, alcohol, ghge)]
+contrib_pergram
+
+# note: intake from the food.csv is slightly different from the new file
+current_diet <- fd$intake
+current_diet
+
+
+# 10 foods contribution (maximum)
+const_max_10foods <- t(as.matrix(current_diet)) %*% as.matrix(contrib_pergram)
+const_max_10foods
+
+# exclude sugar, alcohol
+const_max_10foods <- const_max_10foods[, c('energy', 'protein', 'fat', 'carbs', 'ghge')]
+
+
+# target constraint on energy and nutrients
+# set lower to be 0.9; upper remain the current max
+const_lwrupr <- rbind(const_max_10foods*0.9, const_max_10foods*1)
+rownames(const_lwrupr) <- c('lwr', 'upr')
+const_lwrupr <- data.table(const_lwrupr)
+const_lwrupr
+
+```
+
+## Constraints for 3 foods
+
+We compute the constraints for 3 foods together. Note that the consumption for each of the 28 food groups are different, hence we can not use 3/28 times the total energy, protein...; we need to use a weighted average. 
+
+For example, the total energy for the 10 foods together should be within [5305, 5895]. 
+
+## Standardize food contribution per gram 
+
+Since the range of constraints for 5 categories differ hugely, it could affect the numeric evaluation. We want them to be on comparative scales. 
+
+The current solution is to standardize the contribution in each category (e.g. energy) by its original value divided by the standard deviation. 
+
+Similarly, the upper and lower limit of the constraints also need to be re-scaled. After rescaling, the target will be on a range of hundreds, rather than 3000 vs 1.8. 
+
+
+
+```{r}
+#| label: std
+#| echo: true
+#| eval: true
+
+contrib_pergram <- contrib_pergram[, c('energy', 'protein', 'fat', 'carbs', 'ghge')]
+
+sd_coef <- apply(contrib_pergram, MARGIN = 2, sd)
+
+contrib_pergram_std <- sweep(contrib_pergram, MARGIN = 2, 1/sd_coef, FUN = '*')
+contrib_pergram_std
+
+# standardize constraint
+# test the previous constraint
+const_lwrupr
+const_lwrupr_std <- sweep(const_lwrupr, MARGIN = 2, 1/sd_coef, FUN = '*')
+const_lwrupr_std
+
+```
+
+In the future, different scaling factor can be applied; but it should be a positive number after scaling. Could try dividing the difference between max and min of this variable.
+
+# Run optimization 
+
+Now we are going to solve the optimization problem using `nloptr`. The details of the algorithm please refer to [part 3](https://andreaczhang.github.io/noreden_dev/documentation/small_demo.html).
+
+
+The objective function remains the same for 10 foods. We want to minimize the difference between the current and optimized diet.
+
+```{r}
+#| label: opt-obj
+#| echo: true
+#| eval: true
+
+current_diet
+
+# 10 foods, therefore 10 elements
+# minimize the deviation from the current intake, on 10 foods
+objective <- function(x)
+{
+  return ( (x[1]- current_diet[1])^2 + 
+             (x[2]- current_diet[2])^2 + 
+             (x[3]- current_diet[3])^2 + 
+             (x[4]- current_diet[4])^2 + 
+             (x[5]- current_diet[5])^2 + 
+             (x[6]- current_diet[6])^2 + 
+             (x[7]- current_diet[7])^2 + 
+             (x[8]- current_diet[8])^2 + 
+             (x[9]- current_diet[9])^2 + 
+             (x[10]- current_diet[10])^2)
+}
+
+```
+
+
+We optimize using 5 categories (10 inequality constraints): 
+
+* energy
+* protein
+* fat
+* carbs
+* ghge
+
+We show two examples: one reduces ghge to 90% what the current diet produces; the other reduces ghge to 85%. 
+
+## Example 1: reduce ghge to 90% 
+
+First we reduce the GHGE to 90%. 
+
+```{r}
+#| label: opt-const-f-90
+#| echo: true
+#| eval: true
+
+cstr <- copy(const_lwrupr_std)
+cstr$ghge <- cstr$ghge * 0.9 # reduce to 0.9
+cstr
+
+
+# use the standardized food contribution per gram 
+# contrib_pergram_std
+
+# define the inequality constraints
+inequalconstr <- function (x) {
+  
+  cps <- contrib_pergram_std
+  
+  constr <- c(
+    # energy
+    - x[1]*cps$energy[1] - x[2]*cps$energy[2] - x[3]*cps$energy[3] - x[4]*cps$energy[4] - x[5]*cps$energy[5] - x[6]*cps$energy[6] -  x[7]*cps$energy[7] - x[8]*cps$energy[8] - x[9]*cps$energy[9]- x[10]*cps$energy[10] + cstr$energy[1], # lower
+    x[1]*cps$energy[1] + x[2]*cps$energy[2] + x[3]*cps$energy[3] + x[4]*cps$energy[4] + x[5]*cps$energy[5] + x[6]*cps$energy[6] + x[7]*cps$energy[7] + x[8]*cps$energy[8] + x[9]*cps$energy[9] + x[10]*cps$energy[10] - cstr$energy[2], # upper
+    
+    # protein
+
+    - x[1]*cps$protein[1] - x[2]*cps$protein[2] - x[3]*cps$protein[3] - x[4]*cps$protein[4] - x[5]*cps$protein[5] - x[6]*cps$protein[6] -  x[7]*cps$protein[7] - x[8]*cps$protein[8] - x[9]*cps$protein[9]- x[10]*cps$protein[10] + cstr$protein[1], # lower
+    x[1]*cps$protein[1] + x[2]*cps$protein[2] + x[3]*cps$protein[3] + x[4]*cps$protein[4] + x[5]*cps$protein[5] + x[6]*cps$protein[6] + x[7]*cps$protein[7] + x[8]*cps$protein[8] + x[9]*cps$protein[9] + x[10]*cps$protein[10] - cstr$protein[2], # upper
+    
+    # fat
+
+    - x[1]*cps$fat[1] - x[2]*cps$fat[2] - x[3]*cps$fat[3] - x[4]*cps$fat[4] - x[5]*cps$fat[5] - x[6]*cps$fat[6] -  x[7]*cps$fat[7] - x[8]*cps$fat[8] - x[9]*cps$fat[9]- x[10]*cps$fat[10] + cstr$fat[1], # lower
+    x[1]*cps$fat[1] + x[2]*cps$fat[2] + x[3]*cps$fat[3] + x[4]*cps$fat[4] + x[5]*cps$fat[5] + x[6]*cps$fat[6] + x[7]*cps$fat[7] + x[8]*cps$fat[8] + x[9]*cps$fat[9] + x[10]*cps$fat[10] - cstr$fat[2], # upper
+    
+    # carbs
+
+    - x[1]*cps$carbs[1] - x[2]*cps$carbs[2] - x[3]*cps$carbs[3] - x[4]*cps$carbs[4] - x[5]*cps$carbs[5] - x[6]*cps$carbs[6] -  x[7]*cps$carbs[7] - x[8]*cps$carbs[8] - x[9]*cps$carbs[9]- x[10]*cps$carbs[10] + cstr$carbs[1], # lower
+    x[1]*cps$carbs[1] + x[2]*cps$carbs[2] + x[3]*cps$carbs[3] + x[4]*cps$carbs[4] + x[5]*cps$carbs[5] + x[6]*cps$carbs[6] + x[7]*cps$carbs[7] + x[8]*cps$carbs[8] + x[9]*cps$carbs[9] + x[10]*cps$carbs[10] - cstr$carbs[2], # upper
+    
+    # ghge
+    - x[1]*cps$ghge[1] - x[2]*cps$ghge[2] - x[3]*cps$ghge[3] - x[4]*cps$ghge[4] - x[5]*cps$ghge[5] - x[6]*cps$ghge[6] -  x[7]*cps$ghge[7] - x[8]*cps$ghge[8] - x[9]*cps$ghge[9]- x[10]*cps$ghge[10] + cstr$ghge[1], # lower
+    x[1]*cps$ghge[1] + x[2]*cps$ghge[2] + x[3]*cps$ghge[3] + x[4]*cps$ghge[4] + x[5]*cps$ghge[5] + x[6]*cps$ghge[6] + x[7]*cps$ghge[7] + x[8]*cps$ghge[8] + x[9]*cps$ghge[9] + x[10]*cps$ghge[10] - cstr$ghge[2] # upper
+    
+  )
+  return (constr)
+}
+
+```
+
+Set other parameters 
+
+```{r}
+#| label: opt-run-1
+#| echo: true
+#| eval: true
+
+# Initial values
+x0 <- fd$intake
+
+# lower and upper bounds of x (10 foods)
+lb <- fd$intake_lwr
+ub <- fd$intake_upr
+
+
+opts <- list( "algorithm" = "NLOPT_GN_ISRES",
+              "xtol_rel"= 1.0e-15,
+              "maxeval"= 160000,
+              "tol_constraints_ineq" = rep( 1.0e-10, 10 ))
+
+# run the algorithm
+res <- nloptr::nloptr(
+  x0          = x0,        # initial value for x
+  eval_f      = objective, # objective function
+  lb          = lb,        # lower bound for x
+  ub          = ub,        # upper bound for x
+  eval_g_ineq = inequalconstr, # inequality constraint
+  opts        = opts       # options
+)
+
+print(res)
+
+```
+
+
+Now we print out the results in a more readable way
+
+```{r}
+#| label: print-results-diet-1
+#| echo: true
+#| eval: true
+
+res_diet <- res$solution
+
+# print with the current diet, and change percentage
+# also print the boundary, in case it hit boundary
+
+diet_result <- data.frame(
+  name = fd$food, # food names
+  current = current_diet, 
+  new = res_diet, 
+  percent_change = round((res_diet - current_diet)/current_diet, 3),
+  lower_limit = lb, 
+  upper_limit = ub
+)
+diet_result
+```
+
+
+
+
+```{r}
+#| label: print-results-constrcheck-1
+#| echo: true
+#| eval: true
+
+# verify whether it falls within 
+output_newdiet <- t(as.matrix(res_diet)) %*% as.matrix(contrib_pergram_std)
+# output_newdiet
+
+# cstr
+const_result <- t(rbind(output_newdiet, cstr))
+colnames(const_result) <- c('new_diet','const_lwr', 'const_upr')
+const_result <- data.table(const_result)
+# conditions
+const_result[, is_ok := 'Yes']
+const_result[new_diet < const_lwr, is_ok := 'beyond lower']
+const_result[new_diet > const_upr, is_ok := 'beyond upper']
+
+# relative difference (since we rescaled the targets)
+const_result[, relative_dev := 0]
+const_result[is_ok == 'beyond lower', relative_dev := round((new_diet - const_lwr)/const_lwr, 3)]
+const_result[is_ok == 'beyond upper', relative_dev := round((new_diet - const_upr)/const_upr, 3)]
+
+# print out
+const_result
+```
+
+You should always check how much it actually deviates from the target constraints.
+
+
+## Example 2: reduce ghge to 85% 
+
+
+```{r}
+#| label: opt-const-f85
+#| echo: true
+#| eval: true
+
+cstr <- copy(const_lwrupr_std) # this line is important: it keeps a copy of the original values
+cstr$ghge <- cstr$ghge * 0.85 # reduce to 0.85
+cstr
+
+
+# use the standardized food contribution per gram 
+# contrib_pergram_std
+
+# define the inequality constraints
+inequalconstr <- function (x) {
+  
+  cps <- contrib_pergram_std
+  
+  constr <- c(
+    # energy
+    - x[1]*cps$energy[1] - x[2]*cps$energy[2] - x[3]*cps$energy[3] - x[4]*cps$energy[4] - x[5]*cps$energy[5] - x[6]*cps$energy[6] -  x[7]*cps$energy[7] - x[8]*cps$energy[8] - x[9]*cps$energy[9]- x[10]*cps$energy[10] + cstr$energy[1], # lower
+    x[1]*cps$energy[1] + x[2]*cps$energy[2] + x[3]*cps$energy[3] + x[4]*cps$energy[4] + x[5]*cps$energy[5] + x[6]*cps$energy[6] + x[7]*cps$energy[7] + x[8]*cps$energy[8] + x[9]*cps$energy[9] + x[10]*cps$energy[10] - cstr$energy[2], # upper
+    
+    # protein
+
+    - x[1]*cps$protein[1] - x[2]*cps$protein[2] - x[3]*cps$protein[3] - x[4]*cps$protein[4] - x[5]*cps$protein[5] - x[6]*cps$protein[6] -  x[7]*cps$protein[7] - x[8]*cps$protein[8] - x[9]*cps$protein[9]- x[10]*cps$protein[10] + cstr$protein[1], # lower
+    x[1]*cps$protein[1] + x[2]*cps$protein[2] + x[3]*cps$protein[3] + x[4]*cps$protein[4] + x[5]*cps$protein[5] + x[6]*cps$protein[6] + x[7]*cps$protein[7] + x[8]*cps$protein[8] + x[9]*cps$protein[9] + x[10]*cps$protein[10] - cstr$protein[2], # upper
+    
+    # fat
+
+    - x[1]*cps$fat[1] - x[2]*cps$fat[2] - x[3]*cps$fat[3] - x[4]*cps$fat[4] - x[5]*cps$fat[5] - x[6]*cps$fat[6] -  x[7]*cps$fat[7] - x[8]*cps$fat[8] - x[9]*cps$fat[9]- x[10]*cps$fat[10] + cstr$fat[1], # lower
+    x[1]*cps$fat[1] + x[2]*cps$fat[2] + x[3]*cps$fat[3] + x[4]*cps$fat[4] + x[5]*cps$fat[5] + x[6]*cps$fat[6] + x[7]*cps$fat[7] + x[8]*cps$fat[8] + x[9]*cps$fat[9] + x[10]*cps$fat[10] - cstr$fat[2], # upper
+    
+    # carbs
+
+    - x[1]*cps$carbs[1] - x[2]*cps$carbs[2] - x[3]*cps$carbs[3] - x[4]*cps$carbs[4] - x[5]*cps$carbs[5] - x[6]*cps$carbs[6] -  x[7]*cps$carbs[7] - x[8]*cps$carbs[8] - x[9]*cps$carbs[9]- x[10]*cps$carbs[10] + cstr$carbs[1], # lower
+    x[1]*cps$carbs[1] + x[2]*cps$carbs[2] + x[3]*cps$carbs[3] + x[4]*cps$carbs[4] + x[5]*cps$carbs[5] + x[6]*cps$carbs[6] + x[7]*cps$carbs[7] + x[8]*cps$carbs[8] + x[9]*cps$carbs[9] + x[10]*cps$carbs[10] - cstr$carbs[2], # upper
+    
+    # ghge
+    - x[1]*cps$ghge[1] - x[2]*cps$ghge[2] - x[3]*cps$ghge[3] - x[4]*cps$ghge[4] - x[5]*cps$ghge[5] - x[6]*cps$ghge[6] -  x[7]*cps$ghge[7] - x[8]*cps$ghge[8] - x[9]*cps$ghge[9]- x[10]*cps$ghge[10] + cstr$ghge[1], # lower
+    x[1]*cps$ghge[1] + x[2]*cps$ghge[2] + x[3]*cps$ghge[3] + x[4]*cps$ghge[4] + x[5]*cps$ghge[5] + x[6]*cps$ghge[6] + x[7]*cps$ghge[7] + x[8]*cps$ghge[8] + x[9]*cps$ghge[9] + x[10]*cps$ghge[10] - cstr$ghge[2] # upper
+    
+  )
+  return (constr)
+}
+
+# Initial values
+x0 <- fd$intake
+
+# lower and upper bounds of x (10 foods)
+lb <- fd$intake_lwr
+ub <- fd$intake_upr
+
+
+opts <- list( "algorithm" = "NLOPT_GN_ISRES",
+              "xtol_rel"= 1.0e-15,
+              "maxeval"= 160000,
+              "tol_constraints_ineq" = rep( 1.0e-10, 10 ))
+
+# run the algorithm
+res <- nloptr::nloptr(
+  x0          = x0,        # initial value for x
+  eval_f      = objective, # objective function
+  lb          = lb,        # lower bound for x
+  ub          = ub,        # upper bound for x
+  eval_g_ineq = inequalconstr, # inequality constraint
+  opts        = opts       # options
+)
+
+print(res)
+```
+
+
+
+Now we check the results for the second problem.
+
+```{r}
+#| label: print-results-diet-85
+#| echo: false
+#| eval: true
+
+res_diet <- res$solution
+
+# print with the current diet, and change percentage
+# also print the boundary, in case it hit boundary
+
+diet_result <- data.frame(
+  name = fd$food, # food names
+  current = current_diet, 
+  new = res_diet, 
+  percent_change = round((res_diet - current_diet)/current_diet, 3),
+  lower_limit = lb, 
+  upper_limit = ub
+)
+diet_result
+```
+
+
+
+
+```{r}
+#| label: print-results-constrcheck-2
+#| echo: false
+#| eval: true
+
+# verify whether it falls within 
+output_newdiet <- t(as.matrix(res_diet)) %*% as.matrix(contrib_pergram_std)
+# output_newdiet
+
+# cstr
+const_result <- t(rbind(output_newdiet, cstr))
+colnames(const_result) <- c('new_diet','const_lwr', 'const_upr')
+const_result <- data.table(const_result)
+# conditions
+const_result[, is_ok := 'Yes']
+const_result[new_diet < const_lwr, is_ok := 'beyond lower']
+const_result[new_diet > const_upr, is_ok := 'beyond upper']
+
+# relative difference (since we rescaled the targets)
+const_result[, relative_dev := 0]
+const_result[is_ok == 'beyond lower', relative_dev := round((new_diet - const_lwr)/const_lwr, 3)]
+const_result[is_ok == 'beyond upper', relative_dev := round((new_diet - const_upr)/const_upr, 3)]
+
+# print out
+const_result
+```

@@ -1,0 +1,11 @@
+---
+title: "About Noreden"
+format: 
+  html:
+    code-fold: false
+    code-tools: false
+editor: source
+---
+
+About the project
+

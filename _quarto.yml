@@ -11,11 +11,27 @@ website:
       - href: index.qmd
         text: Home
 
-      - href: noreden/index.qmd
-        text: Noreden
+      - href: documentation/index.qmd
+        text: Documentation
+ 
+      - href: software/index.qmd
+        text: Software
+
+      - href: archive/index.qmd
+        text: Archive
         
-#      - href: about.qmd
-#        text: About
+      - href: about.qmd
+        text: About
+
+    right:
+      - icon: tag
+        text: Issues
+        href: https://github.com/andreaczhang/noreden_dev/issues
+
+      - icon: github
+        text: GitHub
+        href: https://github.com/andreaczhang/noreden_dev
+
 
 format:
   html:

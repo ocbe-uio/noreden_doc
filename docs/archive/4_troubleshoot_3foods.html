@@ -433,8 +433,8 @@ Number of Iterations....: 160000
 Termination conditions:  xtol_rel: 1e-15    maxeval: 160000 
 Number of inequality constraints:  10 
 Number of equality constraints:    0 
-Current value of objective function:  202.05482164757 
-Current value of controls: 174.3123 153.5126 103.4689</code></pre>
+Current value of objective function:  202.054848606764 
+Current value of controls: 174.3086 153.5102 103.4693</code></pre>
 </div>
 </div>
 <p>Now we print out the results in a more readable way</p>
@@ -455,9 +455,9 @@ Current value of controls: 174.3123 153.5126 103.4689</code></pre>
 <span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a>diet_result</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        name current      new percent_change lower_limit upper_limit
-1      Bread   175.4 174.3123         -0.006         160         180
-2 Vegetables   154.6 153.5126         -0.007         140         160
-3   Red meat   117.6 103.4689         -0.120         100         120</code></pre>
+1      Bread   175.4 174.3086         -0.006         160         180
+2 Vegetables   154.6 153.5102         -0.007         140         160
+3   Red meat   117.6 103.4693         -0.120         100         120</code></pre>
 </div>
 </div>
 <div class="cell">
@@ -483,13 +483,13 @@ Current value of controls: 174.3123 153.5126 103.4689</code></pre>
 <span id="cb29-20"><a href="#cb29-20" aria-hidden="true" tabindex="-1"></a>const_result</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Index: &lt;is_ok&gt;
-   new_diet const_lwr const_upr        is_ok relative_dev
-      &lt;num&gt;     &lt;num&gt;     &lt;num&gt;       &lt;char&gt;        &lt;num&gt;
-1: 626.0346  588.3423  653.7137          Yes            0
-2: 456.4121  439.9282  488.8091          Yes            0
-3: 297.0733  293.0966  325.6629          Yes            0
-4: 363.1258  329.5946  366.2162          Yes            0
-5: 241.4652  217.3187  241.4652 beyond upper            0</code></pre>
+   new_diet const_lwr const_upr  is_ok relative_dev
+      &lt;num&gt;     &lt;num&gt;     &lt;num&gt; &lt;char&gt;        &lt;num&gt;
+1: 626.0262  588.3423  653.7137    Yes            0
+2: 456.4084  439.9282  488.8091    Yes            0
+3: 297.0723  293.0966  325.6629    Yes            0
+4: 363.1183  329.5946  366.2162    Yes            0
+5: 241.4652  217.3187  241.4652    Yes            0</code></pre>
 </div>
 </div>
 <p>You should always check how much it actually deviates from the target constraints.</p>
@@ -580,7 +580,7 @@ Number of Iterations....: 160000
 Termination conditions:  xtol_rel: 1e-15    maxeval: 160000 
 Number of inequality constraints:  10 
 Number of equality constraints:    0 
-Current value of objective function:  528.456412562443 
+Current value of objective function:  528.456412600945 
 Current value of controls: 177.753 140 100</code></pre>
 </div>
 </div>

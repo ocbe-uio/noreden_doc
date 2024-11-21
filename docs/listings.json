@@ -36,5 +36,19 @@
       "/noreden/x_litreview.html",
       "/noreden/x_pkgdev_log.html"
     ]
+  },
+  {
+    "listing": "/archive/index.html",
+    "items": [
+      "/archive/1_understand_data.html",
+      "/archive/2_define_problem.html",
+      "/archive/3_small_demo.html",
+      "/archive/4_troubleshoot_3foods.html",
+      "/archive/5_10foods.html",
+      "/archive/6_standard_input.html",
+      "/archive/7_func_factory.html",
+      "/archive/x_litreview.html",
+      "/archive/x_pkgdev_log.html"
+    ]
   }
 ]

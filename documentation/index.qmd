@@ -1,0 +1,27 @@
+---
+title: "Documentation"
+listing:
+  - id: docs
+    max-description-length: 500
+    image-height: 150px
+    fields: [title]
+    contents: 
+      - "1_understand_data.qmd"
+      - "2_define_problem.qmd"
+      - "3_small_demo.qmd"
+      - "4_troubleshoot_3foods.qmd"
+      - "5_10foods.qmd"
+      - "6_standard_input.qmd"
+      - "7_func_factory.qmd"
+      - "x_litreview.qmd"
+      - "x_pkgdev_log.qmd"
+    type: table
+    grid-item-border: false
+    sort-ui: false
+    sort: "date desc"
+    filter-ui: false
+    categories: true
+---
+
+It is important to document while you go.
+

@@ -1,0 +1,322 @@
+---
+title: "Part 1: Understand the current diet"
+format: 
+  html:
+    code-fold: false
+    code-tools: false
+editor: source
+---
+
+Load the aggregated food groups and their attributes. We have 28 food groups.
+
+```{r}
+#| label: load-food-info
+#| echo: true
+#| eval: true
+
+foods <- read.csv('data/foods.csv', sep = ',')
+data.table::setDT(foods) # use data.table format
+foods[1:10,] # show the first 10
+```
+
+
+Define the constraints on 
+
+* energy
+* protein, fat, carbs, sugar, alcohol 
+* GHGE (greenhouse gas equivalent)
+
+```{r}
+#| label: load-contraints
+#| echo: true
+#| eval: true
+
+constraints <- data.frame(
+  constraint = c('lower', 'upper'), 
+  energy = c(9000, 10000), 
+  protein = c(55, 111.5), 
+  fat = c(61.8, 98.8), 
+  carbs = c(250, 334.6), 
+  sugar = c(0, 54.8), 
+  alcohol = c(0, 10),
+  ghge = c(0, 4.7)
+)
+constraints
+```
+
+
+
+## Exploratory data analysis on current diet
+
+Before we construct the optimization problem, we should always understand the data. This helps us picking the important food groups, as well as making sense of the constraints.
+
+```{r}
+#| label: manip-1
+#| echo: true
+#| eval: true
+
+# compute the contribution (indiv * intake) for 28 foods
+ftotal <- apply(X = foods[, c('energy', 'protein', 'fat', 
+                              'carbs', 'sugar', 'alcohol', 'ghge')], 
+                MARGIN = 2, 
+                FUN = function(x){x*foods$intake})
+rownames(ftotal) <- foods$food # name the rows
+head(ftotal)
+```
+
+We can also examine whether the current intake satisfy the constraints from above. For example, the energy contribution from bread is $175.4 \times 10.696$, which is the intake times per unit energy.  
+
+```{r}
+#| label: check-current
+#| echo: true
+#| eval: true
+
+t(as.matrix(foods$intake)) %*% as.matrix(foods[, .(energy, protein, fat, carbs, sugar, alcohol, ghge)])
+```
+
+It looks like all categories but carbs fall within the expected range. Carb is slighter lower than the lower threshold. 
+
+Now we can compute the **percentage** of each one of the 28 food group contribution towards the total.
+
+```{r}
+#| label: manip-2
+#| echo: true
+#| eval: true
+
+# divide by total of all 28 (upper constraints)
+fsum <- apply(ftotal, 2, sum)
+fsum
+
+fprop <- t(apply(X = ftotal, MARGIN = 1, FUN = function(x){x/fsum}))
+fprop <- round(fprop, digits = 3) # keep 3 digits
+rownames(fprop) <- foods$food
+head(fprop)
+```
+
+For example, bread contributes to 20% towards the total energy, and 16.3% of the total protein. 
+
+
+## Visualization
+
+::: {.callout-note}
+
+In this section we are mostly focused on **energy, intake, ghge**. It is easy to extend to other macronutrient categories.
+:::
+
+We need some more data manipulation before plotting. 
+
+```{r}
+#| label: make-big-group
+#| echo: true
+#| eval: true
+#| code-fold: true
+#| code-summary: "Show code"
+
+# first define big groups
+grain <- c('Bread', 'Other grains', 'Cakes')
+fruit_vege <- c('Potatoes', 'Vegetables', 'Legumes', 'Fruit, berries', 
+                'Juice', 'Nuts', 'Vegetarian products')
+meat <- c('Red meat', 'White meat')
+fish_egg <- c('Fish', 'Eggs')
+dairy <- c('Cream, cream desserts', 'Milk, yoghurt', 'Cheese')
+fats <- c('Butter, margarine, oil')
+beverages <- c('Coffee, tea', 'Soda, saft', 'Water', 
+               'Alcoholic beverages', 'Non-dairy milk')
+sugar_other <- c('Sugar, sweets', 'Snacks', 'Sauces', 'Spices', 'Other')
+
+# reorder food names to make the plot easier to read
+names_ordered <- c(grain, fruit_vege, meat, fish_egg, 
+                   dairy, fats, beverages, sugar_other)
+
+names_ordered
+```
+
+
+```{r}
+#| label: manip-3
+#| echo: true
+#| eval: true
+#| code-fold: true
+#| code-summary: "Show code"
+
+# require some data manip
+# need big food group, food name (smaller food group)
+pdt <- data.frame(ftotal) # total 
+pdt$food_name <- row.names(pdt)
+pdt <- data.table::setDT(pdt)
+
+# attach big group
+pdt[food_name %in% grain, big_group := 'grain']
+pdt[food_name %in% fruit_vege, big_group := 'fruit_vege']
+pdt[food_name %in% meat, big_group := 'meat']
+pdt[food_name %in% fish_egg, big_group := 'fish_egg']
+pdt[food_name %in% dairy, big_group := 'dairy']
+pdt[food_name %in% fats, big_group := 'fats']
+pdt[food_name %in% beverages, big_group := 'beverages']
+pdt[food_name %in% sugar_other, big_group := 'sugar_other']
+
+# make long format
+pdt_long <- tidyr::pivot_longer(pdt, cols = -c(food_name, big_group),
+                                names_to = 'category')
+pdt_long <- data.table::setDT(pdt_long)
+
+# new variable, food_name_order
+pdt_long$food_name_order <- factor(pdt_long$food_name, 
+                                   levels = names_ordered, 
+                                   labels = names_ordered)
+```
+
+### Energy contribution from 28 food groups
+
+In total these 28 food groups contribute to 9314kJ. Here is a breakdown of each food groups, colored by different types of food (crude). 
+
+
+```{r}
+#| label: p1
+#| echo: true
+#| eval: true
+library(ggplot2)
+library(ggrepel)
+library(RColorBrewer)
+
+p1 <- ggplot(data = pdt_long[category == 'energy'], 
+             aes(x = food_name_order, y = value, fill = big_group))
+p1 <- p1 + geom_bar(stat = 'identity')
+p1 <- p1 + coord_flip()
+p1 <- p1 + theme_bw()
+p1 <- p1 + scale_fill_brewer(palette = 'Dark2')
+p1 <- p1 + labs(title = 'Energy (multiplied by food intake)', 
+                x = 'Food groups', 
+                y = 'Energy')
+p1 <- p1 + theme(axis.text = element_text(size = 12), 
+                   axis.title = element_text(size = 12), 
+                   plot.title = element_text(size = 20))
+p1
+```
+
+### GHGE contribution from 28 food groups
+
+We can also plot a different metric, say GHGE. We can see that red meat is the largest contributor, followed by cheese and milk (dairy products). 
+
+```{r}
+#| label: p2
+#| echo: true
+#| eval: true
+#| code-fold: true
+#| code-summary: "Show code"
+
+p2 <- ggplot(data = pdt_long[category == 'ghge'], 
+             aes(x = food_name_order, y = value, fill = big_group))
+p2 <- p2 + geom_bar(stat = 'identity')
+p2 <- p2 + coord_flip()
+p2 <- p2 + theme_bw()
+p2 <- p2 + scale_fill_brewer(palette = 'Dark2')
+p2 <- p2 + labs(title = 'GHGE (multiplied by food intake)', 
+                x = 'Food groups', 
+                y = 'GHGE')
+p2 <- p2 + theme(axis.text = element_text(size = 12), 
+                 axis.title = element_text(size = 12), 
+                 plot.title = element_text(size = 20))
+
+p2
+```
+
+### Energy vs GHGE 
+
+We can also show the per unit contribution to energy and GHGE. The size of the bubbles are the amount of consumption: the bigger the more consumed. 
+
+```{r}
+#| label: p3
+#| echo: true
+#| eval: true
+#| code-fold: true
+#| code-summary: "Show code"
+
+pdfd <- data.table::setDT(foods)
+# remove water, outlier
+pdfd <- pdfd[food != 'Water']
+
+
+# attach label 
+pdfd[food %in% grain, big_group := 'grain']
+pdfd[food %in% fruit_vege, big_group := 'fruit_vege']
+pdfd[food %in% meat, big_group := 'meat']
+pdfd[food %in% fish_egg, big_group := 'fish_egg']
+pdfd[food %in% dairy, big_group := 'dairy']
+pdfd[food %in% fats, big_group := 'fats']
+pdfd[food %in% beverages, big_group := 'beverages']
+pdfd[food %in% sugar_other, big_group := 'sugar_other']
+
+
+p3 <- ggplot(data = pdfd, 
+             aes(x = energy, y = ghge, size = intake, 
+                 label = food, color = big_group))
+p3 <- p3 + geom_point(alpha = 0.3) + xlim(-3, 30) + ylim(-0.002, 0.015)
+p3 <- p3 + scale_size(range = c(0.1, 20))
+p3 <- p3 + geom_text_repel(size = 4, max.overlaps = 15)
+# p3 <- p3 + geom_text(size = 3, check_overlap = T)
+p3 <- p3 + theme_bw()
+p3 <- p3 + scale_color_brewer(palette = 'Dark2')
+p3 <- p3 + labs(title = 'Energy vs GHGE per unit food (group)', 
+                x = 'Energy (per unit)', 
+                y = 'GHGE (per unit)')
+p3
+```
+
+
+### Proportion for 5 metrics
+
+Finally we present the percentage contribution of 28 food groups towards 5 categories.
+
+```{r}
+#| label: p4
+#| echo: true
+#| eval: true
+#| code-fold: true
+#| code-summary: "Show code"
+
+pdfp <- data.frame(fprop) # total 
+pdfp$food_name <- row.names(pdfp)
+
+# attach big group
+data.table::setDT(pdfp)
+pdfp[food_name %in% grain, big_group := 'grain']
+pdfp[food_name %in% fruit_vege, big_group := 'fruit_vege']
+pdfp[food_name %in% meat, big_group := 'meat']
+pdfp[food_name %in% fish_egg, big_group := 'fish_egg']
+pdfp[food_name %in% dairy, big_group := 'dairy']
+pdfp[food_name %in% fats, big_group := 'fats']
+pdfp[food_name %in% beverages, big_group := 'beverages']
+pdfp[food_name %in% sugar_other, big_group := 'sugar_other']
+
+pdfp_long <- tidyr::pivot_longer(pdfp, cols = -c(food_name, big_group), names_to = 'category')
+pdfp_long <- data.table::setDT(pdfp_long)
+
+# also add orders here
+pdfp_long$food_name_order <- factor(pdfp_long$food_name, 
+                                   levels = names_ordered, 
+                                   labels = names_ordered)
+
+# plot 
+p4 <- ggplot(data = pdfp_long[category %in% c('energy', 'protein', 'fat', 'carbs','ghge')], 
+             aes(x = food_name_order, y = value, fill = big_group))
+p4 <- p4 + geom_bar(stat = 'identity')
+p4 <- p4 + coord_flip()
+p4 <- p4 + facet_wrap(~category, ncol = 5)
+p4 <- p4 + scale_fill_brewer(palette = 'Dark2')
+p4 <- p4 + labs(title = 'Proportion of food contribution',
+                subtitle = 'Each category sums up to 1',
+                x = 'Food groups', 
+                y = 'Percentage')
+p4 <- p4 + theme_bw()
+p4 <- p4 + theme(axis.text = element_text(size = 10), 
+                 axis.title = element_text(size = 10), 
+                 plot.title = element_text(size = 15), 
+                 strip.text = element_text(size = 12), 
+                 legend.position = 'none')
+p4
+```
+
+
+
+
