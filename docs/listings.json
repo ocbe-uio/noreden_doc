@@ -2,7 +2,10 @@
   {
     "listing": "/documentation/index.html",
     "items": [
-      "/documentation/optimization_problem.html"
+      "/documentation/optimization_problem.html",
+      "/documentation/input_data.html",
+      "/documentation/run_optimisation.html",
+      "/documentation/output_data.html"
     ]
   },
   {

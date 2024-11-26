@@ -124,7 +124,7 @@ constraintsdata[, c(1,2)]
 
 #Constraint right-hand sides and directions
 bvec <- limitsdata$rhs
-sense <- limitsdata$Dir   #Rcplex uses E, L, and R instead of ==, <= and >= 
+sense <- limitsdata$Dir   # Rcplex uses E, L, and R instead of ==, <= and >= 
 bvec
 
 #Set upper and lower bounds for realism constraints    

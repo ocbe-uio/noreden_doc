@@ -4,9 +4,12 @@ listing:
   - id: docs
     max-description-length: 500
     image-height: 150px
-    fields: [title]
+    fields: [title, description]
     contents: 
       - "optimization_problem.qmd"
+      - "input_data.qmd"
+      - "run_optimisation.qmd"
+      - "output_data.qmd"
     type: table
     grid-item-border: false
     sort-ui: false
@@ -15,5 +18,5 @@ listing:
     categories: true
 ---
 
-The documentation site is undergoing big changes. 
+The documentation site is ....
 

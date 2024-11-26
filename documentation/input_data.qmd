@@ -1,0 +1,33 @@
+---
+title: "2. Input Data Processing"
+description: Prepare data for the optimisation
+format: 
+  html:
+    code-fold: false
+    code-tools: false
+    code-annotations: select
+editor: source
+---
+
+
+
+
+
+
+Aim: find a diet combination that satisfy the nutritional and environmental constraints, while similar to the current diet. 
+
+
+$$(x_1 - X_1)^2 + (x_2 - X_2)^2 + ... + (x_k - X_k)^2$$
+
+and satisfy the following **constraints**: 
+
+* $x_1, ..., x_k >= 0$ (realistic diet intake can not be negative)
+* $x_1e_1 + x_2 e_2 + ... + x_k e_k >= E_{lower}$, total energy above the lower limit
+* $x_1e_1 + x_2 e_2 + ... + x_k e_k <= E_{upper}$, total energy below the upper limit
+* $x_1p_1 + x_2 p_2 + ... + x_k p_k >= P_{lower}$, total protein below the upper limit
+* $x_1p_1 + x_2 p_2 + ... + x_k e_k <= P_{upper}$, total protein below the upper limit
+
+And so on. 
+
+
+

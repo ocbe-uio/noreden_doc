@@ -4,7 +4,7 @@
     "href": "documentation/index.html",
     "title": "Documentation",
     "section": "",
-    "text": "The documentation site is undergoing big changes.\n\n\n\n\n\n\n\n\n\nTitle\n\n\n\n\n\n\nOptimization problem in Rcplex\n\n\n\n\n\nNo matching items"
+    "text": "The documentation site is ….\n\n\n\n\n\n\n\n\n\nTitle\n\n\nDescription\n\n\n\n\n\n\n1. Optimization problem\n\n\nOptimization problem set up with CPLEX\n\n\n\n\n2. Input Data Processing\n\n\nPrepare data for the optimisation\n\n\n\n\n3. Run Optimisation\n\n\nRun the program\n\n\n\n\n4. Output Data Processing\n\n\nProcess results\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "index.html",
@@ -1150,9 +1150,9 @@
   {
     "objectID": "documentation/optimization_problem.html",
     "href": "documentation/optimization_problem.html",
-    "title": "Optimization problem in Rcplex",
+    "title": "1. Optimization problem",
     "section": "",
-    "text": "Resources: official Rcplex vignette, page 2.\nThe CPLEX solver aims to solve the optimisation problem:\n\\[min \\frac{1}{2} x' Q x + c'x\\] subject to\n\\[Ax \\leq b\\]\n\\[lb \\leq x \\leq ub\\]\n\n\nlibrary(tidyverse)\nlibrary(palmerpenguins)\n1penguins |&gt;\n2  mutate(\n    bill_ratio = bill_depth_mm / bill_length_mm,\n    bill_area  = bill_depth_mm * bill_length_mm\n  )\n3head(penguins)\n\n\n1\n\nTake penguins, and then,\n\n2\n\nadd new columns for the bill ratio and bill area.\n\n3\n\nshow the first 6 lines"
+    "text": "Aim: find a diet combination that satisfy the nutritional and environmental constraints, while similar to the current diet."
   },
   {
     "objectID": "notes_internal/x_organise_code.html",
@@ -1174,5 +1174,61 @@
     "title": "Notes",
     "section": "Result processing",
     "text": "Result processing\n\nNutrients\ndiet\ndiet departure\nruminant meat departure\nred meat departure\ntotal meat departure"
+  },
+  {
+    "objectID": "documentation/optimization_problem.html#formulation",
+    "href": "documentation/optimization_problem.html#formulation",
+    "title": "Optimization problem",
+    "section": "",
+    "text": "Aim: find a diet combination that satisfy the nutritional and environmental constraints, while similar to the current diet.\n\n\nWe make the following notation:\n\n\\(x_1, x_2, ..., x_{k}\\) are the target food intake (in grams, or other units) for \\(k\\) food groups.\n\\(X_1, X_2, ..., X_{k}\\) are the current food intake (in grams, or other units).\n\nFor the constraints,\n\n\\(e_1, ..., e_k\\): energy associated with each of the food groups\n\n\\(E\\) is the total energy for all foods, with range between \\(E_{lower}, E_{upper}\\)\nFor example, with the data we have, this range is (9000, 10000).\n\n\\(p_1, ..., p_k\\): protein\n\\(f_1, ..., f_k\\): fat\n\\(c_1, ..., c_k\\): carbs\n\\(s_1, ..., s_k\\): sugar\n\\(a_1, ..., a_k\\): alcohol\n\\(g_1, ..., g_k\\): ghge\n\n\n\n\nFind a set of \\(x_1, ..., x_k\\) such that the values would\nminimise the squared sum of differences between current diet and target diet:\n\\((x_1 - X_1)^2 + (x_2 - X_2)^2 + ... + (x_k - X_k)^2\\)\nand satisfy the following constraints:\n\\(x_1, ..., x_k &gt;= 0\\) (realistic diet intake can not be negative)\n\\(x_1e_1 + x_2 e_2 + ... + x_k e_k &gt;= E_{lower}\\), total energy above the lower limit\n\\(x_1e_1 + x_2 e_2 + ... + x_k e_k &lt;= E_{upper}\\), total energy below the upper limit\n\\(x_1p_1 + x_2 p_2 + ... + x_k p_k &gt;= P_{lower}\\), total protein below the upper limit\n\\(x_1p_1 + x_2 p_2 + ... + x_k e_k &lt;= P_{upper}\\), total protein below the upper limit\nAnd so on.\n\n\n\nThis setting is a quadratic program (QP). It is an optimization problem with quadratic objective, and inequality constraints. We do not have equality constraints in this setting.\nWith R, there are various software to find a solution:\n\nCPLEX (chosen one)\nnloptr in nloptr package (non-linear optimization),\nconstrOptim in stats package, which relies on optim function,\nsolve.QP in quadprog package\n\namong others."
+  },
+  {
+    "objectID": "documentation/optimization_problem.html#cplex",
+    "href": "documentation/optimization_problem.html#cplex",
+    "title": "1. Optimization problem",
+    "section": "CPLEX",
+    "text": "CPLEX\n\nResources: official Rcplex vignette, page 2.\n\nThe CPLEX solver aims to solve the optimisation problem:\n\\[min \\frac{1}{2} x' Q x + c'x\\] subject to\n\\[Ax \\leq b\\]\n\\[lb \\leq x \\leq ub\\]\n\nThe program in R looks like this\n\nlibrary(Rcplex)\n\n# the values needs to be available\n1result_obj &lt;- Rcplex(cvec = cvec,\n2                     Amat = Amat,\n3                     bvec = bvec,\n4                     Qmat = Qmat,\n5                     lb = lb,\n                     ub = ub,\n6                     objsense = \"min\",\n                     sense = sense)\n# the result is saved in result_obj, to see the results\nresult_obj\n\n\n1\n\ncvec: vector, current diet values (multiplied by -2)\n\n2\n\nAmat: matrix, individual food contribution to total nutrition and environmental impact\n\n3\n\nbvec: vector, constraint values for nutrition and environmental impact for total diet\n\n4\n\nQmat: matrix\n\n5\n\nlb, ub: lower and upper bound for target diet\n\n6\n\nobjsense, sense: E, L, and R instead of ==, &lt;= and &gt;="
+  },
+  {
+    "objectID": "documentation/1_define_problem.html",
+    "href": "documentation/1_define_problem.html",
+    "title": "Optimization problem in Rcplex",
+    "section": "",
+    "text": "Aim: find a diet combination that satisfy the nutritional and environmental constraints, while similar to the current diet.\n\n\nWe make the following notation:\n\n\\(x_1, x_2, ..., x_{k}\\) are the target food intake (in grams, or other units) for \\(k\\) food groups.\n\\(X_1, X_2, ..., X_{k}\\) are the current food intake (in grams, or other units).\n\nFor the constraints,\n\n\\(e_1, ..., e_k\\): energy associated with each of the food groups\n\n\\(E\\) is the total energy for all foods, with range between \\(E_{lower}, E_{upper}\\)\nFor example, with the data we have, this range is (9000, 10000).\n\n\\(p_1, ..., p_k\\): protein\n\\(f_1, ..., f_k\\): fat\n\\(c_1, ..., c_k\\): carbs\n\\(s_1, ..., s_k\\): sugar\n\\(a_1, ..., a_k\\): alcohol\n\\(g_1, ..., g_k\\): ghge\n\n\n\n\nFind a set of \\(x_1, ..., x_k\\) such that the values would\nminimise the squared sum of differences between current diet and target diet:\n\\((x_1 - X_1)^2 + (x_2 - X_2)^2 + ... + (x_k - X_k)^2\\)\nand satisfy the following constraints:\n\\(x_1, ..., x_k &gt;= 0\\) (realistic diet intake can not be negative)\n\\(x_1e_1 + x_2 e_2 + ... + x_k e_k &gt;= E_{lower}\\), total energy above the lower limit\n\\(x_1e_1 + x_2 e_2 + ... + x_k e_k &lt;= E_{upper}\\), total energy below the upper limit\n\\(x_1p_1 + x_2 p_2 + ... + x_k p_k &gt;= P_{lower}\\), total protein below the upper limit\n\\(x_1p_1 + x_2 p_2 + ... + x_k e_k &lt;= P_{upper}\\), total protein below the upper limit\nAnd so on."
+  },
+  {
+    "objectID": "documentation/1_define_problem.html#formulation",
+    "href": "documentation/1_define_problem.html#formulation",
+    "title": "Optimization problem in Rcplex",
+    "section": "",
+    "text": "Aim: find a diet combination that satisfy the nutritional and environmental constraints, while similar to the current diet.\n\n\nWe make the following notation:\n\n\\(x_1, x_2, ..., x_{k}\\) are the target food intake (in grams, or other units) for \\(k\\) food groups.\n\\(X_1, X_2, ..., X_{k}\\) are the current food intake (in grams, or other units).\n\nFor the constraints,\n\n\\(e_1, ..., e_k\\): energy associated with each of the food groups\n\n\\(E\\) is the total energy for all foods, with range between \\(E_{lower}, E_{upper}\\)\nFor example, with the data we have, this range is (9000, 10000).\n\n\\(p_1, ..., p_k\\): protein\n\\(f_1, ..., f_k\\): fat\n\\(c_1, ..., c_k\\): carbs\n\\(s_1, ..., s_k\\): sugar\n\\(a_1, ..., a_k\\): alcohol\n\\(g_1, ..., g_k\\): ghge\n\n\n\n\nFind a set of \\(x_1, ..., x_k\\) such that the values would\nminimise the squared sum of differences between current diet and target diet:\n\\((x_1 - X_1)^2 + (x_2 - X_2)^2 + ... + (x_k - X_k)^2\\)\nand satisfy the following constraints:\n\\(x_1, ..., x_k &gt;= 0\\) (realistic diet intake can not be negative)\n\\(x_1e_1 + x_2 e_2 + ... + x_k e_k &gt;= E_{lower}\\), total energy above the lower limit\n\\(x_1e_1 + x_2 e_2 + ... + x_k e_k &lt;= E_{upper}\\), total energy below the upper limit\n\\(x_1p_1 + x_2 p_2 + ... + x_k p_k &gt;= P_{lower}\\), total protein below the upper limit\n\\(x_1p_1 + x_2 p_2 + ... + x_k e_k &lt;= P_{upper}\\), total protein below the upper limit\nAnd so on."
+  },
+  {
+    "objectID": "documentation/1_define_problem.html#solve-the-optimization-problem",
+    "href": "documentation/1_define_problem.html#solve-the-optimization-problem",
+    "title": "Optimization problem in Rcplex",
+    "section": "Solve the optimization problem",
+    "text": "Solve the optimization problem\nThis setting is a quadratic program (QP). It is an optimization problem with quadratic objective, and inequality constraints. We do not have equality constraints in this setting.\nWith R, there are various software to find a solution:\n\nnloptr in nloptr package (non-linear optimization),\nconstrOptim in stats package, which relies on optim function,\nsolve.QP in quadprog package\n\namong others."
+  },
+  {
+    "objectID": "documentation/input_data.html",
+    "href": "documentation/input_data.html",
+    "title": "2. Input Data Processing",
+    "section": "",
+    "text": "Aim: find a diet combination that satisfy the nutritional and environmental constraints, while similar to the current diet.\n\\[(x_1 - X_1)^2 + (x_2 - X_2)^2 + ... + (x_k - X_k)^2\\]\nand satisfy the following constraints:\n\n\\(x_1, ..., x_k &gt;= 0\\) (realistic diet intake can not be negative)\n\\(x_1e_1 + x_2 e_2 + ... + x_k e_k &gt;= E_{lower}\\), total energy above the lower limit\n\\(x_1e_1 + x_2 e_2 + ... + x_k e_k &lt;= E_{upper}\\), total energy below the upper limit\n\\(x_1p_1 + x_2 p_2 + ... + x_k p_k &gt;= P_{lower}\\), total protein below the upper limit\n\\(x_1p_1 + x_2 p_2 + ... + x_k e_k &lt;= P_{upper}\\), total protein below the upper limit\n\nAnd so on."
+  },
+  {
+    "objectID": "documentation/output_data.html",
+    "href": "documentation/output_data.html",
+    "title": "Optimization problem",
+    "section": "",
+    "text": "Aim: find a diet combination that satisfy the nutritional and environmental constraints, while similar to the current diet."
+  },
+  {
+    "objectID": "documentation/output_data.html#cplex",
+    "href": "documentation/output_data.html#cplex",
+    "title": "Optimization problem",
+    "section": "CPLEX",
+    "text": "CPLEX\n\nResources: official Rcplex vignette, page 2.\n\nThe CPLEX solver aims to solve the optimisation problem:\n\\[min \\frac{1}{2} x' Q x + c'x\\] subject to\n\\[Ax \\leq b\\]\n\\[lb \\leq x \\leq ub\\]\n\nThe program in R looks like this\n\nlibrary(Rcplex)\n\n# the values needs to be available\n1result_obj &lt;- Rcplex(cvec = cvec,\n2                     Amat = Amat,\n3                     bvec = bvec,\n4                     Qmat = Qmat,\n5                     lb = lb,\n                     ub = ub,\n6                     objsense = \"min\",\n                     sense = sense)\n# the result is saved in result_obj, to see the results\nresult_obj\n\n\n1\n\ncvec: vector, current diet values (multiplied by -2)\n\n2\n\nAmat: matrix, individual food contribution to total nutrition and environmental impact\n\n3\n\nbvec: vector, constraint values for nutrition and environmental impact for total diet\n\n4\n\nQmat: matrix\n\n5\n\nlb, ub: lower and upper bound for target diet\n\n6\n\nobjsense, sense: E, L, and R instead of ==, &lt;= and &gt;="
   }
 ]

@@ -1,5 +1,6 @@
 ---
-title: "Optimization problem in `Rcplex`"
+title: "1. Optimization problem"
+description: Optimization problem set up with `CPLEX`
 format: 
   html:
     code-fold: false
@@ -9,8 +10,70 @@ editor: source
 ---
 
 
-Resources: official [Rcplex vignette](https://cran.r-project.org/web/packages/Rcplex/Rcplex.pdf), page 2.
 
+
+
+
+Aim: find a diet combination that satisfy the nutritional and environmental constraints, while similar to the current diet. 
+
+
+### Notation
+
+We make the following notation: 
+
+* $x_1, x_2, ..., x_{k}$ are the **target food intake** (in grams, or other units) for $k$ food groups.
+* $X_1, X_2, ..., X_{k}$ are the **current food intake** (in grams, or other units).
+
+For the constraints, 
+
+* $e_1, ..., e_k$: energy associated with each of the food groups
+  * $E$ is the total energy for all foods, with range between $E_{lower}, E_{upper}$
+  * For example, with the data we have, this range is (9000, 10000). 
+* $p_1, ..., p_k$: protein
+* $f_1, ..., f_k$: fat
+* $g_1, ..., g_k$: ghge
+
+etc.
+
+### Optimization goal
+
+Find a set of $x_1, ..., x_k$ such that the values would 
+
+**minimise the squared sum of differences** between <u>current</u> diet and <u>target</u> diet:
+
+$$(x_1 - X_1)^2 + (x_2 - X_2)^2 + ... + (x_k - X_k)^2$$
+
+and satisfy the following **constraints**: 
+
+* $x_1, ..., x_k >= 0$ (realistic diet intake can not be negative)
+* $x_1e_1 + x_2 e_2 + ... + x_k e_k >= E_{lower}$, total energy above the lower limit
+* $x_1e_1 + x_2 e_2 + ... + x_k e_k <= E_{upper}$, total energy below the upper limit
+* $x_1p_1 + x_2 p_2 + ... + x_k p_k >= P_{lower}$, total protein below the upper limit
+* $x_1p_1 + x_2 p_2 + ... + x_k e_k <= P_{upper}$, total protein below the upper limit
+
+And so on. 
+
+
+
+### Solve the optimization problem 
+
+This setting is a quadratic program (QP). It is an optimization problem with **quadratic objective**, and **inequality constraints**. We do not have equality constraints in this setting. 
+
+With R, there are various software to find a solution: 
+
+* `CPLEX` (chosen one)
+* `nloptr` in `nloptr` package (non-linear optimization),
+* `constrOptim` in `stats` package, which relies on `optim` function,
+* `solve.QP` in `quadprog` package
+
+among others. 
+
+
+
+
+## CPLEX 
+
+> Resources: official [Rcplex vignette](https://cran.r-project.org/web/packages/Rcplex/Rcplex.pdf), page 2.
 
 The CPLEX solver aims to solve the optimisation problem: 
 
@@ -23,26 +86,32 @@ $$lb \leq x \leq ub$$
 
 ![](fig_input_dim.png)
 
-
-
-
-
-
-
+The program in R looks like this
 
 ```{r}
 #| eval: false
 #| echo: true
-library(tidyverse)
-library(palmerpenguins)
-penguins |>                                      # <1>
-  mutate(                                        # <2>
-    bill_ratio = bill_depth_mm / bill_length_mm, # <2>
-    bill_area  = bill_depth_mm * bill_length_mm  # <2>
-  )                                              # <2>
-head(penguins)                                   # <3>
+library(Rcplex)
+
+# the values needs to be available
+result_obj <- Rcplex(cvec = cvec,              # <1>
+                     Amat = Amat,              # <2>
+                     bvec = bvec,              # <3>
+                     Qmat = Qmat,              # <4>
+                     lb = lb,                  # <5>
+                     ub = ub,                  # <5>
+                     objsense = "min",         # <6>
+                     sense = sense)            # <6>
+# the result is saved in result_obj, to see the results
+result_obj
 ```
-1. Take `penguins`, and then,
-2. add new columns for the bill ratio and bill area.
-3. show the first 6 lines
+1. `cvec`: vector, current diet values (multiplied by -2)
+2. `Amat`: matrix, individual food contribution to total nutrition and environmental impact
+3. `bvec`: vector, constraint values for nutrition and environmental impact for total diet
+4. `Qmat`: matrix
+5. `lb, ub`: lower and upper bound for target diet
+6. `objsense, sense`: E, L, and R instead of ==, <= and >= 
+
+
+
 
