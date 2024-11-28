@@ -21,6 +21,40 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -162,7 +196,31 @@ window.Quarto = {
 <!-- sidebar -->
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#data" id="toc-data" class="nav-link active" data-scroll-target="#data">Data</a>
+  <ul class="collapse">
+  <li><a href="#contribution-per-unit-food" id="toc-contribution-per-unit-food" class="nav-link" data-scroll-target="#contribution-per-unit-food">1. Contribution per unit food</a></li>
+  <li><a href="#constraints" id="toc-constraints" class="nav-link" data-scroll-target="#constraints">2. Constraints</a></li>
+  <li><a href="#bounds" id="toc-bounds" class="nav-link" data-scroll-target="#bounds">3. Bounds</a></li>
+  </ul></li>
+  <li><a href="#data-check" id="toc-data-check" class="nav-link" data-scroll-target="#data-check">Data check</a>
+  <ul class="collapse">
+  <li><a href="#check-food-names" id="toc-check-food-names" class="nav-link" data-scroll-target="#check-food-names">Check food names</a></li>
+  <li><a href="#check-tags" id="toc-check-tags" class="nav-link" data-scroll-target="#check-tags">Check tags</a></li>
+  </ul></li>
+  <li><a href="#data-process" id="toc-data-process" class="nav-link" data-scroll-target="#data-process">Data process</a>
+  <ul class="collapse">
+  <li><a href="#amat" id="toc-amat" class="nav-link" data-scroll-target="#amat">Amat</a></li>
+  <li><a href="#bvec-and-sense" id="toc-bvec-and-sense" class="nav-link" data-scroll-target="#bvec-and-sense">bvec and sense</a></li>
+  <li><a href="#lb-ub" id="toc-lb-ub" class="nav-link" data-scroll-target="#lb-ub">lb, ub</a></li>
+  <li><a href="#qmat-cvec" id="toc-qmat-cvec" class="nav-link" data-scroll-target="#qmat-cvec">Qmat, cvec</a></li>
+  <li><a href="#put-together-as-a-list" id="toc-put-together-as-a-list" class="nav-link" data-scroll-target="#put-together-as-a-list">Put together as a list</a></li>
+  </ul></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -191,19 +249,494 @@ window.Quarto = {
 </header>
 
 
-<p>Aim: find a diet combination that satisfy the nutritional and environmental constraints, while similar to the current diet.</p>
-<p><span class="math display">\[(x_1 - X_1)^2 + (x_2 - X_2)^2 + ... + (x_k - X_k)^2\]</span></p>
-<p>and satisfy the following <strong>constraints</strong>:</p>
+<section id="data" class="level2">
+<h2 class="anchored" data-anchor-id="data">Data</h2>
+<p>The pseudomised data is available in the <code>public_data</code> folder as an example. These are NOT the original values from KBS database.</p>
+<p>Three datasets are relevant:</p>
 <ul>
-<li><span class="math inline">\(x_1, ..., x_k &gt;= 0\)</span> (realistic diet intake can not be negative)</li>
-<li><span class="math inline">\(x_1e_1 + x_2 e_2 + ... + x_k e_k &gt;= E_{lower}\)</span>, total energy above the lower limit</li>
-<li><span class="math inline">\(x_1e_1 + x_2 e_2 + ... + x_k e_k &lt;= E_{upper}\)</span>, total energy below the upper limit</li>
-<li><span class="math inline">\(x_1p_1 + x_2 p_2 + ... + x_k p_k &gt;= P_{lower}\)</span>, total protein below the upper limit</li>
-<li><span class="math inline">\(x_1p_1 + x_2 p_2 + ... + x_k e_k &lt;= P_{upper}\)</span>, total protein below the upper limit</li>
+<li><code>contrib_per_unit.xlsx</code></li>
+<li><code>constraints.xlsx</code></li>
+<li><code>bounds.xlsx</code></li>
 </ul>
-<p>And so on.</p>
+<section id="contribution-per-unit-food" class="level3">
+<h3 class="anchored" data-anchor-id="contribution-per-unit-food">1. Contribution per unit food</h3>
+<p>This dataframe stores data for <strong>contribution per unit food</strong> on</p>
+<ul>
+<li>macro nutrients</li>
+<li>micro nutrients</li>
+<li>environmental impact</li>
+<li>others</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readxl)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(data.table)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>cpu <span class="ot">&lt;-</span> <span class="fu">read_excel</span>(<span class="st">"data/contrib_per_unit.xlsx"</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(cpu)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 55
+  Foodgroup  Means_pr10MJ `Energy (MJ)` Protein1 Protein2 Available carbohydra…¹
+  &lt;chr&gt;             &lt;dbl&gt;         &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;                  &lt;dbl&gt;
+1 Bread, fi…        85.3         0.0109   0.0828   0.0828                  0.460
+2 Bread, co…       116.          0.0101   0.0940   0.0940                  0.413
+3 Flour, gr…         3.78        0.014    0.117    0.117                   0.671
+4 Rice               9.87        0.0135   0.0670   0.0670                  0.704
+5 Pasta             11.1         0.0137   0.109    0.109                   0.624
+6 Breakfast…        17.2         0.0157   0.109    0.109                   0.608
+# ℹ abbreviated name: ¹​`Available carbohydrates1`
+# ℹ 49 more variables: `Available carbohydrates2` &lt;dbl&gt;, `Added Sugar` &lt;dbl&gt;,
+#   `Dietary fiber` &lt;dbl&gt;, Fat1 &lt;dbl&gt;, Fat2 &lt;dbl&gt;,
+#   `Sum saturated fatty acids` &lt;dbl&gt;, `Sum trans fatty acids` &lt;dbl&gt;,
+#   `Sum n-3 fatty acids` &lt;dbl&gt;, `Sum ALA` &lt;dbl&gt;,
+#   `Sum monounsaturated fatty acids1` &lt;dbl&gt;,
+#   `Sum monounsaturated fatty acids2` &lt;dbl&gt;, …</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(cpu)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "Foodgroup"                        "Means_pr10MJ"                    
+ [3] "Energy (MJ)"                      "Protein1"                        
+ [5] "Protein2"                         "Available carbohydrates1"        
+ [7] "Available carbohydrates2"         "Added Sugar"                     
+ [9] "Dietary fiber"                    "Fat1"                            
+[11] "Fat2"                             "Sum saturated fatty acids"       
+[13] "Sum trans fatty acids"            "Sum n-3 fatty acids"             
+[15] "Sum ALA"                          "Sum monounsaturated fatty acids1"
+[17] "Sum monounsaturated fatty acids2" "Sum polyunsaturated fatty acids1"
+[19] "Sum polyunsaturated fatty acids2" "Vitamin A"                       
+[21] "Vitamin E"                        "Thiamin (Vitamin B1)"            
+[23] "Riboflavin (Vitamin B2)"          "Niacin equivalent"               
+[25] "Vitamin B6"                       "Folate"                          
+[27] "Vitamin B12"                      "Vitamin C"                       
+[29] "Vitamin D"                        "Sodium"                          
+[31] "Potassium"                        "Calcium"                         
+[33] "Magnesium"                        "Phosphorus"                      
+[35] "Iron"                             "Zinc"                            
+[37] "Iodine"                           "Selenium"                        
+[39] "Copper"                           "Alcohol"                         
+[41] "GHGE"                             "FE"                              
+[43] "ME"                               "ACID"                            
+[45] "WU"                               "LU"                              
+[47] "Whole grains"                     "Fruit"                           
+[49] "Vegetables"                       "Dairy1"                          
+[51] "Dairy2"                           "Fish1"                           
+[53] "Fish2"                            "Red meat"                        
+[55] "White meat"                      </code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The 2nd column (<code>Means_pr10MJ</code>) is the <strong>average food intake</strong>, which is same as <code>mean</code> in bounds data (3rd data file). It is not necessary to be in this table as it is not the per unit contribution. We will drop it in the subsequent data processing.</p>
+</div>
+</div>
+</section>
+<section id="constraints" class="level3">
+<h3 class="anchored" data-anchor-id="constraints">2. Constraints</h3>
+<p>Total diet constraint limits for each outcome of interest. The names need to match the column names in <code>contrib_per_unit</code> (check it in the next section)</p>
+<ul>
+<li><code>Dir</code>: direction: equal, greater or less than</li>
+<li><code>rhs</code>: right hand side values</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>constraints <span class="ot">&lt;-</span> <span class="fu">read_excel</span>(<span class="st">"data/constraints.xlsx"</span>) </span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(constraints)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 3
+  tag_outcome             Dir     rhs
+  &lt;chr&gt;                   &lt;chr&gt; &lt;dbl&gt;
+1 Energy (MJ)             E      10.5
+2 Protein, g, lower       G      62.9
+3 Protein, g, upper       L     126. 
+4 Carbohydrates, g, lower G     283. 
+5 Carbohydrates, g, upper L     377. 
+6 Added sugar, g          L      62.9</code></pre>
+</div>
+</div>
+</section>
+<section id="bounds" class="level3">
+<h3 class="anchored" data-anchor-id="bounds">3. Bounds</h3>
+<p>Intake information on each food groups. Food names need to match the food names in <code>contrib_per_unit</code>.</p>
+<ul>
+<li><code>mean</code>: average intake based on dietary survey. Served as baseline</li>
+<li><code>lower_bound</code>, <code>upper_bound</code>: lower and upper permissible optimised intake.</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>intake <span class="ot">&lt;-</span> <span class="fu">read_excel</span>(<span class="st">"data/bounds.xlsx"</span>) </span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(intake)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 4
+  Foodgroup           mean lower_bound upper_bound
+  &lt;chr&gt;              &lt;dbl&gt;       &lt;dbl&gt;       &lt;dbl&gt;
+1 Bread fine         85.3        8.53        245. 
+2 Bread coarse      116.        11.6         289. 
+3 Flours grains       3.78       0.378        20.6
+4 Rice                9.87       0.987        53.1
+5 Pasta              11.1        1.11         61.6
+6 Breakfast cereals  17.2        1.72         99.1</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="data-check" class="level1">
+<h1>Data check</h1>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Objectives
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>Check whether the <strong>food names</strong> and <strong>outcome</strong> (nutrient, envimpact) match across different tables, so the multiplication later is correct</li>
+</ul>
+</div>
+</div>
+<section id="check-food-names" class="level3">
+<h3 class="anchored" data-anchor-id="check-food-names">Check food names</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># cpu$Foodgroup</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co"># intake$Foodgroup</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co"># put the food groups from two tables together</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>food_list <span class="ot">&lt;-</span> <span class="fu">cbind</span>(cpu<span class="sc">$</span>Foodgroup, intake<span class="sc">$</span>Foodgroup)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(food_list)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     [,1]                [,2]               
+[1,] "Bread, fine"       "Bread fine"       
+[2,] "Bread, coarse"     "Bread coarse"     
+[3,] "Flour, grains"     "Flours grains"    
+[4,] "Rice"              "Rice"             
+[5,] "Pasta"             "Pasta"            
+[6,] "Breakfast cereals" "Breakfast cereals"</code></pre>
+</div>
+</div>
+<p>It can be helpful to check in detail whether they match. In this case, it is because of the commas.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-6"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-6-1"><a href="#annotated-cell-6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># check whether the values match</span></span>
+<span id="annotated-cell-6-2"><a href="#annotated-cell-6-2" aria-hidden="true" tabindex="-1"></a>food_list[, <span class="dv">1</span>] <span class="sc">==</span> food_list[, <span class="dv">2</span>]</span>
+<span id="annotated-cell-6-3"><a href="#annotated-cell-6-3" aria-hidden="true" tabindex="-1"></a><span class="co"># if they do not match, can inspect in more details</span></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-6" data-target-annotation="1">1</button><span id="annotated-cell-6-4" class="code-annotation-target"><a href="#annotated-cell-6-4" aria-hidden="true" tabindex="-1"></a>food_list[food_list[, <span class="dv">1</span>] <span class="sc">!=</span> food_list[, <span class="dv">2</span>], ]</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-hidden code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-6" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-6" data-code-lines="4" data-code-annotation="1">this line puts all the indices where the 1st and 2nd column don’t match as the row index for <code>food_list</code> dataframe, and prints out all the rows corresponding to those indices</span>
+</dd>
+</dl>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] FALSE FALSE FALSE  TRUE  TRUE  TRUE FALSE FALSE FALSE  TRUE FALSE FALSE
+[13] FALSE FALSE  TRUE  TRUE  TRUE  TRUE FALSE FALSE  TRUE FALSE  TRUE  TRUE
+[25]  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE FALSE FALSE FALSE  TRUE FALSE
+[37] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE FALSE FALSE FALSE
+[49]  TRUE FALSE  TRUE  TRUE FALSE
+      [,1]                           [,2]                         
+ [1,] "Bread, fine"                  "Bread fine"                 
+ [2,] "Bread, coarse"                "Bread coarse"               
+ [3,] "Flour, grains"                "Flours grains"              
+ [4,] "Cakes, cookies, crackers"     "Cakes cookies crackers"     
+ [5,] "Potatoes, raw, boiled, baked" "Potatoes raw boiled"        
+ [6,] "Potatoes, fried"              "Potatoes fried"             
+ [7,] "Vegetables, dark green"       "Vegetables dark green"      
+ [8,] "Vegetables, red orange"       "Vegetables red orange"      
+ [9,] "Vegetables, other"            "Vegetables other"           
+[10,] "Vegetables, salad"            "Vegetables salad"           
+[11,] "Pomme, stone"                 "Pomme stone"                
+[12,] "Fruit, other"                 "Fruit other"                
+[13,] "Meat, dairy substitutes"      "Meat dairy substitutes"     
+[14,] "Fish, lean"                   "Fish lean"                  
+[15,] "Fish, fatty"                  "Fish fatty"                 
+[16,] "Shellfish, other"             "Shellfish other"            
+[17,] "Milk, low fat"                "Milk low fat"               
+[18,] "Milk, high fat"               "Milk high fat"              
+[19,] "Dairy, fermented"             "Dairy fermented"            
+[20,] "Dairy, other"                 "Dairy other"                
+[21,] "Cheese, fresh"                "Cheese fresh"               
+[22,] "Cheese, brown"                "Cheese brown"               
+[23,] "Cheese, other"                "Cheese other"               
+[24,] "Fats, plant-based"            "Fats plant based"           
+[25,] "Fats, animal-based"           "Fats animal based"          
+[26,] "Coffee, tea"                  "Coffee tea"                 
+[27,] "Soft drinks, sugar-sweetened" "Soft drinks sugar sweetened"
+[28,] "Soft drinks, sugar-free"      "Soft drinks sugar free"     
+[29,] "Sugar, sweets"                "Sugar sweets"               
+[30,] "Sauces, miscellaneous"        "Sauces miscellaneous"       </code></pre>
+</div>
+</div>
+</section>
+<section id="check-tags" class="level3">
+<h3 class="anchored" data-anchor-id="check-tags">Check tags</h3>
+<p>The names of outcomes of interest might be coded differently, so it might be necessary to recode the names.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="annotated-cell-7"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><button class="code-annotation-anchor" data-target-cell="annotated-cell-7" data-target-annotation="1">1</button><span id="annotated-cell-7-1" class="code-annotation-target"><a href="#annotated-cell-7-1" aria-hidden="true" tabindex="-1"></a>cpu <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">select</span>(cpu ,</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-7" data-target-annotation="2">2</button><span id="annotated-cell-7-2" class="code-annotation-target"><a href="#annotated-cell-7-2" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"Foodgroup"</span>,</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-7" data-target-annotation="3">3</button><span id="annotated-cell-7-3" class="code-annotation-target"><a href="#annotated-cell-7-3" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"Energy (MJ)"</span> <span class="ot">=</span> <span class="st">"Energy (MJ)"</span>,</span>
+<span id="annotated-cell-7-4"><a href="#annotated-cell-7-4" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"Protein, g, lower"</span> <span class="ot">=</span> <span class="st">"Protein1"</span>, </span>
+<span id="annotated-cell-7-5"><a href="#annotated-cell-7-5" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"Protein, g, upper"</span> <span class="ot">=</span> <span class="st">"Protein2"</span>, </span>
+<span id="annotated-cell-7-6"><a href="#annotated-cell-7-6" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"Carbohydrates, g, lower"</span><span class="ot">=</span><span class="st">"Available carbohydrates1"</span>, </span>
+<span id="annotated-cell-7-7"><a href="#annotated-cell-7-7" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"Carbohydrates, g, upper"</span><span class="ot">=</span><span class="st">"Available carbohydrates2"</span>,</span>
+<span id="annotated-cell-7-8"><a href="#annotated-cell-7-8" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"Added sugar, g"</span><span class="ot">=</span><span class="st">"Added Sugar"</span>,</span>
+<span id="annotated-cell-7-9"><a href="#annotated-cell-7-9" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"Dietary fiber, g"</span><span class="ot">=</span> <span class="st">"Dietary fiber"</span>, </span>
+<span id="annotated-cell-7-10"><a href="#annotated-cell-7-10" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"Fat, g, lower"</span><span class="ot">=</span> <span class="st">"Fat1"</span>,  </span>
+<span id="annotated-cell-7-11"><a href="#annotated-cell-7-11" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"Fat, g, upper"</span><span class="ot">=</span> <span class="st">"Fat2"</span>,</span>
+<span id="annotated-cell-7-12"><a href="#annotated-cell-7-12" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"Saturated fatty acids, g"</span><span class="ot">=</span><span class="st">"Sum saturated fatty acids"</span>,</span>
+<span id="annotated-cell-7-13"><a href="#annotated-cell-7-13" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"Trans fatty acids, g"</span><span class="ot">=</span><span class="st">"Sum trans fatty acids"</span>, <span class="co">#Added</span></span>
+<span id="annotated-cell-7-14"><a href="#annotated-cell-7-14" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"n-3 fatty acids, g"</span><span class="ot">=</span><span class="st">"Sum n-3 fatty acids"</span>,</span>
+<span id="annotated-cell-7-15"><a href="#annotated-cell-7-15" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"ALA, g"</span> <span class="ot">=</span> <span class="st">"Sum ALA"</span>,</span>
+<span id="annotated-cell-7-16"><a href="#annotated-cell-7-16" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"MUFA, g, lower"</span> <span class="ot">=</span> <span class="st">"Sum monounsaturated fatty acids1"</span>,</span>
+<span id="annotated-cell-7-17"><a href="#annotated-cell-7-17" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"MUFA, g, upper"</span> <span class="ot">=</span> <span class="st">"Sum monounsaturated fatty acids2"</span>,</span>
+<span id="annotated-cell-7-18"><a href="#annotated-cell-7-18" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"PUFA, g, lower"</span> <span class="ot">=</span> <span class="st">"Sum polyunsaturated fatty acids1"</span>,</span>
+<span id="annotated-cell-7-19"><a href="#annotated-cell-7-19" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"PUFA, g, upper"</span> <span class="ot">=</span> <span class="st">"Sum polyunsaturated fatty acids2"</span>,</span>
+<span id="annotated-cell-7-20"><a href="#annotated-cell-7-20" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"Vitamin A, RE µg"</span><span class="ot">=</span> <span class="st">"Vitamin A"</span>,</span>
+<span id="annotated-cell-7-21"><a href="#annotated-cell-7-21" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"Vitamin E, alfa-TE"</span><span class="ot">=</span> <span class="st">"Vitamin E"</span>,</span>
+<span id="annotated-cell-7-22"><a href="#annotated-cell-7-22" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"Thiamin (Vitamin B1), mg"</span><span class="ot">=</span> <span class="st">"Thiamin (Vitamin B1)"</span>,</span>
+<span id="annotated-cell-7-23"><a href="#annotated-cell-7-23" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"Riboflavin (Vitamin B2), mg"</span><span class="ot">=</span> <span class="st">"Riboflavin (Vitamin B2)"</span>,</span>
+<span id="annotated-cell-7-24"><a href="#annotated-cell-7-24" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"Niacin, NE"</span><span class="ot">=</span><span class="st">"Niacin equivalent"</span>,</span>
+<span id="annotated-cell-7-25"><a href="#annotated-cell-7-25" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"Vitamin B6, mg"</span><span class="ot">=</span><span class="st">"Vitamin B6"</span>,</span>
+<span id="annotated-cell-7-26"><a href="#annotated-cell-7-26" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"Folate, µg"</span><span class="ot">=</span><span class="st">"Folate"</span>,</span>
+<span id="annotated-cell-7-27"><a href="#annotated-cell-7-27" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"Vitamin B12, µg"</span><span class="ot">=</span><span class="st">"Vitamin B12"</span>,</span>
+<span id="annotated-cell-7-28"><a href="#annotated-cell-7-28" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"Vitamin C, mg"</span><span class="ot">=</span><span class="st">"Vitamin C"</span>,</span>
+<span id="annotated-cell-7-29"><a href="#annotated-cell-7-29" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"Vitamin D, µg"</span> <span class="ot">=</span> <span class="st">"Vitamin D"</span>,</span>
+<span id="annotated-cell-7-30"><a href="#annotated-cell-7-30" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"Sodium, mg"</span><span class="ot">=</span><span class="st">"Sodium"</span>,</span>
+<span id="annotated-cell-7-31"><a href="#annotated-cell-7-31" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"Potassium, mg"</span><span class="ot">=</span><span class="st">"Potassium"</span>,</span>
+<span id="annotated-cell-7-32"><a href="#annotated-cell-7-32" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"Calcium, mg"</span><span class="ot">=</span><span class="st">"Calcium"</span>,</span>
+<span id="annotated-cell-7-33"><a href="#annotated-cell-7-33" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"Magnesium, mg"</span><span class="ot">=</span> <span class="st">"Magnesium"</span>,</span>
+<span id="annotated-cell-7-34"><a href="#annotated-cell-7-34" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"Phosphorus, mg"</span><span class="ot">=</span><span class="st">"Phosphorus"</span>,</span>
+<span id="annotated-cell-7-35"><a href="#annotated-cell-7-35" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"Iron, mg"</span><span class="ot">=</span><span class="st">"Iron"</span>,</span>
+<span id="annotated-cell-7-36"><a href="#annotated-cell-7-36" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"Zinc, mg"</span><span class="ot">=</span><span class="st">"Zinc"</span>,</span>
+<span id="annotated-cell-7-37"><a href="#annotated-cell-7-37" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"Iodine, µg"</span><span class="ot">=</span><span class="st">"Iodine"</span>,</span>
+<span id="annotated-cell-7-38"><a href="#annotated-cell-7-38" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"Selenium, µg"</span><span class="ot">=</span><span class="st">"Selenium"</span>,</span>
+<span id="annotated-cell-7-39"><a href="#annotated-cell-7-39" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"Copper, µg"</span><span class="ot">=</span><span class="st">"Copper"</span>,</span>
+<span id="annotated-cell-7-40"><a href="#annotated-cell-7-40" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"Alcohol, g"</span> <span class="ot">=</span> <span class="st">"Alcohol"</span>,</span>
+<span id="annotated-cell-7-41"><a href="#annotated-cell-7-41" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"GHGE, kg CO2-eq"</span> <span class="ot">=</span> <span class="st">"GHGE"</span>,</span>
+<span id="annotated-cell-7-42"><a href="#annotated-cell-7-42" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"FE, g P-eq"</span> <span class="ot">=</span> <span class="st">"FE"</span>,</span>
+<span id="annotated-cell-7-43"><a href="#annotated-cell-7-43" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"ME, g N-eq"</span> <span class="ot">=</span> <span class="st">"ME"</span>,</span>
+<span id="annotated-cell-7-44"><a href="#annotated-cell-7-44" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"TA, g SO2-eq"</span> <span class="ot">=</span> <span class="st">"ACID"</span>,</span>
+<span id="annotated-cell-7-45"><a href="#annotated-cell-7-45" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"WU, m2"</span> <span class="ot">=</span> <span class="st">"WU"</span>,</span>
+<span id="annotated-cell-7-46"><a href="#annotated-cell-7-46" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"LU, m3a"</span> <span class="ot">=</span> <span class="st">"LU"</span>,</span>
+<span id="annotated-cell-7-47"><a href="#annotated-cell-7-47" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"Whole grains, g"</span> <span class="ot">=</span> <span class="st">"Whole grains"</span>,</span>
+<span id="annotated-cell-7-48"><a href="#annotated-cell-7-48" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"Total fruit, g"</span> <span class="ot">=</span> <span class="st">"Fruit"</span>,</span>
+<span id="annotated-cell-7-49"><a href="#annotated-cell-7-49" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"Total vegetables, g"</span> <span class="ot">=</span> <span class="st">"Vegetables"</span>,</span>
+<span id="annotated-cell-7-50"><a href="#annotated-cell-7-50" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"Total dairy, minimum, g"</span> <span class="ot">=</span> <span class="st">"Dairy1"</span>,</span>
+<span id="annotated-cell-7-51"><a href="#annotated-cell-7-51" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"Total dairy, maximum, g"</span> <span class="ot">=</span> <span class="st">"Dairy2"</span>,</span>
+<span id="annotated-cell-7-52"><a href="#annotated-cell-7-52" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"Total fish, minimum, g"</span> <span class="ot">=</span> <span class="st">"Fish1"</span>,</span>
+<span id="annotated-cell-7-53"><a href="#annotated-cell-7-53" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"Total fish, maximum, g"</span> <span class="ot">=</span> <span class="st">"Fish2"</span>,</span>
+<span id="annotated-cell-7-54"><a href="#annotated-cell-7-54" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"Total red meat, maximum, g"</span> <span class="ot">=</span> <span class="st">"Red meat"</span>,</span>
+<span id="annotated-cell-7-55"><a href="#annotated-cell-7-55" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"Total white meat, maximum, g"</span> <span class="ot">=</span> <span class="st">"White meat"</span> </span>
+<span id="annotated-cell-7-56"><a href="#annotated-cell-7-56" aria-hidden="true" tabindex="-1"></a>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-annotation">
+<dl class="code-annotation-container-hidden code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-7" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-7" data-code-lines="1" data-code-annotation="1">data name</span>
+</dd>
+<dt data-target-cell="annotated-cell-7" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-7" data-code-lines="2" data-code-annotation="2">the column name that already exists in the data</span>
+</dd>
+<dt data-target-cell="annotated-cell-7" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-7" data-code-lines="3" data-code-annotation="3">if wish to change the name, <code>new_name</code> = <code>existing_name</code></span>
+</dd>
+</dl>
+</div>
+</div>
+<p>Afterwards, compare with another table.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># extract the tags of interest from two data</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>tags1 <span class="ot">&lt;-</span> <span class="fu">colnames</span>(cpu)[<span class="sc">-</span><span class="dv">1</span>]</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>tags2 <span class="ot">&lt;-</span> constraints<span class="sc">$</span>tag_outcome</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="co"># put together for easy comparison</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>tags_list <span class="ot">&lt;-</span> <span class="fu">cbind</span>(tags1, tags2)</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="co"># check whether the values match</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>tags_list[, <span class="dv">1</span>] <span class="sc">==</span> tags_list[, <span class="dv">2</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1]  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
+[13]  TRUE  TRUE  TRUE  TRUE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE FALSE
+[25] FALSE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE FALSE FALSE
+[37] FALSE  TRUE FALSE FALSE FALSE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
+[49]  TRUE  TRUE  TRUE  TRUE  TRUE</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># if they do not match, can inspect in more details</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>tags_list[tags_list[, <span class="dv">1</span>] <span class="sc">!=</span> tags_list[, <span class="dv">2</span>], ]  </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      tags1              tags2             
+ [1,] "Vitamin A, RE µg" "Vitamin A, RE μg"
+ [2,] "Folate, µg"       "Folate, μg"      
+ [3,] "Vitamin B12, µg"  "Vitamin B12, μg" 
+ [4,] "Vitamin D, µg"    "Vitamin D, μg"   
+ [5,] "Iodine, µg"       "Iodine, μg"      
+ [6,] "Selenium, µg"     "Selenium, μg"    
+ [7,] "Copper, µg"       "Copper, μg"      
+ [8,] "GHGE, kg CO2-eq"  "GHGE, kg COe-eq" 
+ [9,] "FE, g P-eq"       "FE, kg P-eq"     
+[10,] "ME, g N-eq"       "ME, kg N-eq"     
+[11,] "TA, g SO2-eq"     "TA, kg SO2-eq"   </code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Pay attention to the unmatched ones. In some cases (row 9, 10, 11) it is indeed unmatched (g vs kg); in other cases where special character is involved (such as mu), human will see the same characters but R “sees” differently due to encoding. User should decide for themselves whether they are truly different.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="data-process" class="level1">
+<h1>Data process</h1>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Objectives
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Process the data so that they are in the correct format for the optimisation step</p>
+</div>
+</div>
+<p><img src="fig_input_dataform.png" class="img-fluid"></p>
+<table class="table">
+<colgroup>
+<col style="width: 17%">
+<col style="width: 47%">
+<col style="width: 35%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Data</th>
+<th>Information</th>
+<th>In <code>Rcplex</code> (processing required)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>contrib_per_unit</code></td>
+<td>Contribution per food unit</td>
+<td><code>Amat</code></td>
+</tr>
+<tr class="even">
+<td><code>constraints</code></td>
+<td>Constraint limits and directions</td>
+<td><code>bvec</code>, <code>sense</code></td>
+</tr>
+<tr class="odd">
+<td><code>bounds</code></td>
+<td>Intake for baseline, lower and upper bounds</td>
+<td><code>Qmat</code>, <code>cvec</code>, <code>lb</code>, <code>ub</code></td>
+</tr>
+</tbody>
+</table>
+<section id="amat" class="level3">
+<h3 class="anchored" data-anchor-id="amat">Amat</h3>
+<p><code>Amat</code> comes from <code>contrib_per_unit</code> (here it is called <code>cpu</code>). The necessary processing is to remove the first column (Food names), and transpose so that rows become columns.</p>
+<p>The dimension for <code>Amat</code> is <span class="math inline">\(n_{outcomes} \times n_{foods}\)</span>, these two do not need to be equal. In this example they are equal simply because we happen to have 53 foods and 53 outcomes.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>Amat <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(<span class="fu">t</span>(cpu[, <span class="sc">-</span><span class="fu">c</span>(<span class="dv">1</span>)])) <span class="co"># remove the Foodgroup, then transpose</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(Amat)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 53 53</code></pre>
+</div>
+</div>
+</section>
+<section id="bvec-and-sense" class="level3">
+<h3 class="anchored" data-anchor-id="bvec-and-sense">bvec and sense</h3>
+<p><code>bvec</code> and <code>sense</code> are values from the <code>constraints</code> data. Each pair of values should correspond to one outcome.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(constraints)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 3
+  tag_outcome             Dir     rhs
+  &lt;chr&gt;                   &lt;chr&gt; &lt;dbl&gt;
+1 Energy (MJ)             E      10.5
+2 Protein, g, lower       G      62.9
+3 Protein, g, upper       L     126. 
+4 Carbohydrates, g, lower G     283. 
+5 Carbohydrates, g, upper L     377. 
+6 Added sugar, g          L      62.9</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>bvec <span class="ot">&lt;-</span> constraints<span class="sc">$</span>rhs</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>sense <span class="ot">&lt;-</span> constraints<span class="sc">$</span>Dir   <span class="co">#Rcplex uses E, L, and R instead of ==, &lt;= and &gt;= </span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="lb-ub" class="level3">
+<h3 class="anchored" data-anchor-id="lb-ub">lb, ub</h3>
+<p><code>lb</code>, <code>ub</code> are values from <code>bounds</code> (here called <code>intake</code>).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(intake, <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 3 × 4
+  Foodgroup       mean lower_bound upper_bound
+  &lt;chr&gt;          &lt;dbl&gt;       &lt;dbl&gt;       &lt;dbl&gt;
+1 Bread fine     85.3        8.53        245. 
+2 Bread coarse  116.        11.6         289. 
+3 Flours grains   3.78       0.378        20.6</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>ub <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(intake<span class="sc">$</span>upper_bound)</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>lb <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(intake<span class="sc">$</span>lower_bound)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="qmat-cvec" class="level3">
+<h3 class="anchored" data-anchor-id="qmat-cvec">Qmat, cvec</h3>
+<p><code>Qmat</code> and <code>cvec</code> are derived from the <code>bound</code> data. They are based on the current average intake (baseline).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>obs <span class="ot">&lt;-</span> intake<span class="sc">$</span>mean</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>obssq <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">/</span>obs<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>n_food <span class="ot">&lt;-</span> <span class="fu">length</span>(obs)</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="co"># create diagonal matrix, where each diagonal value is obssq</span></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>Qmat <span class="ot">&lt;-</span> <span class="dv">2</span><span class="sc">*</span><span class="fu">as.matrix</span>(<span class="fu">diag</span>(obssq, n_food, n_food)) </span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a><span class="co"># cvec</span></span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>cvec <span class="ot">&lt;-</span> <span class="sc">-</span>(<span class="dv">2</span><span class="sc">/</span>obs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="put-together-as-a-list" class="level2">
+<h2 class="anchored" data-anchor-id="put-together-as-a-list">Put together as a list</h2>
+<p>For convenience, these values can be saved in an R object (a list) and used directly in the optimisation program.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">cvec =</span> cvec, </span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>          <span class="at">Amat =</span> Amat, </span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>          <span class="at">bvec =</span> bvec, </span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>          <span class="at">Qmat =</span> Qmat, </span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>          <span class="at">lb =</span> lb, </span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>          <span class="at">ub =</span> ub, </span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>          <span class="at">sense =</span> sense)</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a><span class="co"># to save: execute the following line</span></span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(d, <span class="at">file =</span> <span class="st">'d.RData'</span>)</span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a><span class="co"># to read: execute the following line</span></span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">'d.RData'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Once this is done, you can refer to the next chapter: Run optimisation.</p>
 
 
+</section>
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

@@ -10,10 +10,6 @@ editor: source
 ---
 
 
-
-
-
-
 Aim: find a diet combination that satisfy the nutritional and environmental constraints, while similar to the current diet. 
 
 
@@ -111,7 +107,5 @@ result_obj
 4. `Qmat`: matrix
 5. `lb, ub`: lower and upper bound for target diet
 6. `objsense, sense`: E, L, and R instead of ==, <= and >= 
-
-
 
 

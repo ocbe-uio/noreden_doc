@@ -18,5 +18,4 @@ listing:
     categories: true
 ---
 
-The documentation site is ....
 

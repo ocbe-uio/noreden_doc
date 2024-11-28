@@ -10,24 +10,349 @@ editor: source
 ---
 
 
+## Data 
+
+The pseudomised data is available in the `public_data` folder as an example. These are NOT the original values from KBS database. 
+
+
+Three datasets are relevant: 
+
+* `contrib_per_unit.xlsx`
+* `constraints.xlsx`
+* `bounds.xlsx`
 
 
 
 
-Aim: find a diet combination that satisfy the nutritional and environmental constraints, while similar to the current diet. 
+### 1. Contribution per unit food
+
+This dataframe stores data for **contribution per unit food** on 
+
+* macro nutrients
+* micro nutrients 
+* environmental impact
+* others
 
 
-$$(x_1 - X_1)^2 + (x_2 - X_2)^2 + ... + (x_k - X_k)^2$$
+```{r}
+#| label: data-cpu
+#| echo: true
+#| eval: true
 
-and satisfy the following **constraints**: 
+library(readxl)
+library(data.table)
 
-* $x_1, ..., x_k >= 0$ (realistic diet intake can not be negative)
-* $x_1e_1 + x_2 e_2 + ... + x_k e_k >= E_{lower}$, total energy above the lower limit
-* $x_1e_1 + x_2 e_2 + ... + x_k e_k <= E_{upper}$, total energy below the upper limit
-* $x_1p_1 + x_2 p_2 + ... + x_k p_k >= P_{lower}$, total protein below the upper limit
-* $x_1p_1 + x_2 p_2 + ... + x_k e_k <= P_{upper}$, total protein below the upper limit
+cpu <- read_excel("data/contrib_per_unit.xlsx")
+head(cpu)
+colnames(cpu)
+```
 
-And so on. 
 
+::: {.callout-note}
+
+The 2nd column (`Means_pr10MJ`) is the **average food intake**, which is same as `mean` in bounds data (3rd data file). It is not necessary to be in this table as it is not the per unit contribution. We will drop it in the subsequent data processing. 
+
+:::
+
+### 2. Constraints 
+
+Total diet constraint limits for each outcome of interest. The names need to match the column names in `contrib_per_unit` (check it in the next section)
+
+* `Dir`: direction: equal, greater or less than
+* `rhs`: right hand side values
+
+```{r}
+#| label: data-constraints
+#| echo: true
+#| eval: true
+
+constraints <- read_excel("data/constraints.xlsx") 
+head(constraints)
+```
+
+
+
+### 3. Bounds 
+
+Intake information on each food groups. Food names need to match the food names in `contrib_per_unit`. 
+
+* `mean`: average intake based on dietary survey. Served as baseline
+* `lower_bound`, `upper_bound`: lower and upper permissible optimised intake.
+
+```{r}
+#| label: data-bounds
+#| echo: true
+#| eval: true
+
+intake <- read_excel("data/bounds.xlsx") 
+head(intake)
+```
+
+
+
+
+
+
+# Data check
+
+::: {.callout-note}
+## Objectives
+
+* Check whether the **food names** and **outcome** (nutrient, envimpact) match across different tables, so the multiplication later is correct
+
+:::
+
+
+### Check food names
+
+```{r}
+#| label: check-food
+#| echo: true
+#| eval: true
+
+# cpu$Foodgroup
+# intake$Foodgroup
+
+# put the food groups from two tables together
+food_list <- cbind(cpu$Foodgroup, intake$Foodgroup)
+head(food_list)
+```
+
+
+It can be helpful to check in detail whether they match. In this case, it is because of the commas. 
+
+```{r}
+#| label: check-food2
+#| echo: true
+#| eval: true
+
+# check whether the values match
+food_list[, 1] == food_list[, 2]
+# if they do not match, can inspect in more details
+food_list[food_list[, 1] != food_list[, 2], ]  # <1>
+```
+1. this line puts all the indices where the 1st and 2nd column don't match as the row index for `food_list` dataframe, and prints out all the rows corresponding to those indices
+
+
+### Check tags 
+
+The names of outcomes of interest might be coded differently, so it might be necessary to recode the names.
+
+```{r}
+#| label: check-tags1
+#| echo: true
+#| eval: true
+#| code-fold: true
+
+cpu <- dplyr::select(cpu ,  # <1>
+                     "Foodgroup",   # <2>
+                     "Energy (MJ)" = "Energy (MJ)",   # <3>
+                     "Protein, g, lower" = "Protein1", 
+                     "Protein, g, upper" = "Protein2", 
+                     "Carbohydrates, g, lower"="Available carbohydrates1", 
+                     "Carbohydrates, g, upper"="Available carbohydrates2",
+                     "Added sugar, g"="Added Sugar",
+                     "Dietary fiber, g"= "Dietary fiber", 
+                     "Fat, g, lower"= "Fat1",  
+                     "Fat, g, upper"= "Fat2",
+                     "Saturated fatty acids, g"="Sum saturated fatty acids",
+                     "Trans fatty acids, g"="Sum trans fatty acids", #Added
+                     "n-3 fatty acids, g"="Sum n-3 fatty acids",
+                     "ALA, g" = "Sum ALA",
+                     "MUFA, g, lower" = "Sum monounsaturated fatty acids1",
+                     "MUFA, g, upper" = "Sum monounsaturated fatty acids2",
+                     "PUFA, g, lower" = "Sum polyunsaturated fatty acids1",
+                     "PUFA, g, upper" = "Sum polyunsaturated fatty acids2",
+                     "Vitamin A, RE µg"= "Vitamin A",
+                     "Vitamin E, alfa-TE"= "Vitamin E",
+                     "Thiamin (Vitamin B1), mg"= "Thiamin (Vitamin B1)",
+                     "Riboflavin (Vitamin B2), mg"= "Riboflavin (Vitamin B2)",
+                     "Niacin, NE"="Niacin equivalent",
+                     "Vitamin B6, mg"="Vitamin B6",
+                     "Folate, µg"="Folate",
+                     "Vitamin B12, µg"="Vitamin B12",
+                     "Vitamin C, mg"="Vitamin C",
+                     "Vitamin D, µg" = "Vitamin D",
+                     "Sodium, mg"="Sodium",
+                     "Potassium, mg"="Potassium",
+                     "Calcium, mg"="Calcium",
+                     "Magnesium, mg"= "Magnesium",
+                     "Phosphorus, mg"="Phosphorus",
+                     "Iron, mg"="Iron",
+                     "Zinc, mg"="Zinc",
+                     "Iodine, µg"="Iodine",
+                     "Selenium, µg"="Selenium",
+                     "Copper, µg"="Copper",
+                     "Alcohol, g" = "Alcohol",
+                     "GHGE, kg CO2-eq" = "GHGE",
+                     "FE, g P-eq" = "FE",
+                     "ME, g N-eq" = "ME",
+                     "TA, g SO2-eq" = "ACID",
+                     "WU, m2" = "WU",
+                     "LU, m3a" = "LU",
+                     "Whole grains, g" = "Whole grains",
+                     "Total fruit, g" = "Fruit",
+                     "Total vegetables, g" = "Vegetables",
+                     "Total dairy, minimum, g" = "Dairy1",
+                     "Total dairy, maximum, g" = "Dairy2",
+                     "Total fish, minimum, g" = "Fish1",
+                     "Total fish, maximum, g" = "Fish2",
+                     "Total red meat, maximum, g" = "Red meat",
+                     "Total white meat, maximum, g" = "White meat" 
+)
+```
+1. data name
+2. the column name that already exists in the data
+3. if wish to change the name, `new_name` = `existing_name`
+
+
+Afterwards, compare with another table.
+
+```{r}
+#| label: check-tags2
+#| echo: true
+#| eval: true
+
+# extract the tags of interest from two data
+tags1 <- colnames(cpu)[-1]
+tags2 <- constraints$tag_outcome
+
+# put together for easy comparison
+tags_list <- cbind(tags1, tags2)
+
+# check whether the values match
+tags_list[, 1] == tags_list[, 2]
+# if they do not match, can inspect in more details
+tags_list[tags_list[, 1] != tags_list[, 2], ]  
+```
+
+
+::: {.callout-note}
+
+Pay attention to the unmatched ones. In some cases (row 9, 10, 11) it is indeed unmatched (g vs kg); in other cases where special character is involved (such as mu), human will see the same characters but R "sees" differently due to encoding. User should decide for themselves whether they are truly different.  
+:::
+
+
+
+
+# Data process
+
+
+::: {.callout-note}
+## Objectives
+
+Process the data so that they are in the correct format for the optimisation step
+
+:::
+
+
+
+![](fig_input_dataform.png)
+
+| Data | Information | In `Rcplex` (processing required) | 
+|---|--------|------|
+| `contrib_per_unit` | Contribution per food unit  | `Amat` | 
+| `constraints`| Constraint limits and directions | `bvec`, `sense` | 
+| `bounds` | Intake for baseline, lower and upper bounds  |`Qmat`, `cvec`, `lb`, `ub` | 
+
+
+
+
+### Amat
+
+`Amat` comes from `contrib_per_unit` (here it is called `cpu`). The necessary processing is to remove the first column (Food names), and transpose so that rows become columns.
+
+The dimension for `Amat` is $n_{outcomes} \times n_{foods}$, these two do not need to be equal. In this example they are equal simply because we happen to have 53 foods and 53 outcomes.
+
+
+```{r}
+#| label: amat
+#| echo: true
+#| eval: true
+
+Amat <- as.matrix(t(cpu[, -c(1)])) # remove the Foodgroup, then transpose
+dim(Amat)
+```
+
+
+### bvec and sense
+
+`bvec` and `sense` are values from the `constraints` data. Each pair of values should correspond to one outcome. 
+
+```{r}
+#| label: bvec
+#| echo: true
+#| eval: true
+
+head(constraints)
+
+bvec <- constraints$rhs
+sense <- constraints$Dir   #Rcplex uses E, L, and R instead of ==, <= and >= 
+```
+
+
+### lb, ub
+
+`lb`, `ub` are values from `bounds` (here called `intake`). 
+
+```{r}
+#| label: lbub
+#| echo: true
+#| eval: true
+
+head(intake, 3)
+
+ub <- as.numeric(intake$upper_bound)
+lb <- as.numeric(intake$lower_bound)
+```
+
+
+### Qmat, cvec
+
+`Qmat` and `cvec` are derived from the `bound` data. They are based on the current average intake (baseline).  
+
+```{r}
+#| label: qmat
+#| echo: true
+#| eval: true
+
+obs <- intake$mean
+obssq <- 1/obs^2
+n_food <- length(obs)
+
+# create diagonal matrix, where each diagonal value is obssq
+Qmat <- 2*as.matrix(diag(obssq, n_food, n_food)) 
+
+# cvec
+cvec <- -(2/obs)
+```
+
+
+## Put together as a list 
+
+For convenience, these values can be saved in an R object (a list) and used directly in the optimisation program. 
+
+
+```{r}
+#| label: save
+#| echo: true
+#| eval: false
+
+d <- list(cvec = cvec, 
+          Amat = Amat, 
+          bvec = bvec, 
+          Qmat = Qmat, 
+          lb = lb, 
+          ub = ub, 
+          sense = sense)
+
+# to save: execute the following line
+saveRDS(d, file = 'd.RData')
+# to read: execute the following line
+d <- readRDS('d.RData')
+```
+
+
+Once this is done, you can refer to the next chapter: Run optimisation. 
 
 

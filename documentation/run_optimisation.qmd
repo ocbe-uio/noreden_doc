@@ -11,8 +11,69 @@ editor: source
 
 
 
+::: {.callout-note}
+## Requirements: 
+
+The package `Rcplex` needs to be correctly installed. 
+
+:::
+
+To understand more about what the data input should look like, please refer to the previous document: input data processing. 
+
+```{r}
+#| label: read
+#| echo: true
+#| eval: false
+
+# read the saved data
+d <- readRDS('d.RData')
+```
+
+Check if the data look like the right format, 
+
+```{r}
+#| label: check
+#| echo: true
+#| eval: false
+
+# check if the data is correctly loaded
+d$cvec
+d$Amat
+d$bvec
+d$Qmat
+d$lb
+d$ub
+d$sense
+```
 
 
+Once you're satisfied, run the following code chunk.
 
+```{r}
+#| label: run
+#| echo: true
+#| eval: false
 
+library(Rcplex)
 
+# use data from the d list
+problem_1 <- Rcplex(cvec = d$cvec, 
+                    Amat = d$Amat, 
+                    bvec = d$bvec, 
+                    Qmat = d$Qmat, 
+                    lb = d$lb, 
+                    ub = d$ub, 
+                    objsense ="min", 
+                    sense = d$sense) 
+
+```
+
+To save the results for the future, 
+
+```{r}
+#| label: save
+#| echo: true
+#| eval: false
+
+saveRDS(problem_1, file = 'result.RData')
+```
