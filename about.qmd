@@ -7,5 +7,5 @@ format:
 editor: source
 ---
 
-About the project
+This is the documentation of Noreden.
 
