@@ -11,7 +11,7 @@
     "href": "index.html",
     "title": "Noreden",
     "section": "",
-    "text": "Repository\n  \n  \n    \n     Software\n  \n\n  \n  \nWelcome. This is the development documentation website for Noreden Project."
+    "text": "Repository\n  \n  \n    \n     Software\n  \n\n  \n  \nWelcome. This is the development documentation website for NorEden Project."
   },
   {
     "objectID": "about.html",
@@ -1251,5 +1251,12 @@
     "title": "3. Run Optimisation",
     "section": "",
     "text": "Requirements:\n\n\n\nThe package Rcplex needs to be correctly installed.\n\n\nTo understand more about what the data input should look like, please refer to the previous document: input data processing.\n\n# read the saved data\nd &lt;- readRDS('d.RData')\n\nCheck if the data look like the right format,\n\n# check if the data is correctly loaded\nd$cvec\nd$Amat\nd$bvec\nd$Qmat\nd$lb\nd$ub\nd$sense\n\nOnce you’re satisfied, run the following code chunk.\n\nlibrary(Rcplex)\n\n# use data from the d list\nproblem_1 &lt;- Rcplex(cvec = d$cvec, \n                    Amat = d$Amat, \n                    bvec = d$bvec, \n                    Qmat = d$Qmat, \n                    lb = d$lb, \n                    ub = d$ub, \n                    objsense =\"min\", \n                    sense = d$sense) \n\nTo save the results for the future,\n\nsaveRDS(problem_1, file = 'result.RData')"
+  },
+  {
+    "objectID": "dev/noreden3.html",
+    "href": "dev/noreden3.html",
+    "title": "Format 1",
+    "section": "",
+    "text": "Paper 3 Julie\n\nKBS produce 2d output\neach participant, each meal, how much food contribute to the 18g protein (e.g)\nlink food ID with foods eaten\n\nEnd goal:\nproduce the data in format 2, sheet 2\ntable 1,2,4 can be merged\n\n\nFormat 1\n\n1. Food nutrients per g\n4031 rows, each row has a code, name and nutrients\n\n\n2. Groupings and digestibility\nfood group:\nDigestibility:\ncode:\nname (food)\n\n\n3. Intake foods\n4 participants 1001, 1002, 1003, 1004\n? is it total - not divided by meals?\n\n\n\nFormat 2\n\n4. Grouping and digestibility\nonly food group (unique)\nfood group name\ndigestibility factor\n\n\n5. Nutrients contribution of foods\nby person: each consumption is broken down into intake (gram), energy, …"
   }
 ]

@@ -16,7 +16,7 @@ about:
 
 ::: {#hero-heading}
 
-Welcome. This is the development documentation website for Noreden Project.
+Welcome. This is the development documentation website for NorEden Project.
 
 :::
 

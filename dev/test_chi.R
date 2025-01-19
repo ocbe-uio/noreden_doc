@@ -133,7 +133,7 @@ lb <- as.numeric(lowerintake)
 
 # Solve problem 1 (run model) ----
 
-problem_1 <- Rcplex(cvec, 
+results <- Rcplex(cvec, 
                     Amat, 
                     bvec, 
                     Qmat, 
@@ -147,29 +147,36 @@ problem_1 <- Rcplex(cvec,
 
 
 
-# send these to julie to run
 
-d <- list(cvec = cvec, 
-          Amat = Amat, 
-          bvec = bvec, 
-          Qmat = Qmat, 
-          lb = lb, 
-          ub = ub, 
-          sense = sense)
-d
 
-saveRDS(d, file = 'd.RData')
-d <- readRDS('d.RData')
-d$cvec
+
+
 
 # Interpret results ----
+# load pre-run results 
+results <- readRDS('~/Documents/GitHub/noreden_doc/data_public/result.RData')
+results |> str()
+
+# during cleaning up: 
+intake <- read_excel("data_public/bounds.xlsx") 
+intake
+
+
 
 ##Create chart to compare food composition of diets (g of each food group in new vs baseline diet, percent change between diets, lower and upper intake limits aka realism constraints)
-Nut <- round(problem_1$xopt, digits=1) #New diet name (in this case 'Nut' aka Nutrition, since this scenario includes only nutritional and realism constraints)
+Nut <- round(results$xopt, digits=1) 
+#New diet name (in this case 'Nut' aka Nutrition, since this scenario includes only nutritional and realism constraints)
 
-Baseline <- round(constraintsdata[,2],digits=1) #Baseline diet
+# Baseline <- round(constraintsdata[,2],digits=1) #Baseline diet
+Baseline <- round(intake$mean, digits=1) #Baseline diet
+# intake_baseline <- intake$mean
+# intake_upr <- intake$upper_bound
+# intake_lwr <- intake$lower_bound
+lb <- intake$lower_bound
+ub <- intake$upper_bound
 
 percentchange <- round((Nut - Baseline)/Baseline, digits=3) #Percent change between new diet and baseline diet
+percentchange
 
 diet_result <- data.frame(
   Foodgroup = c('Bread fine', 'Bread coarse', 'Flour grains', 'Rice', 'Pasta', 'Breakfast cereals', 'Cakes cookies crackers', 'Potatoes raw boiled', 'Potatoes fried', 'Legumes','Vegetables dark green', 'Vegetables red orange', 'Vegetables other', 'Vegetables salad', 'Nuts', 'Seeds', 'Juice', 'Berries', 'Pomme stone', 'Fruit other', 'Dried fruit', 'Meat dairy substitutes', 'Ruminant meat unprocessed', 'Ruminant meat processed', 'Pork unprocessed', 'Pork processed', 'Red meat mixed processed', 'White meat unprocessed', 'White meat processed', 'Other meat unprocessed', 'Other meat processed', 'Fish lean', 'Fish fatty', 'Shellfish other', 'Eggs', 'Milk low fat', 'Milk high fat', 'Dairy fermented', 'Dairy other', 'Cheese fresh', 'Cheese brown', 'Cheese other', 'Fats plant based', 'Fats animal based', 'Water', 'Coffee tea', 'Soft drinks sugar sweetened', 'Soft drinks sugar free', 'Alcoholic beverages', 'Sugar sweets', 'Snacks', 'Spices', 'Sauces miscellaneous'),
@@ -187,14 +194,27 @@ diet_result
 head(diet_result)
 
 
+
+
 ##Create chart to compare nutrient content of diets (content of nutrients in new vs baseline diet, upper and lower nutrient constraints, relative deviation from constraint)
-output_newdiet <- t(as.matrix(Nut)) %*% as.matrix(constraintsdata[,3:55])
+# output_newdiet <- t(as.matrix(Nut)) %*% as.matrix(constraintsdata[,3:55])
+output_newdiet <- t(as.matrix(Nut)) %*% as.matrix(cpu[,2:54])
 
 #The previously imported nutrient constraints file has notation specific to Rcplex. 
 # The results will be easier to interpret if we import a file with nutrient constraints (upper and lower) in a format that is familiar to us.
+# part 2 ----
 
-cstr <- read_excel("./script_noreden_julie/Example input files/1 Meat reduction/1.1/Nutrient ref 1.1.xlsx")
-cstr1 <- cstr %>% #Select and rename relevant columns
+#constraints <- read_excel("data_public/constraints.xlsx") 
+#constraints
+
+# cstr <- read_excel("./script_noreden_julie/Example input files/1 Meat reduction/1.1/Nutrient ref 1.1.xlsx")
+cstr <- read_excel("dev/julie/1 Meat reduction/1.1/Nutrient ref 1.1.xlsx")
+
+# cstr <- read_excel("data_public/constraints.xlsx") 
+head(cstr)
+
+#Select and rename relevant columns
+cstr1 <- cstr |> 
   select("Energy (MJ)",
          "Protein, g, lower" = "Protein1", 
          "Protein, g, upper" = "Protein2", 
@@ -249,7 +269,7 @@ cstr1 <- cstr %>% #Select and rename relevant columns
          "Total red meat, maximum, g" = "Red meat",
          "Total white meat, maximum, g" = "White meat"  
   )
-library("data.table")
+
 
 #Create chart and assign column names and row names
 const_result <- t(rbind(output_newdiet, cstr1))
@@ -319,12 +339,14 @@ const_result[, relative_dev := 0]
 const_result[is_ok == 'beyond lower', relative_dev := round((new_diet - const_lwr)/const_lwr, 3)]
 const_result[is_ok == 'beyond upper', relative_dev := round((new_diet - const_upr)/const_upr, 3)]
 const_result
+# reorder
 const_result2 <-const_result[,c(4,1,2,3,5,6)]
 
-currentintake <- as.vector(t(constraintsdata[,"Baseline"]))
 
 
-# compute departure ---
+# 4 departures ---
+
+currentintake <- as.vector(t(Baseline))
 
 dietdeparture <-     ((Nut[1]-currentintake[1])/currentintake[1])^2 +
   ((Nut[2]-currentintake[2])/currentintake[2])^2 +
@@ -383,16 +405,21 @@ dietframe <- data.frame (Number, dietdeparture)
 # red meat departure
 redmeatdeparture <- 
 (((Nut[23] + Nut[24] + Nut[25] + Nut[26] + Nut[27])-(currentintake[23] + currentintake[24] +currentintake[25] +currentintake[26] + currentintake[27]))/(currentintake[23] + currentintake[24] +currentintake[25] +currentintake[26] + currentintake[27])) * 100
+redmeatdeparture
 
  Number2 <- 1     
 dietframe2 <- data.frame (Number2, redmeatdeparture)
-       
+dietframe2     
+
+
 # total meat departure
 totalmeatdeparture <- 
 (((Nut[23] + Nut[24] + Nut[25] + Nut[26] + Nut[27] + Nut[28] + Nut[29] + Nut[30] + Nut[31])-(currentintake[23] + currentintake[24] +currentintake[25] +currentintake[26] + currentintake[27] + currentintake[28] + currentintake[29] + currentintake[30] + currentintake[31]))/(currentintake[23] + currentintake[24] +currentintake[25] +currentintake[26] + currentintake[27] + currentintake[28] + currentintake[29] + currentintake[30] + currentintake[31])) * 100
  
  Number3 <- 1     
 dietframe3 <- data.frame (Number3, totalmeatdeparture)
+
+
 
 # ruminant meat departure
 ruminantmeatdeparture <-
@@ -403,15 +430,15 @@ dietframe4 <-  data.frame (Number4, ruminantmeatdeparture)
 
 # save
 
-sink(file="1.1 Meat reduction NutriHealth.txt")
-#Print out
-const_result2 #Check nutrient constraints
-diet_result #Check food amounts in new diet
-dietdeparture
-ruminantmeatdeparture
-redmeatdeparture
-totalmeatdeparture
-sink(file=NULL)
+# sink(file="1.1 Meat reduction NutriHealth.txt")
+# #Print out
+# const_result2 #Check nutrient constraints
+# diet_result #Check food amounts in new diet
+# dietdeparture
+# ruminantmeatdeparture
+# redmeatdeparture
+# totalmeatdeparture
+# sink(file=NULL)
 
 
 library("writexl")

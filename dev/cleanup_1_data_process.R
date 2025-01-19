@@ -184,6 +184,20 @@ lb <- as.numeric(intake_lwr)
 
 
 
+# save into a list to run
+
+# d <- list(cvec = cvec, 
+#           Amat = Amat, 
+#           bvec = bvec, 
+#           Qmat = Qmat, 
+#           lb = lb, 
+#           ub = ub, 
+#           sense = sense)
+# d
+# 
+# saveRDS(d, file = 'd.RData')
+# d <- readRDS('d.RData')
+# d$cvec
 
 
 
