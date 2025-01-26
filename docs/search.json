@@ -11,7 +11,7 @@
     "href": "index.html",
     "title": "Noreden",
     "section": "",
-    "text": "Repository\n  \n  \n    \n     Software\n  \n\n  \n  \nWelcome. This is the development documentation website for NorEden Project."
+    "text": "Repository\n  \n\n  \n  \nWelcome, this is the documentation website for NorEden Project. Here you will find information for\n\nworkflow for diet optimization and examples\nsoftware noreden\ndevelopment code for previous version\n\nPlease reach out by creating an issue."
   },
   {
     "objectID": "about.html",
@@ -1145,7 +1145,7 @@
     "href": "software/index.html",
     "title": "Software",
     "section": "",
-    "text": "This is the documentation on the noreden software"
+    "text": "The R package noreden provides user-friendly functions to facilitate sustainable diet discovery. Given information for food (groups) and their nutritional and environmental impact information, the aim is to find a new diet (i.e. set of foods) that is healthy, acceptable, yet more sustainable in terms of environmental impact.\nPlease refer to the documentation for noreden for more information.\nIntroductory vignette can be read here."
   },
   {
     "objectID": "documentation/optimization_problem.html",
@@ -1220,9 +1220,9 @@
   {
     "objectID": "documentation/output_data.html",
     "href": "documentation/output_data.html",
-    "title": "Optimization problem",
+    "title": "4. Output Data Processing",
     "section": "",
-    "text": "Aim: find a diet combination that satisfy the nutritional and environmental constraints, while similar to the current diet."
+    "text": "The pseudomised data is available in the public_data folder as an example. These are NOT the original values from KBS database.\nThese datasets are relevant:\n\ncontrib_per_unit.xlsx\nconstraints.xlsx\nbounds.xlsx\nnutref.xlsx - this is the nutrition reference file for comparison.\n\nThe result data, result.RData is pre-computed loaded. Please refer to 3. Run Optimisation for how to reach this result."
   },
   {
     "objectID": "documentation/output_data.html#cplex",
@@ -1258,5 +1258,19 @@
     "title": "Format 1",
     "section": "",
     "text": "Paper 3 Julie\n\nKBS produce 2d output\neach participant, each meal, how much food contribute to the 18g protein (e.g)\nlink food ID with foods eaten\n\nEnd goal:\nproduce the data in format 2, sheet 2\ntable 1,2,4 can be merged\n\n\nFormat 1\n\n1. Food nutrients per g\n4031 rows, each row has a code, name and nutrients\n\n\n2. Groupings and digestibility\nfood group:\nDigestibility:\ncode:\nname (food)\n\n\n3. Intake foods\n4 participants 1001, 1002, 1003, 1004\n? is it total - not divided by meals?\n\n\n\nFormat 2\n\n4. Grouping and digestibility\nonly food group (unique)\nfood group name\ndigestibility factor\n\n\n5. Nutrients contribution of foods\nby person: each consumption is broken down into intake (gram), energy, …"
+  },
+  {
+    "objectID": "documentation/output_data.html#data",
+    "href": "documentation/output_data.html#data",
+    "title": "4. Output Data Processing",
+    "section": "",
+    "text": "The pseudomised data is available in the public_data folder as an example. These are NOT the original values from KBS database.\nThese datasets are relevant:\n\ncontrib_per_unit.xlsx\nconstraints.xlsx\nbounds.xlsx\nnutref.xlsx - this is the nutrition reference file for comparison.\n\nThe result data, result.RData is pre-computed loaded. Please refer to 3. Run Optimisation for how to reach this result."
+  },
+  {
+    "objectID": "documentation/output_data.html#load-data",
+    "href": "documentation/output_data.html#load-data",
+    "title": "4. Output Data Processing",
+    "section": "Load data",
+    "text": "Load data\n\nlibrary(readxl)\nlibrary(data.table)\n\n# files needed during cleaning up: \nintake &lt;- read_excel(\"data/bounds.xlsx\") \n\n# contstraints\nconstraints &lt;- read_excel(\"data/constraints.xlsx\") \n\n# contrib per unit\ncpu &lt;- read_excel(\"data/contrib_per_unit.xlsx\")\n\n# nutrition reference\nnutref &lt;- read_excel(\"data/nutref.xlsx\")\n\nLoad the results from previous step,\n\nresults &lt;- readRDS('data/result.RData')\n# examine the strucure of this R object\nresults |&gt; str()\n\nList of 4\n $ xopt  : num [1:53] 8.12 138.62 4.2 13.72 20.26 ...\n $ obj   : num -15.4\n $ status: int 1\n $ extra :List of 2\n  ..$ lambda: num [1:53] 4.52 5.32e-12 -1.27e-11 1.45e-11 -3.02e-12 ...\n  ..$ slack : num [1:53] -5.33e-15 -4.22e+01 1.77e+01 -1.55e+01 7.43e+01 ...\n\n\nThe first object in this list, results$xopt is the one we need."
   }
 ]

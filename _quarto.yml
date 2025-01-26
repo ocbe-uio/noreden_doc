@@ -20,17 +20,17 @@ website:
       - href: archive/index.qmd
         text: Archive
         
-      - href: about.qmd
-        text: About
+      #- href: about.qmd
+      #  text: About
 
     right:
       - icon: tag
         text: Issues
-        href: https://github.com/andreaczhang/noreden_dev/issues
+        href: https://github.com/ocbe-uio/noreden_doc/issues
 
       - icon: github
         text: GitHub
-        href: https://github.com/andreaczhang/noreden_dev
+        href: https://github.com/ocbe-uio/noreden_doc
 
 
 format:

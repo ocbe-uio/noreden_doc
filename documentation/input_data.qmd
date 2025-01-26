@@ -22,8 +22,6 @@ Three datasets are relevant:
 * `bounds.xlsx`
 
 
-
-
 ### 1. Contribution per unit food
 
 This dataframe stores data for **contribution per unit food** on 

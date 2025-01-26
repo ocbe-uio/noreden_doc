@@ -8,15 +8,18 @@ about:
   links:
     - icon: github
       text: Repository
-      href: https://github.com/andreaczhang/noreden_dev
-    - icon: github
-      text: Software
-      href: https://github.com/andreaczhang/noreden
+      href: https://ocbe-uio.github.io/noreden_doc
 ---
 
 ::: {#hero-heading}
 
-Welcome. This is the development documentation website for NorEden Project.
+Welcome, this is the documentation website for NorEden Project. Here you will find information for
+
+* workflow for diet optimization and examples
+* software `noreden`
+* development code for previous version
+
+Please reach out by creating an [issue](https://github.com/ocbe-uio/noreden_doc/issues).
 
 :::
 
