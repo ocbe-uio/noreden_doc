@@ -1,11 +1,11 @@
 ---
-title: "Documentation"
+title: "Archive"
 listing:
-  - id: docs
+  - id: archive
     max-description-length: 500
     image-height: 150px
     fields: [title]
-    contents: 
+    contents:
       - "1_understand_data.qmd"
       - "2_define_problem.qmd"
       - "3_small_demo.qmd"
@@ -22,6 +22,3 @@ listing:
     filter-ui: false
     categories: true
 ---
-
-It is important to document while you go.
-
